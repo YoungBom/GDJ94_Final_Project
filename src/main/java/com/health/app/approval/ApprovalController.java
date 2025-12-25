@@ -1,4 +1,4 @@
-package com.health.app.branch;
+package com.health.app.approval;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -6,12 +6,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/branches")
-public class BranchController {
+@RequestMapping("/approval")
+public class ApprovalController {
 
 	@GetMapping
-	public String branchList(Model model) {
-		model.addAttribute("pageTitle", "지점 관리");
-		return "branch/list";
+	public String approvalList(Model model) {
+		model.addAttribute("pageTitle", "전자 결재");
+		return "approval/list";
 	}
 }

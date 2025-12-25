@@ -1,4 +1,4 @@
-package com.health.app.branch;
+package com.health.app.statistics;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -6,12 +6,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/branches")
-public class BranchController {
+@RequestMapping("/statistics")
+public class StatisticsController {
 
 	@GetMapping
-	public String branchList(Model model) {
-		model.addAttribute("pageTitle", "지점 관리");
-		return "branch/list";
+	public String statisticsView(Model model) {
+		model.addAttribute("pageTitle", "통계");
+		return "statistics/view";
 	}
 }
