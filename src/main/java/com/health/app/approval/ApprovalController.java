@@ -4,19 +4,19 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("/approval")
+@RequestMapping("/approval/*")
 public class ApprovalController {
 
-    @GetMapping("/list")
+    @GetMapping("list")
     public void approvalList() {
     }
 
-    @GetMapping("/form")
+    @GetMapping("form")
     public void approvalForm() {
            
     }
 
-    @GetMapping("/print")
+    @GetMapping("print")
     public void approvalPrint() {
      
     }
