@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.health.app.schedules.ScheduleAttendeeMapper">
+
+    <!-- ScheduleAttendeeDto 결과를 매핑할 resultMap -->
+    <resultMap id="scheduleAttendeeResultMap" type="com.health.app.schedules.ScheduleAttendeeDto">
+        <id property="attendeeId" column="attendee_id"/>
+        <result property="eventId" column="event_id"/>
+        <result property="userId" column="user_id"/>
+        <!-- Enum 타입을 String 값으로 저장하므로, 별도 typeHandler 지정을 하지 않습니다. -->
+        <result property="acceptanceStatus" column="acceptance_status"/>
+        <result property="createUser" column="create_user"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updateUser" column="update_user"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="useYn" column="use_yn"/>
+    </resultMap>
+
+    <insert id="insertScheduleAttendee" parameterType="com.health.app.schedules.ScheduleAttendeeDto" useGeneratedKeys="true" keyProperty="attendeeId">
+        INSERT INTO schedule_attendees (
+            event_id, user_id, acceptance_status,
+            create_user, create_date, use_yn
+        ) VALUES (
+            #{eventId}, #{userId}, #{acceptanceStatus},
+            #{createUser}, NOW(), TRUE
+        )
+    </insert>
+
+    <select id="selectScheduleAttendeesByEventId" parameterType="java.lang.Long" resultMap="scheduleAttendeeResultMap">
+        SELECT
+            attendee_id, event_id, user_id, acceptance_status,
+            create_user, create_date, update_user, update_date, use_yn
+        FROM schedule_attendees
+        WHERE event_id = #{eventId} AND use_yn = TRUE
+    </select>
+
+    <update id="updateScheduleAttendee" parameterType="com.health.app.schedules.ScheduleAttendeeDto">
+        UPDATE schedule_attendees
+        SET
+            event_id = #{eventId},
+            user_id = #{userId},
+            acceptance_status = #{acceptanceStatus},
+            update_user = #{updateUser},
+            update_date = NOW(),
+            use_yn = #{useYn}
+        WHERE attendee_id = #{attendeeId} AND use_yn = TRUE
+    </update>
+
+    <update id="deleteScheduleAttendee" parameterType="java.lang.Long">
+        UPDATE schedule_attendees
+        SET
+            use_yn = FALSE,
+            update_date = NOW()
+        WHERE attendee_id = #{attendeeId}
+    </update>
+
+</mapper>

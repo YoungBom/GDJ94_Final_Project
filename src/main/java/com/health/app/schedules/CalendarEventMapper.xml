@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.health.app.schedules.CalendarEventMapper">
+
+    <!-- CalendarEventDto 결과를 매핑할 resultMap -->
+    <resultMap id="calendarEventResultMap" type="com.health.app.schedules.CalendarEventDto">
+        <id property="eventId" column="event_id"/>
+        <!-- Enum 타입을 String 값으로 저장하므로, 별도 typeHandler 지정을 하지 않습니다. -->
+        <result property="scope" column="scope"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="startAt" column="start_at"/>
+        <result property="endAt" column="end_at"/>
+        <result property="location" column="location"/>
+        <result property="statusCode" column="status_code"/>
+        <result property="allDay" column="is_all_day"/>
+        <result property="repeating" column="is_repeating"/>
+        <result property="repeatInfo" column="repeat_info"/>
+        <result property="departmentCode" column="department_code"/>
+        <result property="ownerUserId" column="owner_user_id"/>
+        <result property="branchId" column="branch_id"/>
+        <result property="createUser" column="create_user"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updateUser" column="update_user"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="useYn" column="use_yn"/>
+    </resultMap>
+
+    <insert id="insertCalendarEvent" parameterType="com.health.app.schedules.CalendarEventDto" useGeneratedKeys="true" keyProperty="eventId">
+        INSERT INTO calendar_events (
+            scope, title, description, start_at, end_at, location, status_code,
+            is_all_day, is_repeating, repeat_info, department_code, owner_user_id, branch_id,
+            create_user, create_date, use_yn
+        ) VALUES (
+            #{scope},
+            #{title}, #{description}, #{startAt}, #{endAt}, #{location},
+            #{statusCode},
+            #{allDay}, #{repeating}, #{repeatInfo}, #{departmentCode}, #{ownerUserId}, #{branchId},
+            #{createUser}, NOW(), TRUE
+        )
+    </insert>
+
+    <select id="selectCalendarEventById" parameterType="java.lang.Long" resultMap="calendarEventResultMap">
+        SELECT
+            event_id, scope, title, description, start_at, end_at, location, status_code,
+            is_all_day, is_repeating, repeat_info, department_code, owner_user_id, branch_id,
+            create_user, create_date, update_user, update_date, use_yn
+        FROM calendar_events
+        WHERE event_id = #{eventId} AND use_yn = TRUE
+    </select>
+
+    <select id="selectCalendarEvents" parameterType="map" resultMap="calendarEventResultMap">
+        SELECT
+            event_id, scope, title, description, start_at, end_at, location, status_code,
+            is_all_day, is_repeating, repeat_info, department_code, owner_user_id, branch_id,
+            create_user, create_date, update_user, update_date, use_yn
+        FROM calendar_events
+        WHERE use_yn = TRUE
+        <if test="start != null and end != null">
+            AND ((start_at BETWEEN #{start} AND #{end}) OR (end_at BETWEEN #{start} AND #{end}))
+        </if>
+        <if test="scope != null">
+            AND scope = #{scope}
+        </if>
+        <if test="ownerUserId != null">
+            AND owner_user_id = #{ownerUserId}
+        </if>
+        <if test="branchId != null">
+            AND branch_id = #{branchId}
+        </if>
+        <if test="departmentCode != null">
+            AND department_code = #{departmentCode}
+        </if>
+        ORDER BY start_at ASC
+    </select>
+
+    <update id="updateCalendarEvent" parameterType="com.health.app.schedules.CalendarEventDto">
+        UPDATE calendar_events
+        SET
+            scope = #{scope},
+            title = #{title},
+            description = #{description},
+            start_at = #{startAt},
+            end_at = #{endAt},
+            location = #{location},
+            status_code = #{statusCode},
+            is_all_day = #{allDay},
+            is_repeating = #{repeating},
+            repeat_info = #{repeatInfo},
+            department_code = #{departmentCode},
+            owner_user_id = #{ownerUserId},
+            branch_id = #{branchId},
+            update_user = #{updateUser},
+            update_date = NOW(),
+            use_yn = #{useYn}
+        WHERE event_id = #{eventId} AND use_yn = TRUE
+    </update>
+
+    <update id="deleteCalendarEvent" parameterType="java.lang.Long">
+        UPDATE calendar_events
+        SET
+            use_yn = FALSE,
+            update_date = NOW()
+        WHERE event_id = #{eventId}
+    </update>
+
+</mapper>
