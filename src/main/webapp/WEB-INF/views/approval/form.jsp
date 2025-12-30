@@ -1,121 +1,124 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core"%>
-<!doctype html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8"/>
-  <title>결재 작성</title>
-</head>
-<body>
+
 <jsp:include page="../includes/admin_header.jsp" />
 
-<h2>전자결재 작성</h2>
+<div class="container-fluid py-3">
 
-<form method="post" action="/approval/create">
-  <!-- 문서 기본 -->
-  <div>
-    <label>결재유형</label>
-    <select name="approvalType" id="approvalType">
-      <option value="">선택</option>
-      <option value="AT001">기획·보고</option>
-      <option value="AT002">비용·재무</option>
-      <option value="AT003">구매·발주</option>
-      <option value="AT004">출장·근태</option>
-      <option value="AT005">인사(HR)</option>
-    </select>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">전자결재 문서 작성</h3>
+    <a class="btn btn-outline-secondary" href="<c:url value='/approval/list'/>">목록</a>
   </div>
 
-  <div style="margin-top:8px;">
-    <label>문서양식</label>
-    <select name="documentForm" id="documentForm" disabled>
-      <option value="">결재유형을 선택하세요</option>
-    </select>
-  </div>
+  <!-- 저장 폼 -->
+  <form action="<c:url value='/approval/save'/>" method="post" id="approvalForm">
 
-  <hr>
+    <!-- 문서 유형 -->
+    <div class="mb-3">
+      <label class="form-label">문서 유형</label>
 
-  <!-- 문서 메타(작성 단계에서는 자동 세팅/표시만) -->
-  <h3>문서 정보</h3>
-  <div>
-    <span>기안자: </span><span>${loginUser.userName}</span>
-  </div>
-  <div>
-    <span>작성일: </span><span>${today}</span>
-  </div>
+      <select class="form-select" name="approvalTypeCode" id="approvalTypeCode" required>
+        <option value="">선택</option>
+        <option value="AT001">기안서</option>
+        <option value="AT002">업무보고서</option>
+        <option value="AT003">품의서</option>
+        <option value="AT004">지출결의서</option>
+        <option value="AT005">구매요청서(PR)</option>
+        <option value="AT006">발주서(PO)</option>
+        <option value="AT007">출장 신청서</option>
+        <option value="AT008">근태 신청서</option>
+        <option value="AT009">휴가 신청서</option>
+        <option value="AT010">휴직 신청서</option>
+        <option value="AT011">사직서</option>
+        <option value="AT012">인사 발령/변경 품의서</option>
+      </select>
 
-  <hr>
+    </div>
 
-  <!-- 본문 -->
-  <div>
-    <label>제목</label><br/>
-    <input type="text" name="title" style="width:400px;" required />
-  </div>
+   
+    <!-- 문서유형별 추가 입력 -->
+    <div class="card mb-3">
+      <div class="card-header">문서유형별 추가 입력</div>
+      <div class="card-body">
 
-  <div style="margin-top:12px;">
-    <label>내용</label><br/>
-    <textarea name="content" rows="10" cols="80" required></textarea>
-  </div>
+        <!-- 기본 -->
+        <div class="doc-extra" data-type="__DEFAULT__">
+          <jsp:include page="fields/fields_default.jsp"/>
+        </div>
 
-  <div style="margin-top:12px;">
-    <label>파일 첨부</label><br/>
-    <input type="file" name="files" multiple />
-  </div>
+        <!-- 휴가 신청서 (AT009) -->
+        <div class="doc-extra" data-type="AT009" style="display:none;">
+          <jsp:include page="fields/fields_leave.jsp"/>
+        </div>
 
-  <!-- 버튼 영역 -->
-  <div style="margin-top:20px;">
-    <button type="button" id="btnTempSave">임시저장</button>
-    <button type="button" id="btnPreview">미리보기</button>
-    <button type="button" id="btnSubmit">상신</button>
-    <button type="button" onclick="location.href='/approval/list'">목록</button>
-  </div>
-</form>
-<script>
-  document.getElementById('approvalType').addEventListener('change', async function () {
-    const approvalType = this.value;
-    const formSelect = document.getElementById('documentForm');
+        <!-- 출장 신청서 (AT007) -->
+        <div class="doc-extra" data-type="AT007" style="display:none;">
+          <jsp:include page="fields/fields_trip.jsp"/>
+        </div>
 
-    formSelect.innerHTML = '';
-    formSelect.disabled = true;
+        <!-- 근태 신청서 (AT008) -->
+        <div class="doc-extra" data-type="AT008" style="display:none;">
+          <jsp:include page="fields/fields_attendance.jsp"/>
+        </div>
 
-    if (!approvalType) {
-      const opt = document.createElement('option');
-      opt.value = '';
-      opt.textContent = '결재유형을 선택하세요';
-      formSelect.appendChild(opt);
-      return;
-    }
+        <!-- 구매요청서(PR) (AT005) -->
+        <div class="doc-extra" data-type="AT005" style="display:none;">
+          <jsp:include page="fields/fields_pr.jsp"/>
+        </div>
 
-    try {
-      const url = '/api/common-codes/document-forms?approvalType=' + encodeURIComponent(approvalType);
-      const res = await fetch(url);
+        <!-- 발주서(PO) (AT006) -->
+        <div class="doc-extra" data-type="AT006" style="display:none;">
+          <jsp:include page="fields/fields_po.jsp"/>
+        </div>
 
-      if (!res.ok) throw new Error('Failed to load document forms');
+        <!-- 지출결의서 (AT004) -->
+        <div class="doc-extra" data-type="AT004" style="display:none;">
+          <jsp:include page="fields/fields_expense.jsp"/>
+        </div>
 
-      const data = await res.json();
+        <!-- 휴직 신청서 (AT010) -->
+        <div class="doc-extra" data-type="AT010" style="display:none;">
+          <jsp:include page="fields/fields_leave_of_absence.jsp"/>
+        </div>
 
-      const defaultOpt = document.createElement('option');
-      defaultOpt.value = '';
-      defaultOpt.textContent = '선택';
-      formSelect.appendChild(defaultOpt);
+        <!-- 사직서 (AT011) -->
+        <div class="doc-extra" data-type="AT011" style="display:none;">
+          <jsp:include page="fields/fields_resignation.jsp"/>
+        </div>
 
-      for (const item of data) {
-        const opt = document.createElement('option');
-        opt.value = item.code;
-        opt.textContent = item.label;
-        formSelect.appendChild(opt);
-      }
+        <!-- 인사 발령/변경 품의서 (AT012) -->
+        <div class="doc-extra" data-type="AT012" style="display:none;">
+          <jsp:include page="fields/fields_hr_change.jsp"/>
+        </div>
 
-      formSelect.disabled = false;
-    } catch (e) {
-      const opt = document.createElement('option');
-      opt.value = '';
-      opt.textContent = '문서양식 로딩 실패';
-      formSelect.appendChild(opt);
-      console.error(e);
-    }
-  });
-</script>
+      </div>
+    </div>
+    
+ 	<!-- 제목 -->
+    <div class="mb-3">
+      <label class="form-label">제목</label>
+      <input type="text" class="form-control" name="title" id="title" maxlength="200" required />
+    </div>
 
+    <!-- 본문(공통) -->
+    <div class="mb-3" id="contentBlock">
+      <label class="form-label">내용</label>
+      <textarea class="form-control" name="content" id="content" rows="10" required></textarea>
+      <div class="form-text">문서 유형별 추가 입력은 아래에서 작성합니다.</div>
+    </div>
+
+    <!-- 버튼 -->
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-outline-primary" onclick="submitTemp()">임시저장</button>
+      <button type="submit" class="btn btn-primary">저장</button>
+      <a class="btn btn-outline-secondary" href="<c:url value='/approval/list'/>">취소</a>
+    </div>
+
+    <!-- 임시저장 구분 -->
+    <input type="hidden" name="tempYn" id="tempYn" value="N" />
+  </form>
+</div>
+
+
+<script src="/approval/js/formChange.js"></script>
 <jsp:include page="../includes/admin_footer.jsp" />
-</body>
-</html>
