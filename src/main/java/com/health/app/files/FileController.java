@@ -14,6 +14,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.health.app.attachments.Attachment;
 
@@ -37,18 +40,32 @@ public class FileController {
 
     // 파일 업로드를 처리하는 POST 요청 처리
     @PostMapping("/upload")
-    public String handleFileUpload(@RequestParam("file") MultipartFile file,
+    public String handleFileUpload(@RequestParam("file") List<MultipartFile> files,
                                    RedirectAttributes redirectAttributes) {
-        try {
-            Long fileId = fileService.storeFile(file); // Long 타입의 fileId를 반환받음
-            redirectAttributes.addFlashAttribute("message",
-                    "파일 업로드 성공: " + file.getOriginalFilename() + " (파일 ID: " + fileId + ")");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("message",
-                    "파일 업로드 실패: " + file.getOriginalFilename() + " 에러: " + e.getMessage());
+        List<String> uploadedFiles = new ArrayList<>();
+        List<String> failedFiles = new ArrayList<>();
+
+        for (MultipartFile file : files) {
+            if (file.isEmpty()) continue;
+            try {
+                Long fileId = fileService.storeFile(file);
+                uploadedFiles.add(file.getOriginalFilename() + " (ID: " + fileId + ")");
+            } catch (Exception e) {
+                failedFiles.add(file.getOriginalFilename());
+            }
         }
 
-        return "redirect:/files/upload"; // 업로드 폼으로 리다이렉트
+        if (!uploadedFiles.isEmpty()) {
+            redirectAttributes.addFlashAttribute("message",
+                    "파일 업로드 성공: " + uploadedFiles.stream().collect(Collectors.joining(", ")));
+        }
+        if (!failedFiles.isEmpty()) {
+            // 실패 메시지를 별도의 속성으로 추가하여 성공 메시지와 함께 표시될 수 있도록 함
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "파일 업로드 실패: " + failedFiles.stream().collect(Collectors.joining(", ")));
+        }
+
+        return "redirect:/files/upload";
     }
 
     // 파일 다운로드를 처리하는 GET 요청 처리

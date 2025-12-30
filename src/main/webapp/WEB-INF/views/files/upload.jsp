@@ -40,7 +40,7 @@
                                     <label for="exampleInputFile">파일 선택</label>
                                     <div class="input-group">
                                         <div class="custom-file">
-                                            <input type="file" class="custom-file-input" id="exampleInputFile" name="file">
+                                            <input type="file" class="custom-file-input" id="exampleInputFile" name="file" multiple>
                                             <label class="custom-file-label" for="exampleInputFile">파일을 선택하세요</label>
                                         </div>
                                         <div class="input-group-append">
@@ -49,8 +49,13 @@
                                     </div>
                                 </div>
                                 <c:if test="${not empty message}">
-                                    <div class="alert alert-info mt-3" role="alert">
+                                    <div class="alert alert-success mt-3" role="alert">
                                         ${message}
+                                    </div>
+                                </c:if>
+                                <c:if test="${not empty errorMessage}">
+                                    <div class="alert alert-danger mt-3" role="alert">
+                                        ${errorMessage}
                                     </div>
                                 </c:if>
                             </div>

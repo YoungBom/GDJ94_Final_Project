@@ -7,9 +7,9 @@ import lombok.Builder;
 
 import java.time.LocalDateTime;
 
-/**
- * schedule_attendees 테이블에 매핑되는 DTO 클래스
- */
+
+// schedule_attendees 테이블에 매핑되는 DTO 클래스
+ 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

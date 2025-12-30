@@ -3,9 +3,7 @@ package com.health.app.schedules;
 import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
 
-/**
- * schedule_attendees 테이블에 대한 MyBatis 매퍼 인터페이스
- */
+// schedule_attendees 테이블에 대한 MyBatis 매퍼 인터페이스
 @Mapper
 public interface ScheduleAttendeeMapper {
     void insertScheduleAttendee(ScheduleAttendeeDto scheduleAttendee);

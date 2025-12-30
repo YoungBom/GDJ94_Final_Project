@@ -103,15 +103,7 @@ public class FileService {
                 .orElseThrow(() -> new RuntimeException("첨부파일 정보를 찾을 수 없습니다 (ID: " + fileId + ")"));
     }
 
-    /**
-     * 첨부파일을 다른 엔티티(게시물 등)와 연결합니다.
-     * @param fileId 연결할 첨부파일의 ID
-     * @param entityType 연결될 엔티티의 타입 (예: "NOTICE", "APPROVAL", "PRODUCT")
-     * @param entityId 연결될 엔티티의 ID
-     * @param linkRole 파일의 역할 (예: "MAIN_IMAGE", "ATTACHMENT", "THUMBNAIL")
-     * @param createUser 연결을 생성하는 사용자 ID
-     * @return 생성된 AttachmentLink 엔티티의 ID
-     */
+ 
     @Transactional
     public Long linkFileToEntity(Long fileId, String entityType, Long entityId, String linkRole, Long createUser) {
         AttachmentLink attachmentLink = new AttachmentLink();
@@ -120,24 +112,18 @@ public class FileService {
         attachmentLink.setEntityId(entityId);
         attachmentLink.setLinkRole(linkRole);
         attachmentLink.setCreateUser(createUser);
-        // createDate, useYn, sortOrder는 @PrePersist에서 설정되거나 기본값 가짐
 
         AttachmentLink savedLink = attachmentLinkRepository.save(attachmentLink);
         return savedLink.getLinkId();
     }
 
-    /**
-     * 첨부파일을 논리적으로 삭제 처리합니다. (useYn = false)
-     * @param fileId 삭제할 첨부파일의 ID
-     * @param updateUser 업데이트하는 사용자 ID
-     */
     @Transactional
     public void deleteAttachment(Long fileId, Long updateUser) {
         Attachment attachment = attachmentRepository.findById(fileId)
                 .orElseThrow(() -> new RuntimeException("삭제할 첨부파일을 찾을 수 없습니다 (ID: " + fileId + ")"));
         
         attachment.setUseYn(false);
-        attachment.setUpdateUser(updateUser); // TODO: 실제 로그인 사용자 ID로 변경
+        attachment.setUpdateUser(updateUser); //  실제 로그인 사용자 ID로 변경해야함
         attachment.setUpdateDate(LocalDateTime.now());
         attachmentRepository.save(attachment); // 변경사항 저장
     }
