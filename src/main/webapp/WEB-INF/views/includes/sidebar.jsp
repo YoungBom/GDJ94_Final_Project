@@ -84,7 +84,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a href="/approval/signature_saved" class="nav-link">
+              <a href="/approval/signature" class="nav-link">
                 <p>서명창</p>
               </a>
             </li>

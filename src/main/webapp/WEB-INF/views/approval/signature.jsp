@@ -36,7 +36,6 @@
     </div>
   </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/signature_pad@5.1.3/dist/signature_pad.umd.min.js"></script>
 <script>
 (function () {
   const modal = document.getElementById('signModal');
@@ -113,7 +112,7 @@
   btnDelete.addEventListener('click', async function () {
     if (!confirm('서명을 삭제할까요?')) return;
 
-    const res = await fetch('/api/signature/me', { method: 'DELETE' });
+    const res = await fetch('/approval/signature', { method: 'DELETE' });
     if (!res.ok) {
       alert('서명 삭제 실패');
       return;
