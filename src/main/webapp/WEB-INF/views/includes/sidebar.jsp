@@ -62,11 +62,49 @@
           </a>
         </li>
 
-        <li class="nav-item">
-          <a href="<c:url value='/schedules'/>" class="nav-link">
-            <i class="nav-icon bi bi-calendar"></i>
-            <p>일정</p>
+        <!-- 일정 관리 Treeview -->
+        <li class="nav-item menu-open">
+          <a href="#" class="nav-link" data-lte-toggle="treeview">
+            <i class="nav-icon bi bi-calendar-event"></i>
+            <p>
+              캘린더
+              <i class="nav-arrow bi bi-chevron-right"></i>
+            </p>
           </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="<c:url value='/schedules'/>?filter=all" class="nav-link schedule-filter" data-scope="all">
+                <p>전체 일정</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="<c:url value='/schedules'/>?filter=my" class="nav-link schedule-filter" data-scope="PERSONAL">
+                <p>내 일정</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="<c:url value='/schedules'/>?filter=dept" class="nav-link schedule-filter" data-scope="DEPARTMENT">
+                <p>부서 일정</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="<c:url value='/schedules'/>?filter=company" class="nav-link schedule-filter" data-scope="COMPANY">
+                <p>전사 일정</p>
+              </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" id="sidebar-add-event">
+                    <i class="nav-icon bi bi-plus-circle"></i>
+                    <p>일정 등록</p>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="<c:url value='/schedules/manage'/>" class="nav-link">
+                    <i class="nav-icon bi bi-list-task"></i>
+                    <p>일정 관리</p>
+                </a>
+            </li>
+                      </ul>
         </li>
 
         <!-- ✅ 전자결재 Treeview (여기만 toggle) -->
