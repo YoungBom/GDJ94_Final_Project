@@ -8,7 +8,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">결재 문서 목록/// 조건으로 임심 저장도 같이 만들기</h3>
+                <h3 class="card-title">결재 문서 목록/// 조건으로 임시 저장도 같이 만들기</h3>
             </div>
             <div class="card-body">
                 <p>이곳에 결재 문서 목록 테이블이 표시됩니다.</p>
