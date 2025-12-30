@@ -56,6 +56,13 @@
         </li>
 
         <li class="nav-item">
+          <a href="<c:url value='/inventory'/>" class="nav-link">
+            <i class="nav-icon bi bi-box-seam"></i>
+            <p>재고 관리</p>
+          </a>
+        </li>
+
+        <li class="nav-item">
           <a href="<c:url value='/schedules'/>" class="nav-link">
             <i class="nav-icon bi bi-calendar"></i>
             <p>일정</p>
