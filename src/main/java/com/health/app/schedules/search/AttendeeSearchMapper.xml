@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.health.app.schedules.search.AttendeeSearchMapper">
+
+    <resultMap id="userSearchResultMap" type="com.health.app.schedules.search.AttendeeSearchDto">
+        <result property="userId" column="user_id"/>
+        <result property="name" column="name"/>
+        <result property="departmentName" column="department_name"/>
+    </resultMap>
+
+    <select id="findByName" parameterType="string" resultMap="userSearchResultMap">
+        SELECT
+            u.user_id,
+            u.name,
+            c.code_desc AS department_name
+        FROM
+            users u
+        LEFT JOIN
+            common_code c ON u.department_code = c.code AND c.code_group = 'DEPARTMENT'
+        WHERE
+            u.name LIKE CONCAT('%', #{name}, '%')
+            AND u.use_yn = TRUE
+        ORDER BY
+            u.name ASC;
+    </select>
+
+    <select id="findUsersByIds" parameterType="list" resultMap="userSearchResultMap">
+        SELECT
+            u.user_id,
+            u.name,
+            c.code_desc AS department_name
+        FROM
+            users u
+        LEFT JOIN
+            common_code c ON u.department_code = c.code AND c.code_group = 'DEPARTMENT'
+        WHERE
+            u.user_id IN
+            <foreach item="userId" collection="userIds" open="(" separator="," close=")">
+                #{userId}
+            </foreach>
+            AND u.use_yn = TRUE
+        ORDER BY
+            u.name ASC;
+    </select>
+
+</mapper>
