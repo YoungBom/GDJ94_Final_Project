@@ -135,11 +135,12 @@ public class ScheduleService {
      * 특정 ID 목록에 해당하는 사용자들을 조회합니다.
      * @param userIds 조회할 사용자 ID 목록
      * @return AttendeeSearchDto 리스트
-     */
     public List<AttendeeSearchDto> getUsersByIds(List<Long> userIds) {
         if (userIds == null || userIds.isEmpty()) {
             return Collections.emptyList();
         }
         return attendeeSearchMapper.findUsersByIds(userIds);
     }
+    
+     */
 }
