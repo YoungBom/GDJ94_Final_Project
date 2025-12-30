@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.health.app.inventory.mapper.InventoryMapper">
+
+    <!-- 재고 현황 조회 -->
+    <select id="selectInventoryList"
+            resultType="com.health.app.inventory.dto.InventoryViewDto">
+        <![CDATA[
+        SELECT
+            i.inventory_id        AS inventoryId,
+            i.branch_id           AS branchId,
+            b.branch_name         AS branchName,
+            i.product_id          AS productId,
+            p.product_name        AS productName,
+
+            i.quantity            AS quantity,
+            i.low_stock_threshold AS lowStockThreshold,
+            p.reorder_point       AS reorderPoint,
+
+            CASE
+                WHEN i.low_stock_threshold IS NULL OR i.low_stock_threshold = 0
+                THEN p.reorder_point
+                ELSE i.low_stock_threshold
+            END AS thresholdValue,
+
+            CASE
+                WHEN i.quantity <= CASE
+                    WHEN i.low_stock_threshold IS NULL OR i.low_stock_threshold = 0
+                    THEN p.reorder_point
+                    ELSE i.low_stock_threshold
+                END
+                THEN 1 ELSE 0
+            END AS lowStock
+
+        FROM inventory i
+        JOIN branch b  ON b.branch_id  = i.branch_id
+        JOIN product p ON p.product_id = i.product_id
+        ]]>
+        <where>
+            <if test="branchId != null">
+                <![CDATA[ i.branch_id = #{branchId} ]]>
+            </if>
+
+            <if test="keyword != null and keyword != ''">
+                <![CDATA[
+                AND (
+                    p.product_name LIKE CONCAT('%', #{keyword}, '%')
+                    OR b.branch_name LIKE CONCAT('%', #{keyword}, '%')
+                )
+                ]]>
+            </if>
+
+            <if test="onlyLowStock == true">
+                <![CDATA[
+                AND i.quantity <= CASE
+                    WHEN i.low_stock_threshold IS NULL OR i.low_stock_threshold = 0
+                    THEN p.reorder_point
+                    ELSE i.low_stock_threshold
+                END
+                ]]>
+            </if>
+        </where>
+        <![CDATA[
+        ORDER BY lowStock DESC, i.quantity ASC, p.product_name ASC
+        ]]>
+    </select>
+
+    <!-- 특정 지점 + 상품 재고 조회 -->
+    <select id="selectInventoryOne"
+            resultType="com.health.app.inventory.dto.InventoryViewDto">
+        <![CDATA[
+        SELECT
+            i.inventory_id        AS inventoryId,
+            i.branch_id           AS branchId,
+            b.branch_name         AS branchName,
+            i.product_id          AS productId,
+            p.product_name        AS productName,
+            i.quantity            AS quantity,
+            i.low_stock_threshold AS lowStockThreshold,
+            p.reorder_point       AS reorderPoint
+        FROM inventory i
+        JOIN branch b  ON b.branch_id  = i.branch_id
+        JOIN product p ON p.product_id = i.product_id
+        WHERE i.branch_id = #{branchId}
+          AND i.product_id = #{productId}
+        ]]>
+    </select>
+
+    <!-- 재고 행 생성(없으면) -->
+    <insert id="insertInventoryIfAbsent">
+        <![CDATA[
+        INSERT INTO inventory (
+            branch_id,
+            product_id,
+            quantity,
+            low_stock_threshold
+        )
+        SELECT
+            #{branchId},
+            #{productId},
+            #{quantity},
+            #{lowStockThreshold}
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM inventory
+            WHERE branch_id = #{branchId}
+              AND product_id = #{productId}
+        )
+        ]]>
+    </insert>
+
+    <!-- 재고 수량 증감 -->
+    <update id="updateInventoryQuantity">
+        <![CDATA[
+        UPDATE inventory
+        SET quantity = quantity + #{delta}
+        WHERE branch_id = #{branchId}
+          AND product_id = #{productId}
+        ]]>
+    </update>
+
+    <!-- 재고 이동 이력 저장 -->
+    <insert id="insertInventoryHistory">
+        <![CDATA[
+        INSERT INTO inventory_history (
+            branch_id,
+            product_id,
+            move_type,
+            quantity,
+            reason,
+            create_user,
+            create_date,
+            ref_type,
+            ref_id
+        ) VALUES (
+            #{branchId},
+            #{productId},
+            #{moveType},
+            #{quantity},
+            #{reason},
+            #{createUser},
+            NOW(),
+            #{refType},
+            #{refId}
+        )
+        ]]>
+    </insert>
+
+    <!-- 재고 이동 이력 조회 -->
+    <select id="selectInventoryHistory"
+            resultType="com.health.app.inventory.dto.InventoryHistoryViewDto">
+        <![CDATA[
+        SELECT
+            h.inventory_history_id AS inventoryHistoryId,
+            h.branch_id            AS branchId,
+            b.branch_name          AS branchName,
+            h.product_id           AS productId,
+            p.product_name         AS productName,
+            h.move_type            AS moveType,
+            h.quantity             AS quantity,
+            h.reason               AS reason,
+            h.create_user          AS createUser,
+            h.create_date          AS createDate,
+            h.ref_type             AS refType,
+            h.ref_id               AS refId
+        FROM inventory_history h
+        JOIN branch b  ON b.branch_id  = h.branch_id
+        JOIN product p ON p.product_id = h.product_id
+        ]]>
+        <where>
+            <if test="branchId != null">
+                <![CDATA[ h.branch_id = #{branchId} ]]>
+            </if>
+
+            <if test="keyword != null and keyword != ''">
+                <![CDATA[
+                AND (
+                    p.product_name LIKE CONCAT('%', #{keyword}, '%')
+                    OR b.branch_name LIKE CONCAT('%', #{keyword}, '%')
+                    OR h.reason LIKE CONCAT('%', #{keyword}, '%')
+                )
+                ]]>
+            </if>
+
+            <if test="moveType != null and moveType != ''">
+                <![CDATA[ AND h.move_type = #{moveType} ]]>
+            </if>
+
+            <if test="refType != null and refType != ''">
+                <![CDATA[ AND h.ref_type = #{refType} ]]>
+            </if>
+        </where>
+        <![CDATA[
+        ORDER BY h.inventory_history_id DESC
+        LIMIT 500
+        ]]>
+    </select>
+
+    <!-- 지점 옵션 -->
+    <select id="selectBranchOptions"
+            resultType="com.health.app.inventory.dto.OptionDto">
+        <![CDATA[
+        SELECT branch_id AS id, branch_name AS name
+        FROM branch
+        WHERE use_yn = TRUE
+        ORDER BY branch_name ASC
+        ]]>
+    </select>
+
+    <!-- 상품 옵션 -->
+    <select id="selectProductOptions"
+            resultType="com.health.app.inventory.dto.OptionDto">
+        <![CDATA[
+        SELECT product_id AS id, product_name AS name
+        FROM product
+        WHERE use_yn = TRUE
+        ORDER BY product_name ASC
+        ]]>
+    </select>
+
+</mapper>
