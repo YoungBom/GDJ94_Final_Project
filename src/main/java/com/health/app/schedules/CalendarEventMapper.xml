@@ -12,8 +12,8 @@
         <result property="scope" column="scope"/>
         <result property="title" column="title"/>
         <result property="description" column="description"/>
-        <result property="startAt" column="start_at"/>
-        <result property="endAt" column="end_at"/>
+        <result property="startAt" column="start_at" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"/>
+        <result property="endAt" column="end_at" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"/>
         <result property="location" column="location"/>
         <result property="statusCode" column="status_code"/>
         <result property="allDay" column="is_all_day"/>
@@ -23,9 +23,9 @@
         <result property="ownerUserId" column="owner_user_id"/>
         <result property="branchId" column="branch_id"/>
         <result property="createUser" column="create_user"/>
-        <result property="createDate" column="create_date"/>
+        <result property="createDate" column="create_date" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"/>
         <result property="updateUser" column="update_user"/>
-        <result property="updateDate" column="update_date"/>
+        <result property="updateDate" column="update_date" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"/>
         <result property="useYn" column="use_yn"/>
     </resultMap>
 
@@ -106,5 +106,15 @@
             update_date = NOW()
         WHERE event_id = #{eventId}
     </update>
+
+    <select id="selectEventsByOwner" parameterType="java.lang.Long" resultMap="calendarEventResultMap">
+        SELECT
+            event_id, scope, title, description, start_at, end_at, location, status_code,
+            is_all_day, is_repeating, repeat_info, department_code, owner_user_id, branch_id,
+            create_user, create_date, update_user, update_date, use_yn
+        FROM calendar_events
+        WHERE create_user = #{ownerUserId} AND use_yn = TRUE
+        ORDER BY start_at DESC
+    </select>
 
 </mapper>

@@ -1,16 +1,20 @@
 package com.health.app.schedules;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus; // HttpStatus 임포트 추가
-import org.springframework.http.ResponseEntity; // ResponseEntity 임포트 추가
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping; // PostMapping 임포트 추가
-import org.springframework.web.bind.annotation.RequestBody; // RequestBody 임포트 추가
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
+import com.health.app.schedules.search.AttendeeSearchDto;
+import com.health.app.schedules.search.AttendeeSearchMapper;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,10 +25,12 @@ import java.util.Map;
 public class ScheduleController {
 
     private final ScheduleService scheduleService;
+    private final AttendeeSearchMapper attendeeSearchMapper;
 
     @Autowired
-    public ScheduleController(ScheduleService scheduleService) {
+    public ScheduleController(ScheduleService scheduleService, AttendeeSearchMapper attendeeSearchMapper) {
         this.scheduleService = scheduleService;
+        this.attendeeSearchMapper = attendeeSearchMapper;
     }
 
     @GetMapping
@@ -33,37 +39,79 @@ public class ScheduleController {
         return "schedules/view";
     }
 
-    /**
-     * FullCalendar에 표시할 일정 데이터를 JSON으로 반환하는 API 엔드포인트
-     * @param start 조회 시작 날짜 (FullCalendar가 자동으로 전달)
-     * @param end 조회 종료 날짜 (FullCalendar가 자동으로 전달)
-     * @return 캘린더 이벤트 DTO 목록
-     */
     @GetMapping("/events")
     @ResponseBody
     public List<CalendarEventDto> getEvents(
             @RequestParam String start,
-            @RequestParam String end) {
+            @RequestParam String end,
+            @RequestParam(value = "scope", required = false) String scope) {
         
         Map<String, Object> params = new HashMap<>();
         params.put("start", start);
         params.put("end", end);
         
-        // TODO: 로그인 기능 구현 후, 사용자 ID, 지점 ID, 부서 코드 등을 파라미터에 추가해야 함
-        // params.put("ownerUserId", loggedInUserId);
-        // params.put("branchId", loggedInUserBranchId);
-
+        if (scope != null && !scope.equalsIgnoreCase("all")) {
+            params.put("scope", scope);
+        }
+        
         return scheduleService.getCalendarEvents(params);
     }
 
-    /**
-     * 새로운 일정 생성을 처리하는 API 엔드포인트
-     * @param calendarEvent 생성할 일정 데이터
-     * @return 생성된 일정 정보와 HTTP 상태 코드
-     */
     @PostMapping("/events")
-    public ResponseEntity<CalendarEventDto> createEvent(@RequestBody CalendarEventDto calendarEvent) {
-        CalendarEventDto createdEvent = scheduleService.createCalendarEvent(calendarEvent);
+    public ResponseEntity<CalendarEventDto> createEvent(
+            @RequestPart("event") CalendarEventDto calendarEvent,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files) {
+        
+        CalendarEventDto createdEvent = scheduleService.createCalendarEvent(calendarEvent, files);
         return new ResponseEntity<>(createdEvent, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/users/search")
+    @ResponseBody
+    public List<AttendeeSearchDto> searchAttendees(@RequestParam("name") String name) {
+        return attendeeSearchMapper.findByName(name);
+    }
+
+    @GetMapping("/manage")
+    public String scheduleManageView(Model model) {
+        model.addAttribute("pageTitle", "일정 관리");
+        Long tempUserId = 1L; 
+        List<CalendarEventDto> eventList = scheduleService.getEventsByOwner(tempUserId);
+        model.addAttribute("eventList", eventList);
+        return "schedules/manage";
+    }
+
+    /**
+     * 특정 이벤트를 삭제하는 API 엔드포인트
+     * @param eventId 삭제할 이벤트 ID
+     * @return HTTP 상태 코드
+     */
+    @PostMapping("/events/{eventId}/delete")
+    public ResponseEntity<Void> deleteEvent(@PathVariable Long eventId) {
+        // TODO: 삭제 권한 확인 로직 추가
+        scheduleService.deleteCalendarEvent(eventId);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 특정 ID의 캘린더 이벤트를 조회하는 API 엔드포인트
+     * @param eventId 조회할 이벤트 ID
+     * @return 캘린더 이벤트 DTO와 HTTP 상태 코드
+     */
+    @GetMapping("/events/{eventId}")
+    public ResponseEntity<CalendarEventDto> getEventById(@PathVariable Long eventId) {
+        CalendarEventDto event = scheduleService.getEventById(eventId);
+        return ResponseEntity.ok(event);
+    }
+
+    /**
+     * 특정 ID 목록에 해당하는 사용자들의 상세 정보를 반환하는 API 엔드포인트
+     * @param ids 조회할 사용자 ID 목록
+     * @return AttendeeSearchDto 리스트
+     */
+    @GetMapping("/users/details")
+    @ResponseBody
+    public List<AttendeeSearchDto> getUsersDetails(@RequestParam("ids") List<Long> ids) {
+        return scheduleService.getUsersByIds(ids);
     }
 }

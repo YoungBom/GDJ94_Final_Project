@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * calendar_events 테이블에 매핑되는 DTO 클래스
@@ -29,6 +30,9 @@ public class CalendarEventDto {
     private String departmentCode;
     private Long ownerUserId;
     private Long branchId;
+
+    // --- 추가 필드 ---
+    private List<Long> attendeeIds; // 참석자 ID 목록
 
     private Long createUser;
     private LocalDateTime createDate;

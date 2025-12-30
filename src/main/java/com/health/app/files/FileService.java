@@ -123,7 +123,7 @@ public class FileService {
                 .orElseThrow(() -> new RuntimeException("삭제할 첨부파일을 찾을 수 없습니다 (ID: " + fileId + ")"));
         
         attachment.setUseYn(false);
-        attachment.setUpdateUser(updateUser); //  실제 로그인 사용자 ID로 변경해야함
+        attachment.setUpdateUser(updateUser); // TODO: 실제 로그인 사용자 ID로 변경해야함
         attachment.setUpdateDate(LocalDateTime.now());
         attachmentRepository.save(attachment); // 변경사항 저장
     }

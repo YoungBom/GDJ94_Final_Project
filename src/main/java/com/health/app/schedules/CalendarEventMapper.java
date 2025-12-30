@@ -14,4 +14,5 @@ public interface CalendarEventMapper {
     List<CalendarEventDto> selectCalendarEvents(Map<String, Object> params);
     void updateCalendarEvent(CalendarEventDto calendarEvent);
     void deleteCalendarEvent(Long eventId); // 논리적 삭제를 위한 update
+    List<CalendarEventDto> selectEventsByOwner(Long ownerUserId);
 }

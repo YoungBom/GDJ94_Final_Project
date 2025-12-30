@@ -5,7 +5,17 @@ package com.health.app.schedules;
  * calendar_events 테이블의 scope 컬럼에 매핑
  */
 public enum ScheduleType {
-    PERSONAL,
-    DEPARTMENT,
-    COMPANY
+    PERSONAL("개인"),
+    DEPARTMENT("부서"),
+    COMPANY("전사");
+
+    private final String displayName;
+
+    ScheduleType(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
 }

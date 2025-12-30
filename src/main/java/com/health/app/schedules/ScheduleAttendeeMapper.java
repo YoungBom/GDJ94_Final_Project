@@ -10,4 +10,5 @@ public interface ScheduleAttendeeMapper {
     List<ScheduleAttendeeDto> selectScheduleAttendeesByEventId(Long eventId);
     void updateScheduleAttendee(ScheduleAttendeeDto scheduleAttendee);
     void deleteScheduleAttendee(Long attendeeId); // 논리적 삭제를 위한 update
+    void deleteAttendeesByEventId(Long eventId); // 특정 이벤트의 모든 참석자를 논리적으로 삭제
 }

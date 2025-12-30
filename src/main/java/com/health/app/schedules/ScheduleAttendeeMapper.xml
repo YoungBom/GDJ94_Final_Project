@@ -57,4 +57,12 @@
         WHERE attendee_id = #{attendeeId}
     </update>
 
+    <update id="deleteAttendeesByEventId" parameterType="java.lang.Long">
+        UPDATE schedule_attendees
+        SET
+            use_yn = FALSE,
+            update_date = NOW()
+        WHERE event_id = #{eventId}
+    </update>
+
 </mapper>
