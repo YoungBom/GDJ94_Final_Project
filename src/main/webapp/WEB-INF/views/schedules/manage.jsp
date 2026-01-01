@@ -11,6 +11,11 @@
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">내가 생성한 일정 목록</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-primary btn-sm" id="addEventBtn">
+                        <i class="bi bi-plus-circle"></i> 일정 등록
+                    </button>
+                </div>
             </div>
             <!-- /.card-header -->
             <div class="card-body">
@@ -82,6 +87,15 @@
                                         <label for="eventTitle">일정 제목</label>
                                         <input type="text" class="form-control" id="eventTitle" required>
                                     </div>
+
+                                    <div class="form-group">
+                                        <label for="eventStatus">상태</label>
+                                        <select class="form-control" id="eventStatus">
+                                            <option value="SCHEDULED">예정</option>
+                                            <option value="COMPLETED">완료</option>
+                                            <option value="CANCELLED">취소</option>
+                                        </select>
+                                    </div>
                                     <div class="form-group">
                                         <label for="eventStart">시작 일시</label>
                                         <input type="datetime-local" class="form-control" id="eventStart" required>
@@ -103,6 +117,10 @@
                                         <div id="attendee-search-results" class="list-group" style="position: absolute; z-index: 1000; width: 95%;">
                                             <!-- Search results will be shown here -->
                                         </div>
+                                    </div>
+                                    <div class="form-group form-check">
+                                        <input type="checkbox" class="form-check-input" id="eventAllDay">
+                                        <label class="form-check-label" for="eventAllDay">종일</label>
                                     </div>
                                     <div class="form-group form-check">
                                         <input type="checkbox" class="form-check-input" id="eventRepeating">
@@ -132,63 +150,11 @@
                     </div>
                 </div>
 
-<jsp:include page="../includes/admin_footer.jsp" />
-
+<!-- Page specific scripts - footer 전에 로드해야 함 -->
 <script>
-    var contextPath = "${pageContext.request.contextPath}";
+// contextPath 변수 정의 (schedules.js에서 사용)
+const contextPath = '${pageContext.request.contextPath}';
 </script>
-<!-- Page specific script for FullCalendar -->
-<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/main.min.css' rel='stylesheet' />
-<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js'></script>
 <script src="<c:url value='/js/schedules.js'/>"></script>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const tableBody = document.querySelector('#eventManageTable tbody');
-    console.log('tableBody element:', tableBody); // Debug log
-
-    if (tableBody) { // Add null check before adding listener
-        tableBody.addEventListener('click', function(e) {
-            // ... (rest of the code)
-        // '삭제' 버튼 클릭 이벤트 위임
-        if (e.target && e.target.classList.contains('btn-delete-event')) {
-            const button = e.target;
-            const eventId = button.dataset.eventId;
-
-            if (confirm('정말 이 일정을 삭제하시겠습니까? 관련된 모든 정보가 삭제됩니다.')) {
-                console.log('Deleting event with ID:', eventId); // Debug log
-                const deleteUrl = `/schedules/events/${eventId}/delete`; // Directly use absolute path for testing
-                console.log('Delete URL (modified):', deleteUrl); // New debug log
-                fetch(deleteUrl, {
-                    method: 'POST',
-                    headers: {
-                        // Spring Security CSRF 토큰이 필요할 경우 헤더에 추가
-                    }
-                })
-                .then(response => {
-                    if (response.ok) {
-                        // UI에서 해당 행 제거
-                        button.closest('tr').remove();
-                        alert('일정이 삭제되었습니다.');
-                    } else {
-                        response.text().then(text => {
-                            alert('삭제에 실패했습니다: ' + text);
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('삭제 중 오류가 발생했습니다.');
-                });
-            }
-        }
-        
-        // '수정' 버튼 클릭 이벤트 처리
-        if (e.target && e.target.classList.contains('btn-edit-event')) {
-            const eventId = e.target.dataset.eventId;
-            console.log('Fetching event for edit with ID:', eventId); // Debug log
-            const editUrl = `/schedules/events/${eventId}`; // Directly use absolute path for testing
-            console.log('Edit URL (modified):', editUrl); // New debug log
-
-            fetch(editUrl)
-                .then(response => {
+<jsp:include page="../includes/admin_footer.jsp" />

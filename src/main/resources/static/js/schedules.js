@@ -180,6 +180,11 @@ function initFullCalendar() {
         dateClick: function(info) {
             updateEventList(info.date, calendarInstance.getEvents());
         },
+        eventClick: function(info) {
+            // 일정 클릭 시 상세보기 모달 표시
+            const eventId = info.event.id;
+            showEventDetail(eventId);
+        },
         eventsSet: function(events) {
             updateEventList(new Date(), events);
         }
@@ -203,40 +208,60 @@ function initFullCalendar() {
  * #eventModal, #addEventBtn, #saveEventBtn 등의 요소가 있는 페이지에서 실행됩니다.
  */
 function initEventModalLogic() {
+    console.log('========== initEventModalLogic 함수 실행됨 ==========');
     const addEventBtn = document.getElementById('addEventBtn');
     const sidebarAddBtn = document.getElementById('sidebar-add-event');
     const saveEventBtn = document.getElementById('saveEventBtn');
     const eventModal = document.getElementById('eventModal');
-    
-    if (!addEventBtn || !saveEventBtn || !eventModal) return;
 
-    // "일정 등록" 버튼 (상단) 클릭 시 모달 표시
-    addEventBtn.addEventListener('click', function() {
+    console.log('addEventBtn:', addEventBtn);
+    console.log('saveEventBtn:', saveEventBtn);
+    console.log('eventModal:', eventModal);
+
+    // saveEventBtn과 eventModal만 필수, addEventBtn은 선택적
+    if (!saveEventBtn || !eventModal) {
+        console.log('필수 요소(saveEventBtn, eventModal)를 찾지 못해 initEventModalLogic 종료');
+        return;
+    }
+
+    console.log('필수 요소 발견, 이벤트 리스너 등록 시작');
+
+    // "일정 등록" 버튼 (상단) 클릭 시 모달 표시 (버튼이 있을 때만)
+    if (addEventBtn) {
+        addEventBtn.addEventListener('click', function() {
         document.getElementById('eventForm').reset();
         selectedAttendees = [];
         const selectedAttendeesContainer = document.getElementById('selected-attendees');
         renderSelectedAttendees(selectedAttendeesContainer); // 컨테이너 전달
         document.getElementById('eventId').value = '';
         document.getElementById('eventModalLabel').textContent = '일정 등록';
+        document.getElementById('eventStatus').value = 'SCHEDULED'; // 기본값 설정
+        document.getElementById('eventAllDay').checked = false; // 기본값 설정
         const now = new Date();
         now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
         document.getElementById('eventStart').value = now.toISOString().slice(0, 16);
         now.setHours(now.getHours() + 1);
         document.getElementById('eventEnd').value = now.toISOString().slice(0, 16);
-        $('#eventModal').modal('show');
-    });
+        const modal = new bootstrap.Modal(document.getElementById('eventModal'));
+        modal.show();
+        });
+    }
 
     // "일정 등록" 메뉴 (사이드바) 클릭 시 모달 표시
-    if(sidebarAddBtn) {
+    if (sidebarAddBtn && addEventBtn) {
         sidebarAddBtn.addEventListener('click', function(e) {
             e.preventDefault();
             addEventBtn.click();
         });
     }
 
+    console.log('저장 버튼 이벤트 리스너 등록 완료');
+
     // 저장 버튼 클릭 시 이벤트 처리
     saveEventBtn.addEventListener('click', function() {
+        console.log('========== 저장 버튼 클릭됨 ==========');
         const attendeeIds = selectedAttendees.map(user => user.userId);
+        const isEditMode = document.getElementById('eventId').value ? true : false;
         const eventData = {
             eventId: document.getElementById('eventId').value || null,
             scope: document.getElementById('eventType').value,
@@ -244,16 +269,41 @@ function initEventModalLogic() {
             startAt: document.getElementById('eventStart').value,
             endAt: document.getElementById('eventEnd').value,
             location: document.getElementById('eventLocation').value,
+            statusCode: document.getElementById('eventStatus').value,
+            allDay: document.getElementById('eventAllDay').checked,
             description: document.getElementById('eventDescription').value,
             attendeeIds: attendeeIds,
-            repeating: document.getElementById('eventRepeating').checked
+            repeating: document.getElementById('eventRepeating').checked,
+            useYn: true,
+            createUser: isEditMode ? null : 1,  // 신규 등록 시에만 설정
+            updateUser: isEditMode ? 1 : null   // 수정 시에만 설정
         };
+
+        console.log('eventData:', eventData);
+        console.log('수정 모드:', eventData.eventId ? 'PUT' : 'POST');
+
+        // 유효성 검사
+        if (!eventData.title || !eventData.startAt || !eventData.endAt) {
+            console.log('유효성 검사 실패: 필수 항목 누락');
+            alert('제목, 시작 일시, 종료 일시는 필수 입력 항목입니다.');
+            return;
+        }
+
+        if (new Date(eventData.startAt) >= new Date(eventData.endAt)) {
+            console.log('유효성 검사 실패: 시작/종료 시간 오류');
+            alert('종료 일시는 시작 일시보다 이후여야 합니다.');
+            return;
+        }
+
+        console.log('유효성 검사 통과, FormData 생성 중...');
 
         const eventAttachmentsInput = document.getElementById('eventAttachments');
         const files = eventAttachmentsInput ? eventAttachmentsInput.files : null;
-        
+
         const formData = new FormData();
-        formData.append('event', JSON.stringify(eventData));
+        // JSON을 Blob으로 감싸서 전송 (PUT 요청의 multipart 처리를 위해)
+        const eventBlob = new Blob([JSON.stringify(eventData)], { type: 'application/json' });
+        formData.append('event', eventBlob, 'event.json');
 
         if (files && files.length > 0) {
             for (let i = 0; i < files.length; i++) {
@@ -262,9 +312,13 @@ function initEventModalLogic() {
         }
 
         const saveUrl = contextPath + '/schedules/events';
+        const method = eventData.eventId ? 'PUT' : 'POST';
         console.log('Save event URL:', saveUrl);
+        console.log('HTTP Method:', method);
+        console.log('FormData 전송 시작...');
+
         fetch(saveUrl, {
-            method: eventData.eventId ? 'PUT' : 'POST',
+            method: method,
             body: formData,
         })
         .then(response => {
@@ -281,17 +335,33 @@ function initEventModalLogic() {
                     throw new Error(errorMessage);
                 });
             } else if (!response.ok) {
-                return response.text().then(text => { throw new Error(text) });
+                // response body를 한 번만 읽기 위해 text()로 먼저 읽음
+                return response.text().then(text => {
+                    try {
+                        const errorBody = JSON.parse(text);
+                        throw new Error(errorBody.message || '알 수 없는 오류가 발생했습니다.');
+                    } catch (e) {
+                        // JSON 파싱 실패 시 원본 텍스트 사용
+                        throw new Error(text || '서버 오류가 발생했습니다.');
+                    }
+                });
             }
             return response.json();
         })
         .then(data => {
             console.log('Success:', data);
-            $('#eventModal').modal('hide');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('eventModal'));
+            if (modal) {
+                modal.hide();
+            }
             if (calendarInstance) {
-                 calendarInstance.refetchEvents();
+                calendarInstance.refetchEvents();
             }
             alert('일정이 성공적으로 저장되었습니다!');
+            // 일정 관리 페이지인 경우 페이지 새로고침
+            if (window.location.pathname.includes('/manage')) {
+                location.reload();
+            }
         })
         .catch((error) => {
             console.error('Error:', error);
@@ -316,8 +386,8 @@ function initManagePageLogic() {
 
             if (confirm('정말 이 일정을 삭제하시겠습니까? 관련된 모든 정보가 삭제됩니다.')) {
                 console.log('Deleting event with ID:', eventId);
-                const deleteUrl = `/schedules/events/${eventId}/delete`; // Directly use absolute path for testing
-                console.log('Delete URL (modified):', deleteUrl);
+                const deleteUrl = contextPath + `/schedules/events/${eventId}/delete`;
+                console.log('Delete URL:', deleteUrl);
                 fetch(deleteUrl, {
                     method: 'POST',
                     headers: {
@@ -344,8 +414,8 @@ function initManagePageLogic() {
         if (e.target && e.target.classList.contains('btn-edit-event')) {
             const eventId = e.target.dataset.eventId;
             console.log('Fetching event for edit with ID:', eventId);
-            const editUrl = `/schedules/events/${eventId}`; // Directly use absolute path for testing
-            console.log('Edit URL (modified):', editUrl);
+            const editUrl = contextPath + `/schedules/events/${eventId}`;
+            console.log('Edit URL:', editUrl);
 
             fetch(editUrl)
                 .then(response => {
@@ -362,6 +432,8 @@ function initManagePageLogic() {
                     document.getElementById('eventStart').value = event.startAt.slice(0, 16);
                     document.getElementById('eventEnd').value = event.endAt.slice(0, 16);
                     document.getElementById('eventLocation').value = event.location || '';
+                    document.getElementById('eventStatus').value = event.statusCode || 'SCHEDULED';
+                    document.getElementById('eventAllDay').checked = event.allDay || false;
                     document.getElementById('eventDescription').value = event.description || '';
                     document.getElementById('eventRepeating').checked = event.repeating;
 
@@ -369,7 +441,8 @@ function initManagePageLogic() {
                     const selectedAttendeesContainer = document.getElementById('selected-attendees');
                     renderSelectedAttendees(selectedAttendeesContainer); // 컨테이너 전달
 
-                    $('#eventModal').modal('show');
+                    const modal = new bootstrap.Modal(document.getElementById('eventModal'));
+                    modal.show();
                 })
                 .catch(error => {
                     console.error('Error fetching event for edit:', error);
@@ -380,11 +453,215 @@ function initManagePageLogic() {
 }
 
 
+/**
+ * 일정 상세보기 모달을 표시합니다.
+ * @param {number} eventId - 조회할 이벤트 ID
+ */
+function showEventDetail(eventId) {
+    const detailUrl = contextPath + `/schedules/events/${eventId}`;
+
+    fetch(detailUrl)
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => { throw new Error(text) });
+            }
+            return response.json();
+        })
+        .then(event => {
+            // 일정 유형 표시
+            const typeMap = {
+                'PERSONAL': { text: '개인', class: 'bg-primary' },
+                'DEPARTMENT': { text: '부서', class: 'bg-success' },
+                'COMPANY': { text: '전사', class: 'bg-danger' }
+            };
+            const typeInfo = typeMap[event.scope] || { text: event.scope, class: 'bg-secondary' };
+            document.getElementById('detailEventType').textContent = typeInfo.text;
+            document.getElementById('detailEventType').className = `badge ${typeInfo.class}`;
+
+            // 상태 표시
+            const statusMap = {
+                'SCHEDULED': { text: '예정', class: 'bg-info' },
+                'COMPLETED': { text: '완료', class: 'bg-success' },
+                'CANCELLED': { text: '취소', class: 'bg-secondary' }
+            };
+            const statusInfo = statusMap[event.statusCode] || { text: event.statusCode, class: 'bg-secondary' };
+            document.getElementById('detailEventStatus').textContent = statusInfo.text;
+            document.getElementById('detailEventStatus').className = `badge ${statusInfo.class}`;
+
+            // 기본 정보 표시
+            document.getElementById('detailEventTitle').textContent = event.title || '';
+            document.getElementById('detailEventStart').textContent = event.startAt ? event.startAt.replace('T', ' ') : '';
+            document.getElementById('detailEventEnd').textContent = event.endAt ? event.endAt.replace('T', ' ') : '';
+            document.getElementById('detailEventAllDay').textContent = event.allDay ? '예' : '아니오';
+            document.getElementById('detailEventLocation').textContent = event.location || '-';
+            document.getElementById('detailEventRepeating').textContent = event.repeating ? '예' : '아니오';
+            document.getElementById('detailEventDescription').textContent = event.description || '-';
+
+            // 참석자 표시
+            const attendeesContainer = document.getElementById('detailEventAttendees');
+            if (event.attendees && event.attendees.length > 0) {
+                attendeesContainer.innerHTML = '';
+                event.attendees.forEach(attendee => {
+                    const badge = document.createElement('span');
+                    badge.className = 'badge bg-info me-1';
+                    badge.textContent = `${attendee.name} (${attendee.departmentName || '부서없음'})`;
+                    attendeesContainer.appendChild(badge);
+                });
+            } else {
+                attendeesContainer.innerHTML = '<span class="text-muted">참석자가 없습니다.</span>';
+            }
+
+            // 첨부파일 표시 (참고 파일)
+            const attachmentsContainer = document.getElementById('detailEventAttachments');
+            if (event.attachments && event.attachments.length > 0) {
+                attachmentsContainer.innerHTML = '';
+                event.attachments.forEach(file => {
+                    const fileLink = document.createElement('div');
+                    fileLink.className = 'mb-1';
+                    fileLink.innerHTML = `
+                        <i class="bi bi-file-earmark-arrow-down"></i>
+                        <a href="${contextPath}/schedules/attachments/${file.fileId}/download" target="_blank">
+                            ${file.fileName}
+                        </a>
+                        <span class="text-muted ms-2">(${formatFileSize(file.fileSize)})</span>
+                    `;
+                    attachmentsContainer.appendChild(fileLink);
+                });
+            } else {
+                attachmentsContainer.innerHTML = '<span class="text-muted">첨부된 파일이 없습니다.</span>';
+            }
+
+            // 수정/삭제 버튼에 이벤트 ID 저장
+            document.getElementById('editEventFromDetailBtn').dataset.eventId = eventId;
+            document.getElementById('deleteEventFromDetailBtn').dataset.eventId = eventId;
+
+            // 모달 표시
+            const modal = new bootstrap.Modal(document.getElementById('eventDetailModal'));
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Error fetching event detail:', error);
+            alert('일정 상세 정보를 불러오는 데 실패했습니다: ' + error.message);
+        });
+}
+
+/**
+ * 파일 크기를 읽기 쉬운 형식으로 변환합니다.
+ * @param {number} bytes - 바이트 단위 파일 크기
+ * @returns {string} 포맷된 파일 크기
+ */
+function formatFileSize(bytes) {
+    if (!bytes) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+}
+
 // DOMContentLoaded 이벤트 리스너
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('========== DOMContentLoaded 이벤트 발생 ==========');
+    console.log('현재 페이지 경로:', window.location.pathname);
+
     // 페이지별 기능 초기화
+    console.log('1. initAttendeeSearch 호출');
     initAttendeeSearch();
+
+    console.log('2. initFullCalendar 호출');
     initFullCalendar();
+
+    console.log('3. initEventModalLogic 호출');
     initEventModalLogic();
+
+    console.log('4. initManagePageLogic 호출');
     initManagePageLogic();
+
+    console.log('5. 상세보기 모달 버튼 이벤트 리스너 등록');
+    // 상세보기 모달에서 수정 버튼 클릭 시
+    const editFromDetailBtn = document.getElementById('editEventFromDetailBtn');
+    if (editFromDetailBtn) {
+        editFromDetailBtn.addEventListener('click', function() {
+            const eventId = this.dataset.eventId;
+            // 상세보기 모달 닫기
+            const detailModal = bootstrap.Modal.getInstance(document.getElementById('eventDetailModal'));
+            if (detailModal) {
+                detailModal.hide();
+            }
+            // 수정 모달 열기 (manage.jsp의 수정 로직 재사용)
+            const editUrl = contextPath + `/schedules/events/${eventId}`;
+            fetch(editUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text) });
+                    }
+                    return response.json();
+                })
+                .then(event => {
+                    document.getElementById('eventModalLabel').textContent = '일정 수정';
+                    document.getElementById('eventId').value = event.eventId;
+                    document.getElementById('eventType').value = event.scope;
+                    document.getElementById('eventTitle').value = event.title;
+                    document.getElementById('eventStart').value = event.startAt.slice(0, 16);
+                    document.getElementById('eventEnd').value = event.endAt.slice(0, 16);
+                    document.getElementById('eventLocation').value = event.location || '';
+                    document.getElementById('eventStatus').value = event.statusCode || 'SCHEDULED';
+                    document.getElementById('eventAllDay').checked = event.allDay || false;
+                    document.getElementById('eventDescription').value = event.description || '';
+                    document.getElementById('eventRepeating').checked = event.repeating;
+
+                    selectedAttendees = event.attendees || [];
+                    const selectedAttendeesContainer = document.getElementById('selected-attendees');
+                    renderSelectedAttendees(selectedAttendeesContainer);
+
+                    const modal = new bootstrap.Modal(document.getElementById('eventModal'));
+                    modal.show();
+                })
+                .catch(error => {
+                    console.error('Error fetching event for edit:', error);
+                    alert('일정 정보를 불러오는 데 실패했습니다: ' + error.message);
+                });
+        });
+    }
+
+    // 상세보기 모달에서 삭제 버튼 클릭 시
+    const deleteFromDetailBtn = document.getElementById('deleteEventFromDetailBtn');
+    if (deleteFromDetailBtn) {
+        deleteFromDetailBtn.addEventListener('click', function() {
+            const eventId = this.dataset.eventId;
+            if (confirm('정말 이 일정을 삭제하시겠습니까? 관련된 모든 정보가 삭제됩니다.')) {
+                const deleteUrl = contextPath + `/schedules/events/${eventId}/delete`;
+                fetch(deleteUrl, {
+                    method: 'POST',
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('일정이 삭제되었습니다.');
+                        // 상세보기 모달 닫기
+                        const detailModal = bootstrap.Modal.getInstance(document.getElementById('eventDetailModal'));
+                        if (detailModal) {
+                            detailModal.hide();
+                        }
+                        // 캘린더 새로고침
+                        if (calendarInstance) {
+                            calendarInstance.refetchEvents();
+                        }
+                        // 일정 관리 페이지인 경우 페이지 새로고침
+                        if (window.location.pathname.includes('/manage')) {
+                            location.reload();
+                        }
+                    } else {
+                        response.text().then(text => {
+                            alert('삭제에 실패했습니다: ' + text);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('삭제 중 오류가 발생했습니다.');
+                });
+            }
+        });
+    }
+
+    console.log('========== 모든 초기화 함수 호출 완료 ==========');
 });

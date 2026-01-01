@@ -195,7 +195,7 @@ public class ScheduleService {
             for (MultipartFile file : files) {
                 if (!file.isEmpty()) {
                     Long fileId = fileService.storeFile(file);
-                    fileService.linkFileToEntity(fileId, "CALENDAR_EVENT", calendarEvent.getEventId(), "reference", calendarEvent.getCreateUser());
+                    fileService.linkFileToEntity(fileId, "CALENDAR_EVENT", calendarEvent.getEventId(), "reference", calendarEvent.getUpdateUser());
                 }
             }
         }

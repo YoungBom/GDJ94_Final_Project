@@ -64,30 +64,43 @@ public class ScheduleController {
     }
 
     @PostMapping("/events")
-    public ResponseEntity<?> createEvent( // ResponseEntity의 제네릭 타입을 와일드카드로 변경
-            @RequestPart("event") CalendarEventDto calendarEvent,
+    public ResponseEntity<?> createEvent(
+            @RequestPart("event") String eventJson,
             @RequestPart(value = "files", required = false) List<MultipartFile> files) {
-        
+
         try {
+            // JSON 문자열을 수동으로 파싱
+            com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+            CalendarEventDto calendarEvent = objectMapper.readValue(eventJson, CalendarEventDto.class);
+
             CalendarEventDto createdEvent = scheduleService.createCalendarEvent(calendarEvent, files);
             return new ResponseEntity<>(createdEvent, HttpStatus.CREATED);
         } catch (TimeConflictException e) {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("message", e.getMessage());
             errorResponse.put("conflicts", e.getConflicts());
-            // Content-Type을 application/json으로 명시하여 프론트엔드에서 파싱할 수 있도록 함
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            return new ResponseEntity<>(errorResponse, headers, HttpStatus.CONFLICT); // 409 Conflict
+            return new ResponseEntity<>(errorResponse, headers, HttpStatus.CONFLICT);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "일정 생성 중 오류가 발생했습니다: " + e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
     }
 
     @PutMapping("/events")
-    public ResponseEntity<?> updateEvent( // ResponseEntity의 제네릭 타입을 와일드카드로 변경
-            @RequestPart("event") CalendarEventDto calendarEvent,
+    public ResponseEntity<?> updateEvent(
+            @RequestPart("event") String eventJson,
             @RequestPart(value = "files", required = false) List<MultipartFile> files) {
-        
+
         try {
+            // JSON 문자열을 수동으로 파싱
+            com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+            CalendarEventDto calendarEvent = objectMapper.readValue(eventJson, CalendarEventDto.class);
+
             CalendarEventDto updatedEvent = scheduleService.updateCalendarEvent(calendarEvent, files);
             return new ResponseEntity<>(updatedEvent, HttpStatus.OK);
         } catch (TimeConflictException e) {
@@ -96,7 +109,11 @@ public class ScheduleController {
             errorResponse.put("conflicts", e.getConflicts());
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            return new ResponseEntity<>(errorResponse, headers, HttpStatus.CONFLICT); // 409 Conflict
+            return new ResponseEntity<>(errorResponse, headers, HttpStatus.CONFLICT);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "일정 수정 중 오류가 발생했습니다: " + e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
     }
 

@@ -127,6 +127,9 @@
         WHERE sa.user_id = #{userId}
           AND sa.use_yn = TRUE
           AND ce.use_yn = TRUE
+          <if test="excludeEventId != null">
+          AND ce.event_id != #{excludeEventId}
+          </if>
           AND (
                 (ce.start_at &lt; #{proposedEnd} AND ce.end_at > #{proposedStart})
               )
