@@ -21,7 +21,7 @@
   </div>
 
   <!-- 카드 목록 -->
-  <div id="signList" class="row g-3"></div>
+  <div id="signList" class="row g-3 d-flex justify-content-center"></div>
 </div>
 
 <!-- Bootstrap Modal -->
@@ -156,50 +156,51 @@
       const imgSrc = normalizeImgUrl(item);
 
       return `
-        <div class="col-4">
-          <div class="card">
-            <div class="card-body">
-              <div class="row g-1 align-items-center">
-                <div class="col-4 col-md-12">
-                  <div class="border rounded-3 p-1 bg-body">
-                    <img
-                      src="\${imgSrc}"
-                      class="img-fluid d-block mx-auto object-fit-contain"
-                      style="height:100px; width:100%;"
-                      alt="서명 이미지"
-                      onerror="this.onerror=null; this.removeAttribute('src'); this.closest('.border').innerHTML='<div class=&quot;text-body-secondary small py-4 text-center&quot;>이미지 로드 실패</div>';"
-                    />
-                  </div>
+      <div style="width:250px;">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="row g-1 align-items-center">
+              <div class="col-12">
+                <div class="border rounded-3 p-1 bg-body">
+                  <img
+                    src="\${imgSrc}"
+                    class="img-fluid d-block mx-auto object-fit-contain"
+                    style="height:100px; width:100%;"
+                    alt="서명 이미지"
+                    onerror="this.onerror=null; this.removeAttribute('src'); this.closest('.border').innerHTML='<div class=&quot;text-body-secondary small py-4 text-center&quot;>이미지 로드 실패</div>';"
+                  />
                 </div>
+              </div>
 
-                <div class="col-12 col-md-12">
-                  <div class="d-flex align-items-center gap-2 flex-wrap">
-                    ${badge}
-                    <span class="text-body-secondary small">ID: \${item.signatureId}</span>
-                  </div>
+              <div class="col-12">
+                <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
+                  ${badge}
+                  <span class="text-body-secondary small">ID: \${item.signatureId}</span>
+                </div>
+				
+                <div class="d-flex gap-2 flex-wrap">
+                  <button type="button"
+                          class="btn btn-outline-primary btn-sm"
+                          data-action="primary"
+                          data-id="\${item.signatureId}"
+                          ${item.isPrimary ? 'disabled' : ''}>
+                    대표로 설정
+                  </button>
 
-                  <div class="d-flex gap-2 flex-wrap">
-                    <button type="button"
-                            class="btn btn-outline-primary"
-                            data-action="primary"
-                            data-id="\${item.signatureId}"
-                            ${item.isPrimary ? 'disabled' : ''}>
-                      대표로 설정
-                    </button>
-
-                    <button type="button"
-                            class="btn btn-outline-danger"
-                            data-action="delete"
-                            data-id="\${item.signatureId}">
-                      삭제
-                    </button>
-                  </div>
+                  <button type="button"
+                          class="btn btn-outline-danger btn-sm"
+                          data-action="delete"
+                          data-id="\${item.signatureId}">
+                    삭제
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      `;
+      </div>
+    `;
+
     }).join('');
 
     signListEl.querySelectorAll('button[data-action="primary"]').forEach(btn => {
