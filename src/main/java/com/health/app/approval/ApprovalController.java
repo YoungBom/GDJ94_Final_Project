@@ -2,11 +2,14 @@ package com.health.app.approval;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import com.health.app.approval.dto.ApprovalProductDto;
 import com.health.app.security.model.LoginUser;
 
 import lombok.RequiredArgsConstructor;
@@ -18,24 +21,54 @@ public class ApprovalController {
 
     private final ApprovalService approvalService;
 
-    @GetMapping("list")
-    public void approvalList() { }
+    /* =========================
+     * 페이지 라우팅
+     * ========================= */
 
+    @GetMapping("list")
+    public String approvalList() {
+        return "approval/list";
+    }
+
+    // ✅ form은 한 군데만 유지 (branches 세팅 포함)
     @GetMapping("form")
-    public void approvalForm() { }
+    public String approvalForm(Model model) {
+        model.addAttribute("branches", approvalService.getBranches());
+        model.addAttribute("products", java.util.Collections.emptyList()); // 초기 비움
+        return "approval/form";
+    }
 
     @GetMapping("signature")
-    public void approvalSignature() { }
+    public String approvalSignature() {
+        return "approval/signature";
+    }
 
     @GetMapping("print")
-    public void approvalPrint() { }
-    @GetMapping("inbox")
-    public String inbox(@AuthenticationPrincipal LoginUser loginUser,
-                        org.springframework.ui.Model model) {
+    public String approvalPrint() {
+        return "approval/print";
+    }
 
+    /* =========================
+     * Inbox
+     * ========================= */
+
+    @GetMapping("inbox")
+    public String inbox(@AuthenticationPrincipal LoginUser loginUser, Model model) {
         Long userId = loginUser.getUserId();
         model.addAttribute("list", approvalService.getMyInbox(userId));
         return "approval/inbox";
+    }
+
+    /* =========================
+     * Draft / Submit
+     * ========================= */
+
+    @PostMapping("saveDraftForm")
+    public String saveDraftForm(@AuthenticationPrincipal LoginUser loginUser,
+                                @ModelAttribute ApprovalDraftDTO dto) {
+
+        ApprovalDraftDTO saved = approvalService.saveDraft(loginUser.getUserId(), dto);
+        return "redirect:/approval/line?docVerId=" + saved.getDocVerId();
     }
 
     @PostMapping("submit")
@@ -43,26 +76,19 @@ public class ApprovalController {
                          @RequestParam Long docVerId) {
 
         approvalService.submit(loginUser.getUserId(), docVerId);
-
         return "redirect:/approval/list";
     }
 
-    @PostMapping("saveDraftForm")
-    public String saveDraftForm(@AuthenticationPrincipal LoginUser loginUser,
-                                @ModelAttribute ApprovalDraftDTO dto) {
+    /* =========================
+     * Lines
+     * ========================= */
 
-        ApprovalDraftDTO saved = approvalService.saveDraft(loginUser.getUserId(), dto);
-
-        return "redirect:/approval/line?docVerId=" + saved.getDocVerId();
-    }
-
-    
     @GetMapping("line")
-    public String linePage(@RequestParam Long docVerId, org.springframework.ui.Model model) {
+    public String linePage(@RequestParam Long docVerId, Model model) {
         model.addAttribute("docVerId", docVerId);
-        return "approval/line"; 
+        return "approval/line";
     }
-  
+
     @PostMapping("saveLinesForm")
     @ResponseBody
     public String saveLinesForm(@AuthenticationPrincipal LoginUser loginUser,
@@ -93,10 +119,21 @@ public class ApprovalController {
     public List<ApprovalLineDTO> linesForm(@RequestParam Long docVerId) {
         return approvalService.getLines(docVerId);
     }
+
     @GetMapping("approvers/tree")
     @ResponseBody
-    public java.util.Map<String, Object> approverTree() {
+    public Map<String, Object> approverTree() {
         return approvalService.getApproverTree();
     }
 
+    /* =========================
+     * ✅ Approval 전용 상품 조회 API
+     * - 프론트에서 branchId 선택 시 호출해서 products 채우는 용도
+     * ========================= */
+
+    @GetMapping("products")
+    @ResponseBody
+    public List<ApprovalProductDTO> products(@RequestParam(required = false) Long branchId) {
+        return approvalService.getProductsByBranch(branchId);
+    }
 }

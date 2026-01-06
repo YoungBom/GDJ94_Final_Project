@@ -3,7 +3,9 @@
   const extras = document.querySelectorAll('.doc-extra');
   const formCodeInput = document.getElementById('formCode');
 
-  // AT -> DF 매핑
+  if (!typeSelect) return; // ✅ 방어
+
+  // AT -> DF 매핑 (정책: AT012도 DF012로 임시 확정)
   const typeToForm = {
     "AT001": "DF001",
     "AT002": "DF002",
@@ -16,7 +18,7 @@
     "AT009": "DF009",
     "AT010": "DF010",
     "AT011": "DF011",
-    // "AT012": "DF??"  // 너희 DF 정의가 없어서 정책 필요
+    "AT012": "DF012" // ✅ 임시 정책 확정(나중에 바꾸면 됨)
   };
 
   function syncFormCode(typeCode) {
@@ -26,41 +28,54 @@
 
   function setEnabled(container, enabled) {
     const fields = container.querySelectorAll('input, select, textarea, button');
-    fields.forEach(f => {
-      f.disabled = !enabled;
+    fields.forEach(f => { f.disabled = !enabled; });
+  }
+
+  function hideAll() {
+    extras.forEach(el => {
+      el.style.display = 'none';
+      setEnabled(el, false);
+    });
+  }
+
+  function showDefaultOnly() {
+    hideAll();
+    extras.forEach(el => {
+      if (el.getAttribute('data-type') === '__DEFAULT__') {
+        el.style.display = '';
+        setEnabled(el, true);
+      }
     });
   }
 
   function showExtras(typeCode) {
-    let matched = false;
+    hideAll();
 
+    let matched = false;
     extras.forEach(el => {
       const t = el.getAttribute('data-type');
       const on = (t === typeCode);
 
-      el.style.display = on ? '' : 'none';
-      setEnabled(el, on);
-
-      if (on) matched = true;
+      if (on) {
+        el.style.display = '';
+        setEnabled(el, true);
+        matched = true;
+      }
     });
 
     if (!matched) {
-      extras.forEach(el => {
-        if (el.getAttribute('data-type') === '__DEFAULT__') {
-          el.style.display = '';
-          setEnabled(el, true);
-        }
-      });
+      showDefaultOnly();
     }
   }
 
-  typeSelect.addEventListener('change', function () {
+  function apply() {
     const typeCode = typeSelect.value;
-    syncFormCode(typeCode);   // ✅ 추가
+    syncFormCode(typeCode);
     showExtras(typeCode);
-  });
+  }
+
+  typeSelect.addEventListener('change', apply);
 
   // 초기 1회
-  syncFormCode(typeSelect.value); // ✅ 추가
-  showExtras(typeSelect.value);
+  apply();
 })();

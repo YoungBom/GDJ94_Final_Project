@@ -9,6 +9,8 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.health.app.approval.ApprovalProductDTO;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -16,10 +18,19 @@ import lombok.RequiredArgsConstructor;
 public class ApprovalService {
 
     private final ApprovalMapper approvalMapper;
+    private final ApprovalProductMapper approvalProductMapper; // ✅ 신규 주입
+
+    /* ==================================================
+     * 받은 결재함
+     * ================================================== */
+    @Transactional(readOnly = true)
     public List<ApprovalInboxRowDTO> getMyInbox(Long approverId) {
         return approvalMapper.selectMyInbox(approverId);
     }
 
+    /* ==================================================
+     * 임시저장
+     * ================================================== */
     @Transactional
     public ApprovalDraftDTO saveDraft(Long loginUserId, ApprovalDraftDTO dto) {
 
@@ -27,6 +38,7 @@ public class ApprovalService {
         dto.setCreateUser(loginUserId);
         dto.setUpdateUser(loginUserId);
 
+        // 지점 자동 세팅
         if (dto.getBranchId() == null) {
             Long branchId = approvalMapper.selectBranchIdByUserId(loginUserId);
             if (branchId == null) {
@@ -35,14 +47,15 @@ public class ApprovalService {
             dto.setBranchId(branchId);
         }
 
+        // 문서 번호
         if (dto.getDocNo() == null || dto.getDocNo().isBlank()) {
             dto.setDocNo("TMP-" + System.currentTimeMillis());
         }
 
+        // 상태 기본값
         if (dto.getStatusCode() == null || dto.getStatusCode().isBlank()) {
-            dto.setStatusCode("AS001");
+            dto.setStatusCode("AS001"); // 임시저장
         }
-
         if (dto.getVerStatusCode() == null || dto.getVerStatusCode().isBlank()) {
             dto.setVerStatusCode("AVS001");
         }
@@ -61,6 +74,9 @@ public class ApprovalService {
         return dto;
     }
 
+    /* ==================================================
+     * 결재선 저장
+     * ================================================== */
     @Transactional
     public void saveLines(Long loginUserId, Long docVerId, List<ApprovalLineDTO> lines) {
 
@@ -69,9 +85,12 @@ public class ApprovalService {
         }
 
         approvalMapper.deleteLinesByDocVerId(docVerId);
+
         int seqAuto = 1;
         for (ApprovalLineDTO line : lines) {
+
             line.setDocVerId(docVerId);
+
             if (line.getSeq() == null) {
                 line.setSeq(seqAuto++);
             } else {
@@ -89,6 +108,9 @@ public class ApprovalService {
         }
     }
 
+    /* ==================================================
+     * 결재선 조회
+     * ================================================== */
     @Transactional(readOnly = true)
     public List<ApprovalLineDTO> getLines(Long docVerId) {
         if (docVerId == null) {
@@ -97,6 +119,9 @@ public class ApprovalService {
         return approvalMapper.selectLinesByDocVerId(docVerId);
     }
 
+    /* ==================================================
+     * 결재자 트리
+     * ================================================== */
     @Transactional(readOnly = true)
     public Map<String, Object> getApproverTree() {
 
@@ -104,18 +129,21 @@ public class ApprovalService {
         List<Map<String, Object>> brUsers = approvalMapper.selectBranchApprovers();
         List<Map<String, Object>> brList  = approvalMapper.selectBranches();
 
+        // 본사 → 부서
         Map<String, List<Map<String, Object>>> headOfficeByDept = new LinkedHashMap<>();
         for (Map<String, Object> u : hqUsers) {
             String deptCode = String.valueOf(u.get("deptCode"));
             headOfficeByDept.computeIfAbsent(deptCode, k -> new ArrayList<>()).add(u);
         }
 
+        // 지점명 맵
         Map<Long, String> branchNameMap = new HashMap<>();
         for (Map<String, Object> b : brList) {
             Long branchId = ((Number) b.get("branchId")).longValue();
             branchNameMap.put(branchId, String.valueOf(b.get("branchName")));
         }
 
+        // 지점 → 사용자
         Map<String, Object> branches = new LinkedHashMap<>();
         for (Map<String, Object> u : brUsers) {
 
@@ -141,39 +169,55 @@ public class ApprovalService {
         result.put("branches", branches);
         return result;
     }
-    
- @Transactional
- public void submit(Long loginUserId, Long docVerId) {
 
-     if (docVerId == null) {
-         throw new IllegalArgumentException("docVerId is required");
-     }
+    /* ==================================================
+     * 결재 요청
+     * ================================================== */
+    @Transactional
+    public void submit(Long loginUserId, Long docVerId) {
 
-     Long drafterId = approvalMapper.selectDrafterIdByDocVerId(docVerId);
-     if (drafterId == null) {
-         throw new IllegalStateException("문서를 찾을 수 없습니다. docVerId=" + docVerId);
-     }
-     if (!drafterId.equals(loginUserId)) {
-         throw new IllegalStateException("기안자만 결재 요청할 수 있습니다.");
-     }
+        if (docVerId == null) {
+            throw new IllegalArgumentException("docVerId is required");
+        }
 
-     int lineCount = approvalMapper.countLinesByDocVerId(docVerId);
-     if (lineCount <= 0) {
-         throw new IllegalStateException("결재선이 없습니다. 결재선을 먼저 설정하세요.");
-     }
+        Long drafterId = approvalMapper.selectDrafterIdByDocVerId(docVerId);
+        if (drafterId == null) {
+            throw new IllegalStateException("문서를 찾을 수 없습니다. docVerId=" + docVerId);
+        }
+        if (!drafterId.equals(loginUserId)) {
+            throw new IllegalStateException("기안자만 결재 요청할 수 있습니다.");
+        }
 
-     String docStatus = approvalMapper.selectDocStatusByDocVerId(docVerId);
-     if (docStatus == null) {
-         throw new IllegalStateException("문서 상태 조회 실패. docVerId=" + docVerId);
-     }
-     if (!"AS001".equals(docStatus)) {
-         throw new IllegalStateException("임시저장 문서만 결재 요청할 수 있습니다. 현재상태=" + docStatus);
-     }
+        int lineCount = approvalMapper.countLinesByDocVerId(docVerId);
+        if (lineCount <= 0) {
+            throw new IllegalStateException("결재선이 없습니다. 결재선을 먼저 설정하세요.");
+        }
 
-     approvalMapper.updateDocumentStatusByDocVerId(docVerId, "AS002", loginUserId);
-     approvalMapper.updateVersionStatusByDocVerId(docVerId, "AVS002", loginUserId);
-     approvalMapper.updateAllLinesStatusByDocVerId(docVerId, "ALS001", loginUserId);
-     approvalMapper.updateFirstLineToPending(docVerId, "ALS002", loginUserId);
- }
+        String docStatus = approvalMapper.selectDocStatusByDocVerId(docVerId);
+        if (!"AS001".equals(docStatus)) {
+            throw new IllegalStateException("임시저장 문서만 결재 요청할 수 있습니다.");
+        }
 
+        approvalMapper.updateDocumentStatusByDocVerId(docVerId, "AS002", loginUserId);
+        approvalMapper.updateVersionStatusByDocVerId(docVerId, "AVS002", loginUserId);
+        approvalMapper.updateAllLinesStatusByDocVerId(docVerId, "ALS001", loginUserId);
+        approvalMapper.updateFirstLineToPending(docVerId, "ALS002", loginUserId);
+    }
+
+    /* ==================================================
+     * ✅ approval 전용 상품 조회
+     * ================================================== */
+    @Transactional(readOnly = true)
+    public List<ApprovalProductDTO> getProductsByBranch(Long branchId) {
+        // 현재는 branchId 조건 없이 전체 상품
+        return approvalProductMapper.selectProductsByBranch(branchId);
+    }
+
+    /* ==================================================
+     * 지점 목록
+     * ================================================== */
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getBranches() {
+        return approvalMapper.selectBranches();
+    }
 }

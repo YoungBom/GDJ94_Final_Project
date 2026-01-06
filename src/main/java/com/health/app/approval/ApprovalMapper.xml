@@ -160,128 +160,142 @@
     <select id="selectLinesByDocVerId"
         parameterType="long"
         resultType="com.health.app.approval.ApprovalLineDTO">
-  SELECT
-      l.line_id        AS lineId,
-      l.doc_ver_id     AS docVerId,
-      l.seq            AS seq,
-      l.line_role_code AS lineRoleCode,
-      l.user_id        AS approverId,
-      u.name           AS approverName,
-      l.status_code    AS lineStatusCode,
-      l.acted_at       AS actedAt,
-      l.comment        AS comment,
-      l.signature_file_id AS signatureFileId,
-      l.create_user    AS createUser,
-      l.create_date    AS createDate,
-      l.update_user    AS updateUser,
-      l.update_date    AS updateDate,
-      l.use_yn         AS useYn
-  FROM approval_lines l
-  JOIN users u ON u.user_id = l.user_id
-  WHERE l.doc_ver_id = #{docVerId}
-    AND l.use_yn = 1
-  ORDER BY l.seq
-</select>
-
-<select id="selectHeadOfficeApprovers" resultType="map">
-  SELECT
-      u.user_id         AS userId
-    , u.name            AS name
-    , u.department_code AS deptCode
-    , u.role_code       AS roleCode
-  FROM users u
-  WHERE u.branch_id IS NULL
-    AND u.use_yn = 1
-  ORDER BY u.department_code, u.name
-</select>
-
-<select id="selectBranchApprovers" resultType="map">
-  SELECT
-      u.user_id   AS userId
-    , u.name      AS name
-    , u.branch_id AS branchId
-    , u.role_code AS roleCode
-  FROM users u
-  WHERE u.branch_id IS NOT NULL
-    AND u.use_yn = 1
-  ORDER BY u.branch_id, u.name
-</select>
-
-<select id="selectBranches" resultType="map">
-  SELECT
-      b.branch_id   AS branchId
-    , b.branch_name AS branchName
-  FROM branch b
-  ORDER BY b.branch_id
-</select>
-
-<select id="selectDrafterIdByDocVerId" resultType="long">
-  SELECT d.drafter_user_id
-  FROM approval_documents d
-  JOIN approval_document_versions v ON v.doc_id = d.doc_id
-  WHERE v.doc_ver_id = #{docVerId}
-  LIMIT 1
-</select>
-
-<select id="countLinesByDocVerId" resultType="int">
-  SELECT COUNT(*)
-  FROM approval_lines
-  WHERE doc_ver_id = #{docVerId}
-    AND use_yn = 1
-</select>
-
-<select id="selectDocStatusByDocVerId" resultType="string">
-  SELECT d.status_code
-  FROM approval_documents d
-  JOIN approval_document_versions v ON v.doc_id = d.doc_id
-  WHERE v.doc_ver_id = #{docVerId}
-  LIMIT 1
-</select>
-
-<update id="updateDocumentStatusByDocVerId">
-  UPDATE approval_documents d
-  JOIN approval_document_versions v ON v.doc_id = d.doc_id
-  SET d.status_code = #{statusCode},
-      d.update_user = #{updateUser},
-      d.update_date = NOW()
-  WHERE v.doc_ver_id = #{docVerId}
-</update>
-
-<update id="updateVersionStatusByDocVerId">
-  UPDATE approval_document_versions
-  SET ver_status_code = #{verStatusCode}
-  WHERE doc_ver_id = #{docVerId}
-</update>
-
-<update id="updateAllLinesStatusByDocVerId">
-  UPDATE approval_lines
-  SET status_code = #{lineStatusCode},
-      acted_at = NULL,
-      comment = NULL,
-      signature_file_id = NULL,
-      update_user = #{updateUser},
-      update_date = NOW()
-  WHERE doc_ver_id = #{docVerId}
-    AND use_yn = 1
-</update>
-
-<update id="updateFirstLineToPending">
-  UPDATE approval_lines
-  SET status_code = #{lineStatusCode},
-      update_user = #{updateUser},
-      update_date = NOW()
-  WHERE doc_ver_id = #{docVerId}
-    AND use_yn = 1
-    AND seq = (
-      SELECT t.min_seq
-      FROM (
-        SELECT MIN(seq) AS min_seq
-        FROM approval_lines
-        WHERE doc_ver_id = #{docVerId}
-          AND use_yn = 1
-      ) t
-    )
-</update>
-
-
+	  SELECT
+	      l.line_id        AS lineId,
+	      l.doc_ver_id     AS docVerId,
+	      l.seq            AS seq,
+	      l.line_role_code AS lineRoleCode,
+	      l.user_id        AS approverId,
+	      u.name           AS approverName,
+	      l.status_code    AS lineStatusCode,
+	      l.acted_at       AS actedAt,
+	      l.comment        AS comment,
+	      l.signature_file_id AS signatureFileId,
+	      l.create_user    AS createUser,
+	      l.create_date    AS createDate,
+	      l.update_user    AS updateUser,
+	      l.update_date    AS updateDate,
+	      l.use_yn         AS useYn
+	  FROM approval_lines l
+	  JOIN users u ON u.user_id = l.user_id
+	  WHERE l.doc_ver_id = #{docVerId}
+	    AND l.use_yn = 1
+	  ORDER BY l.seq
+	</select>
+	
+	<select id="selectHeadOfficeApprovers" resultType="map">
+	  SELECT
+	      u.user_id         AS userId
+	    , u.name            AS name
+	    , u.department_code AS deptCode
+	    , u.role_code       AS roleCode
+	  FROM users u
+	  WHERE u.branch_id IS NULL
+	    AND u.use_yn = 1
+	  ORDER BY u.department_code, u.name
+	</select>
+	
+	<select id="selectBranchApprovers" resultType="map">
+	  SELECT
+	      u.user_id   AS userId
+	    , u.name      AS name
+	    , u.branch_id AS branchId
+	    , u.role_code AS roleCode
+	  FROM users u
+	  WHERE u.branch_id IS NOT NULL
+	    AND u.use_yn = 1
+	  ORDER BY u.branch_id, u.name
+	</select>
+	
+	<select id="selectBranches" resultType="map">
+	  SELECT
+	      b.branch_id   AS branchId
+	    , b.branch_name AS branchName
+	  FROM branch b
+	  ORDER BY b.branch_id
+	</select>
+	
+	<select id="selectDrafterIdByDocVerId" resultType="long">
+	  SELECT d.drafter_user_id
+	  FROM approval_documents d
+	  JOIN approval_document_versions v ON v.doc_id = d.doc_id
+	  WHERE v.doc_ver_id = #{docVerId}
+	  LIMIT 1
+	</select>
+	
+	<select id="countLinesByDocVerId" resultType="int">
+	  SELECT COUNT(*)
+	  FROM approval_lines
+	  WHERE doc_ver_id = #{docVerId}
+	    AND use_yn = 1
+	</select>
+	
+	<select id="selectDocStatusByDocVerId" resultType="string">
+	  SELECT d.status_code
+	  FROM approval_documents d
+	  JOIN approval_document_versions v ON v.doc_id = d.doc_id
+	  WHERE v.doc_ver_id = #{docVerId}
+	  LIMIT 1
+	</select>
+	
+	<update id="updateDocumentStatusByDocVerId">
+	  UPDATE approval_documents d
+	  JOIN approval_document_versions v ON v.doc_id = d.doc_id
+	  SET d.status_code = #{statusCode},
+	      d.update_user = #{updateUser},
+	      d.update_date = NOW()
+	  WHERE v.doc_ver_id = #{docVerId}
+	</update>
+	
+	<update id="updateVersionStatusByDocVerId">
+	  UPDATE approval_document_versions
+	  SET ver_status_code = #{verStatusCode}
+	  WHERE doc_ver_id = #{docVerId}
+	</update>
+	
+	<update id="updateAllLinesStatusByDocVerId">
+	  UPDATE approval_lines
+	  SET status_code = #{lineStatusCode},
+	      acted_at = NULL,
+	      comment = NULL,
+	      signature_file_id = NULL,
+	      update_user = #{updateUser},
+	      update_date = NOW()
+	  WHERE doc_ver_id = #{docVerId}
+	    AND use_yn = 1
+	</update>
+	
+	<update id="updateFirstLineToPending">
+	  UPDATE approval_lines
+	  SET status_code = #{lineStatusCode},
+	      update_user = #{updateUser},
+	      update_date = NOW()
+	  WHERE doc_ver_id = #{docVerId}
+	    AND use_yn = 1
+	    AND seq = (
+	      SELECT t.min_seq
+	      FROM (
+	        SELECT MIN(seq) AS min_seq
+	        FROM approval_lines
+	        WHERE doc_ver_id = #{docVerId}
+	          AND use_yn = 1
+	      ) t
+	    )
+	</update>
+	
+	<select id="selectProductsByBranch"
+        parameterType="long"
+        resultType="com.health.app.approval.BranchProductStockDTO">
+    	SELECT
+	        p.product_id   AS productId,
+	        p.product_name AS productName,
+	        i.quantity     AS stockQty
+	    FROM inventory i
+	    JOIN product p ON p.product_id = i.product_id
+	    WHERE i.use_yn = 1
+	      AND p.use_yn = 1
+	      AND i.branch_id = #{branchId}
+	    ORDER BY p.product_name ASC
+	</select>
+		
 </mapper>

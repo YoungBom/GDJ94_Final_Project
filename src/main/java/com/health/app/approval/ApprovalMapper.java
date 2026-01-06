@@ -38,4 +38,31 @@ public interface ApprovalMapper {
                                  @Param("lineStatusCode") String lineStatusCode,
                                  @Param("updateUser") Long updateUser);
     List<ApprovalInboxRowDTO> selectMyInbox(@Param("approverId") Long approverId);
+    
+    ApprovalDocHeaderDTO selectDocHeaderByDocVerId(@Param("docVerId") Long docVerId);
+
+    ApprovalLineDTO selectMyPendingLine(@Param("docVerId") Long docVerId,
+                                        @Param("userId") Long userId);
+
+    int approveMyLine(@Param("docVerId") Long docVerId,
+                      @Param("userId") Long userId,
+                      @Param("comment") String comment,
+                      @Param("signatureFileId") Long signatureFileId,
+                      @Param("updateUser") Long updateUser);
+
+    int rejectMyLine(@Param("docVerId") Long docVerId,
+                     @Param("userId") Long userId,
+                     @Param("comment") String comment,
+                     @Param("signatureFileId") Long signatureFileId,
+                     @Param("updateUser") Long updateUser);
+
+    int promoteNextLineToPending(@Param("docVerId") Long docVerId,
+                                 @Param("nextSeq") Long nextSeq,
+                                 @Param("updateUser") Long updateUser);
+
+    int existsNextLine(@Param("docVerId") Long docVerId,
+                       @Param("nextSeq") Long nextSeq);
+    
+    List<ApprovalProductDTO> selectProductsByBranch(@Param("branchId") Long branchId);
+
 }

@@ -54,7 +54,6 @@
                 <td><span class="badge text-bg-secondary"><c:out value="${row.mySeq}"/></span></td>
                 <td><c:out value="${row.submittedAt}"/></td>
                 <td class="text-end">
-                  <!-- 다음 단계에서 handle 화면 구현 -->
                   <a class="btn btn-sm btn-primary" href="/approval/handle?docVerId=${row.docVerId}">
                     결재하기
                   </a>
