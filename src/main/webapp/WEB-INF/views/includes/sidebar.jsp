@@ -138,6 +138,11 @@
                 <p>결재 라인</p>
               </a>
             </li>
+            <li class="nav-item">
+              <a href="/approval/inbox" class="nav-link">
+                <p>기안함</p>
+              </a>
+            </li>
           </ul>
         </li>
 

@@ -4,6 +4,32 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.health.app.approval.ApprovalMapper">
+ <select id="selectMyInbox" resultType="com.health.app.approval.ApprovalInboxRowDTO">
+    SELECT
+        d.doc_id             AS docId,
+        v.doc_ver_id         AS docVerId,
+        d.doc_no             AS docNo,
+        d.type_code          AS typeCode,
+        d.form_code          AS formCode,
+        d.status_code        AS docStatusCode,
+        v.ver_status_code    AS verStatusCode,
+        d.drafter_user_id    AS drafterId,
+        d.drafter_branch_id  AS branchId,
+        l.seq                AS mySeq,
+        l.status_code        AS myLineStatusCode,
+        v.create_date        AS submittedAt,
+        d.update_date        AS updateDate
+    FROM approval_lines l
+    JOIN approval_document_versions v ON v.doc_ver_id = l.doc_ver_id
+    JOIN approval_documents d ON d.doc_id = v.doc_id
+    WHERE l.use_yn = 1
+      AND v.use_yn = 1
+      AND d.use_yn = 1
+      AND l.user_id = #{approverId}
+      AND l.status_code = 'ALS002'
+      AND d.status_code = 'AS002'
+    ORDER BY v.create_date DESC, d.doc_id DESC
+  </select>
 
     <!-- 1) documents -->
     <insert id="insertDocument"
@@ -71,7 +97,6 @@
         )
     </insert>
 
-    <!-- 3) ext (개별 컬럼 저장) -->
     <insert id="insertDocumentExt"
             parameterType="com.health.app.approval.ApprovalDraftDTO">
         INSERT INTO approval_document_ext
@@ -98,7 +123,6 @@
         )
     </insert>
 
-    <!-- 4) documents.current_doc_ver_id -->
     <update id="updateCurrentVersion"
             parameterType="com.health.app.approval.ApprovalDraftDTO">
         UPDATE approval_documents
@@ -109,17 +133,12 @@
         WHERE doc_id = #{docId}
     </update>
 
-    <!-- ✅ userId로 branchId 조회 -->
     <select id="selectBranchIdByUserId" resultType="long">
         SELECT branch_id
         FROM users
         WHERE user_id = #{userId}
     </select>
 
-
-
-
-    <!-- (1) docVerId 기준 결재선 전체 삭제 -->
     <delete id="deleteLinesByDocVerId">
         DELETE FROM approval_lines
         WHERE doc_ver_id = #{docVerId}
@@ -164,12 +183,6 @@
   ORDER BY l.seq
 </select>
 
-
-<!-- =========================
-     ✅ 결재자 트리 조회
-     ========================= -->
-
-<!-- 본사: branch_id IS NULL -->
 <select id="selectHeadOfficeApprovers" resultType="map">
   SELECT
       u.user_id         AS userId
@@ -182,7 +195,6 @@
   ORDER BY u.department_code, u.name
 </select>
 
-<!-- 지점: branch_id IS NOT NULL -->
 <select id="selectBranchApprovers" resultType="map">
   SELECT
       u.user_id   AS userId
@@ -195,7 +207,6 @@
   ORDER BY u.branch_id, u.name
 </select>
 
-<!-- 지점명 -->
 <select id="selectBranches" resultType="map">
   SELECT
       b.branch_id   AS branchId
@@ -204,11 +215,6 @@
   ORDER BY b.branch_id
 </select>
 
-<!-- =========================
-     결재 요청(SUBMIT)
-     ========================= -->
-
-<!-- docVerId로 기안자 조회 -->
 <select id="selectDrafterIdByDocVerId" resultType="long">
   SELECT d.drafter_user_id
   FROM approval_documents d
@@ -217,7 +223,6 @@
   LIMIT 1
 </select>
 
-<!-- 결재선 건수 -->
 <select id="countLinesByDocVerId" resultType="int">
   SELECT COUNT(*)
   FROM approval_lines
@@ -225,7 +230,6 @@
     AND use_yn = 1
 </select>
 
-<!-- 현재 문서 상태 -->
 <select id="selectDocStatusByDocVerId" resultType="string">
   SELECT d.status_code
   FROM approval_documents d
@@ -234,7 +238,6 @@
   LIMIT 1
 </select>
 
-<!-- 문서 상태 변경 -->
 <update id="updateDocumentStatusByDocVerId">
   UPDATE approval_documents d
   JOIN approval_document_versions v ON v.doc_id = d.doc_id
@@ -244,14 +247,12 @@
   WHERE v.doc_ver_id = #{docVerId}
 </update>
 
-<!-- 버전 상태 변경 -->
 <update id="updateVersionStatusByDocVerId">
   UPDATE approval_document_versions
   SET ver_status_code = #{verStatusCode}
   WHERE doc_ver_id = #{docVerId}
 </update>
 
-<!-- 결재선 전체 WAIT 초기화 -->
 <update id="updateAllLinesStatusByDocVerId">
   UPDATE approval_lines
   SET status_code = #{lineStatusCode},
@@ -264,7 +265,6 @@
     AND use_yn = 1
 </update>
 
-<!-- 첫 결재자만 PENDING -->
 <update id="updateFirstLineToPending">
   UPDATE approval_lines
   SET status_code = #{lineStatusCode},

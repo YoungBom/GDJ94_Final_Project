@@ -29,14 +29,21 @@ public class ApprovalController {
 
     @GetMapping("print")
     public void approvalPrint() { }
-    
+    @GetMapping("inbox")
+    public String inbox(@AuthenticationPrincipal LoginUser loginUser,
+                        org.springframework.ui.Model model) {
+
+        Long userId = loginUser.getUserId();
+        model.addAttribute("list", approvalService.getMyInbox(userId));
+        return "approval/inbox";
+    }
+
     @PostMapping("submit")
     public String submit(@AuthenticationPrincipal LoginUser loginUser,
                          @RequestParam Long docVerId) {
 
         approvalService.submit(loginUser.getUserId(), docVerId);
 
-        // 제출 후: 목록 또는 상세로 이동 (원하는 곳으로 바꿔)
         return "redirect:/approval/list";
     }
 
@@ -46,7 +53,6 @@ public class ApprovalController {
 
         ApprovalDraftDTO saved = approvalService.saveDraft(loginUser.getUserId(), dto);
 
-        // 저장된 docVerId로 결재선 화면 이동
         return "redirect:/approval/line?docVerId=" + saved.getDocVerId();
     }
 
