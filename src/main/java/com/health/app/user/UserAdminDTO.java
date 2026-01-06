@@ -1,10 +1,8 @@
 package com.health.app.user;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter 
-@Setter
+@Data
 public class UserAdminDTO {
 
     private Long userId;
@@ -14,7 +12,18 @@ public class UserAdminDTO {
     private String phone;
 
     private String roleCode;
-    private String statusCode;
+    private String roleName;
+
+    private String departmentCode;
+    private String departmentName;
 
     private String branchName;
+
+    private String userStatusCode;
+    private String userStatusName;
+
+    private Integer failCount;
+    private String lockStatusCode;
+
+    private String createDate;
 }

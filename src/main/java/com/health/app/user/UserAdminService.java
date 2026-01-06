@@ -1,17 +1,16 @@
 package com.health.app.user;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
+import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class UserAdminService {
 
-    private final UserAdminMapper userMapper;
+    private final UserAdminMapper userAdminMapper;
 
-    public List<UserAdminDTO> getUserList() {
-        return userMapper.selectUserList();
+    public List<UserAdminDTO> getUserAdminList() {
+        return userAdminMapper.selectUserAdminList();
     }
 }
