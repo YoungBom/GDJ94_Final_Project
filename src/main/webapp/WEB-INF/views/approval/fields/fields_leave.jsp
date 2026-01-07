@@ -15,12 +15,12 @@
     <label class="form-label">휴가 구분</label>
     <select class="form-select" name="extCode1" required>
       <option value="">선택</option>
-      <option value="ANNUAL">연차</option>
-      <option value="HALF_AM">반차(오전)</option>
-      <option value="HALF_PM">반차(오후)</option>
-      <option value="SICK">병가</option>
-      <option value="EVENT">경조</option>
-      <option value="ETC">기타</option>
+      <option value="연차">연차</option>
+      <option value="반차(오전)">반차(오전)</option>
+      <option value="반차(오후)">반차(오후)</option>
+      <option value="병가">병가</option>
+      <option value="경조">경조</option>
+      <option value="기타">기타</option>
     </select>
   </div>
 

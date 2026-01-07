@@ -4,7 +4,11 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.health.app.approval.ApprovalMapper">
- <select id="selectMyInbox" resultType="com.health.app.approval.ApprovalInboxRowDTO">
+
+  <!-- ==================================================
+       받은 결재함
+       ================================================== -->
+  <select id="selectMyInbox" resultType="com.health.app.approval.ApprovalInboxRowDTO">
     SELECT
         d.doc_id             AS docId,
         v.doc_ver_id         AS docVerId,
@@ -21,7 +25,7 @@
         d.update_date        AS updateDate
     FROM approval_lines l
     JOIN approval_document_versions v ON v.doc_ver_id = l.doc_ver_id
-    JOIN approval_documents d ON d.doc_id = v.doc_id
+    JOIN approval_documents d        ON d.doc_id = v.doc_id
     WHERE l.use_yn = 1
       AND v.use_yn = 1
       AND d.use_yn = 1
@@ -31,371 +35,394 @@
     ORDER BY v.create_date DESC, d.doc_id DESC
   </select>
 
-    <!-- 1) documents -->
-    <insert id="insertDocument"
-            parameterType="com.health.app.approval.ApprovalDraftDTO"
-            useGeneratedKeys="true"
-            keyProperty="docId">
-        INSERT INTO approval_documents
-        (
-            doc_no,
-            type_code,
-            form_code,
-            status_code,
-            drafter_user_id,
-            drafter_branch_id,
-            current_doc_ver_id,
-            create_user,
-            create_date,
-            update_user,
-            update_date,
-            use_yn
-        )
-        VALUES
-        (
-            #{docNo},
-            #{typeCode},
-            #{formCode},
-            #{statusCode},
-            #{drafterId},
-            #{branchId},
-            NULL,
-            #{createUser},
-            NOW(),
-            #{updateUser},
-            NOW(),
-            1
-        )
-    </insert>
-
-    <!-- 2) versions -->
-    <insert id="insertDocumentVersion"
-            parameterType="com.health.app.approval.ApprovalDraftDTO"
-            useGeneratedKeys="true"
-            keyProperty="docVerId">
-        INSERT INTO approval_document_versions
-        (
-            doc_id,
-            version_no,
-            ver_status_code,
-            title,
-            body,
-            create_user,
-            create_date,
-            use_yn
-        )
-        VALUES
-        (
-            #{docId},
-            #{versionNo},
-            #{verStatusCode},
-            #{title},
-            #{body},
-            #{createUser},
-            NOW(),
-            TRUE
-        )
-    </insert>
-
-    <insert id="insertDocumentExt"
-            parameterType="com.health.app.approval.ApprovalDraftDTO">
-        INSERT INTO approval_document_ext
-        (
-            doc_ver_id,
-            ext_dt1, ext_dt2, ext_dt3, ext_dt4,
-            ext_no1, ext_no2, ext_no3, ext_no4,
-            ext_txt1, ext_txt2, ext_txt3, ext_txt4, ext_txt5, ext_txt6,
-            ext_code1, ext_code2, ext_code3, ext_code4,
-            create_user,
-            create_date,
-            use_yn
-        )
-        VALUES
-        (
-            #{docVerId},
-            #{extDt1}, #{extDt2}, #{extDt3}, #{extDt4},
-            #{extNo1}, #{extNo2}, #{extNo3}, #{extNo4},
-            #{extTxt1}, #{extTxt2}, #{extTxt3}, #{extTxt4}, #{extTxt5}, #{extTxt6},
-            #{extCode1}, #{extCode2}, #{extCode3}, #{extCode4},
-            #{createUser},
-            NOW(),
-            TRUE
-        )
-    </insert>
-
-    <update id="updateCurrentVersion"
-            parameterType="com.health.app.approval.ApprovalDraftDTO">
-        UPDATE approval_documents
-        SET
-            current_doc_ver_id = #{docVerId},
-            update_user = #{updateUser},
-            update_date = NOW()
-        WHERE doc_id = #{docId}
-    </update>
-
-    <select id="selectBranchIdByUserId" resultType="long">
-        SELECT branch_id
-        FROM users
-        WHERE user_id = #{userId}
-    </select>
-
-    <delete id="deleteLinesByDocVerId">
-        DELETE FROM approval_lines
-        WHERE doc_ver_id = #{docVerId}
-    </delete>
-
-    <insert id="insertLine" parameterType="com.health.app.approval.ApprovalLineDTO">
-	  INSERT INTO approval_lines (
-	      doc_ver_id, seq, line_role_code, user_id,
-	      status_code, acted_at, comment, signature_file_id,
-	      create_user, create_date, update_user, update_date, use_yn
-	  ) VALUES (
-	      #{docVerId}, #{seq}, #{lineRoleCode}, #{approverId},
-	      #{lineStatusCode}, #{actedAt}, #{comment}, #{signatureFileId},
-	      #{createUser}, NOW(), #{updateUser}, NOW(), 1
-	  )
-	</insert>
-
-
-    <select id="selectLinesByDocVerId"
-        parameterType="long"
-        resultType="com.health.app.approval.ApprovalLineDTO">
-	  SELECT
-	      l.line_id        AS lineId,
-	      l.doc_ver_id     AS docVerId,
-	      l.seq            AS seq,
-	      l.line_role_code AS lineRoleCode,
-	      l.user_id        AS approverId,
-	      u.name           AS approverName,
-	      l.status_code    AS lineStatusCode,
-	      l.acted_at       AS actedAt,
-	      l.comment        AS comment,
-	      l.signature_file_id AS signatureFileId,
-	      l.create_user    AS createUser,
-	      l.create_date    AS createDate,
-	      l.update_user    AS updateUser,
-	      l.update_date    AS updateDate,
-	      l.use_yn         AS useYn
-	  FROM approval_lines l
-	  JOIN users u ON u.user_id = l.user_id
-	  WHERE l.doc_ver_id = #{docVerId}
-	    AND l.use_yn = 1
-	  ORDER BY l.seq
-	</select>
-	
-	<select id="selectHeadOfficeApprovers" resultType="map">
-	  SELECT
-	      u.user_id         AS userId
-	    , u.name            AS name
-	    , u.department_code AS deptCode
-	    , u.role_code       AS roleCode
-	  FROM users u
-	  WHERE u.branch_id IS NULL
-	    AND u.use_yn = 1
-	  ORDER BY u.department_code, u.name
-	</select>
-	
-	<select id="selectBranchApprovers" resultType="map">
-	  SELECT
-	      u.user_id   AS userId
-	    , u.name      AS name
-	    , u.branch_id AS branchId
-	    , u.role_code AS roleCode
-	  FROM users u
-	  WHERE u.branch_id IS NOT NULL
-	    AND u.use_yn = 1
-	  ORDER BY u.branch_id, u.name
-	</select>
-	
-	<select id="selectBranches" resultType="map">
-	  SELECT
-	      b.branch_id   AS branchId
-	    , b.branch_name AS branchName
-	  FROM branch b
-	  ORDER BY b.branch_id
-	</select>
-	
-	<select id="selectDrafterIdByDocVerId" resultType="long">
-	  SELECT d.drafter_user_id
-	  FROM approval_documents d
-	  JOIN approval_document_versions v ON v.doc_id = d.doc_id
-	  WHERE v.doc_ver_id = #{docVerId}
-	  LIMIT 1
-	</select>
-	
-	<select id="countLinesByDocVerId" resultType="int">
-	  SELECT COUNT(*)
-	  FROM approval_lines
-	  WHERE doc_ver_id = #{docVerId}
-	    AND use_yn = 1
-	</select>
-	
-	<select id="selectDocStatusByDocVerId" resultType="string">
-	  SELECT d.status_code
-	  FROM approval_documents d
-	  JOIN approval_document_versions v ON v.doc_id = d.doc_id
-	  WHERE v.doc_ver_id = #{docVerId}
-	  LIMIT 1
-	</select>
-	
-	<update id="updateDocumentStatusByDocVerId">
-	  UPDATE approval_documents d
-	  JOIN approval_document_versions v ON v.doc_id = d.doc_id
-	  SET d.status_code = #{statusCode},
-	      d.update_user = #{updateUser},
-	      d.update_date = NOW()
-	  WHERE v.doc_ver_id = #{docVerId}
-	</update>
-	
-	<update id="updateVersionStatusByDocVerId">
-	  UPDATE approval_document_versions
-	  SET ver_status_code = #{verStatusCode}
-	  WHERE doc_ver_id = #{docVerId}
-	</update>
-	
-	<update id="updateAllLinesStatusByDocVerId">
-	  UPDATE approval_lines
-	  SET status_code = #{lineStatusCode},
-	      acted_at = NULL,
-	      comment = NULL,
-	      signature_file_id = NULL,
-	      update_user = #{updateUser},
-	      update_date = NOW()
-	  WHERE doc_ver_id = #{docVerId}
-	    AND use_yn = 1
-	</update>
-	
-	<update id="updateFirstLineToPending">
-	  UPDATE approval_lines
-	  SET status_code = #{lineStatusCode},
-	      update_user = #{updateUser},
-	      update_date = NOW()	
-	  WHERE doc_ver_id = #{docVerId}
-	    AND use_yn = 1
-	    AND seq = (
-	      SELECT t.min_seq
-	      FROM (
-	        SELECT MIN(seq) AS min_seq
-	        FROM approval_lines
-	        WHERE doc_ver_id = #{docVerId}
-	          AND use_yn = 1
-	      ) t
-	    )
-	</update>
-	
-		<select id="selectVacationPrint"
-        parameterType="long"
-        resultType="com.health.app.approval.VacationPrintDTO">
-
-  SELECT
-      d.doc_id          AS docId,
-      v.doc_ver_id      AS docVerId,
-      d.doc_no          AS docNo,
-      d.type_code       AS typeCode,
-      d.form_code       AS formCode,
-      d.status_code     AS statusCode,
-
-      d.drafter_user_id AS drafterUserId,
-
-      u.name            AS drafterName,
-      u.department_code AS drafterDeptName,
-      u.role_code       AS drafterPosition,
-
-      b.branch_name     AS drafterBranchName,
-
-      v.create_date     AS draftDate,
-
-      u.name            AS employeeName,
-      u.department_code AS departmentName,
-      u.role_code       AS positionName,
-
-      e.ext_txt4        AS mainDuty,         
-      e.ext_code1       AS leaveType,        
-      e.ext_txt1        AS leaveTypeEtc,    
-      e.ext_txt2        AS leaveReason,      
-
-      e.ext_dt1         AS leaveStartDate,   
-      e.ext_dt2         AS leaveEndDate,     
-      e.ext_no1         AS leaveDays,       
-
-      e.ext_txt3        AS handoverNote,     
-      e.ext_dt3         AS writtenDate      
-
-  FROM approval_document_versions v
-  JOIN approval_documents d
-    ON d.doc_id = v.doc_id
-  LEFT JOIN users u
-    ON u.user_id = d.drafter_user_id
-  LEFT JOIN branch b
-    ON b.branch_id = d.drafter_branch_id
-  LEFT JOIN approval_document_ext e
-    ON e.doc_ver_id = v.doc_ver_id
-   AND e.use_yn = 1
-
-  WHERE v.doc_ver_id = #{docVerId}
-    AND v.use_yn = 1
-    AND d.use_yn = 1
-</select>
-		<select id="selectPrintLines"
-        parameterType="long"
-        resultType="com.health.app.approval.ApprovalPrintLineDTO">
-
-  SELECT
-      l.seq            AS lineNo,
-      l.line_role_code AS role,
-      l.user_id        AS userId,
-
-      u.name           AS userName,
-      u.department_code AS deptName,
-      u.role_code      AS positionName,
-
-      l.status_code    AS decisionCode,
-      l.comment        AS comment,
-
-      /* 서명은 파일키로 저장돼 있으니 일단 키를 문자열로 담음 (경로 조립은 JSP/서비스에서) */
-      CAST(l.signature_file_id AS CHAR) AS signImagePath,
-      l.acted_at       AS decidedDate
-
-  FROM approval_lines l
-  LEFT JOIN users u
-    ON u.user_id = l.user_id
-  WHERE l.doc_ver_id = #{docVerId}
-    AND l.use_yn = 1
-  ORDER BY l.seq ASC
-</select>
-		
-	<select id="selectCurrentPendingLineId" resultType="long">
-  SELECT line_id
-  FROM approval_lines
-  WHERE doc_ver_id = #{docVerId}
-    AND line_status_code = 'ALS002'
-    AND use_yn = 1
-  ORDER BY seq
-  LIMIT 1
-</select>
-
-<update id="updateLineStatusByLineId">
-  UPDATE approval_lines
-  SET line_status_code = #{statusCode},
-      comment = #{comment},
-      update_date = NOW()
-  WHERE line_id = #{lineId}
-</update>
-
-<update id="updateNextLineToPending">
-  UPDATE approval_lines
-  SET line_status_code = #{pendingCode},
-      update_date = NOW()
-  WHERE doc_ver_id = #{docVerId}
-    AND use_yn = 1
-    AND line_status_code = 'ALS001'
-    AND seq = (
-      SELECT MIN(seq)
-      FROM approval_lines
-      WHERE doc_ver_id = #{docVerId}
-        AND use_yn = 1
-        AND line_status_code = 'ALS001'
+  <!-- ==================================================
+       1) documents
+       ================================================== -->
+  <insert id="insertDocument"
+          parameterType="com.health.app.approval.ApprovalDraftDTO"
+          useGeneratedKeys="true"
+          keyProperty="docId">
+    INSERT INTO approval_documents
+    (
+      doc_no,
+      type_code,
+      form_code,
+      status_code,
+      drafter_user_id,
+      drafter_branch_id,
+      current_doc_ver_id,
+      create_user,
+      create_date,
+      update_user,
+      update_date,
+      use_yn
     )
-</update>
-	
+    VALUES
+    (
+      #{docNo},
+      #{typeCode},
+      #{formCode},
+      #{statusCode},
+      #{drafterId},
+      #{branchId},
+      NULL,
+      #{createUser},
+      NOW(),
+      #{updateUser},
+      NOW(),
+      1
+    )
+  </insert>
+
+  <!-- ==================================================
+       2) versions
+       ================================================== -->
+  <insert id="insertDocumentVersion"
+          parameterType="com.health.app.approval.ApprovalDraftDTO"
+          useGeneratedKeys="true"
+          keyProperty="docVerId">
+    INSERT INTO approval_document_versions
+    (
+      doc_id,
+      version_no,
+      ver_status_code,
+      title,
+      body,
+      create_user,
+      create_date,
+      use_yn
+    )
+    VALUES
+    (
+      #{docId},
+      #{versionNo},
+      #{verStatusCode},
+      #{title},
+      #{body},
+      #{createUser},
+      NOW(),
+      1
+    )
+  </insert>
+
+  <insert id="insertDocumentExt"
+          parameterType="com.health.app.approval.ApprovalDraftDTO">
+    INSERT INTO approval_document_ext
+    (
+      doc_ver_id,
+      ext_dt1, ext_dt2, ext_dt3, ext_dt4,
+      ext_no1, ext_no2, ext_no3, ext_no4,
+      ext_txt1, ext_txt2, ext_txt3, ext_txt4, ext_txt5, ext_txt6,
+      ext_code1, ext_code2, ext_code3, ext_code4,
+      create_user,
+      create_date,
+      use_yn
+    )
+    VALUES
+    (
+      #{docVerId},
+      #{extDt1}, #{extDt2}, #{extDt3}, #{extDt4},
+      #{extNo1}, #{extNo2}, #{extNo3}, #{extNo4},
+      #{extTxt1}, #{extTxt2}, #{extTxt3}, #{extTxt4}, #{extTxt5}, #{extTxt6},
+      #{extCode1}, #{extCode2}, #{extCode3}, #{extCode4},
+      #{createUser},
+      NOW(),
+      1
+    )
+  </insert>
+
+  <update id="updateCurrentVersion"
+          parameterType="com.health.app.approval.ApprovalDraftDTO">
+    UPDATE approval_documents
+    SET
+      current_doc_ver_id = #{docVerId},
+      update_user        = #{updateUser},
+      update_date        = NOW()
+    WHERE doc_id = #{docId}
+  </update>
+
+  <select id="selectBranchIdByUserId" resultType="long">
+    SELECT branch_id
+    FROM users
+    WHERE user_id = #{userId}
+  </select>
+
+  <!-- ==================================================
+       결재선 저장/조회
+       ================================================== -->
+  <delete id="deleteLinesByDocVerId">
+    DELETE FROM approval_lines
+    WHERE doc_ver_id = #{docVerId}
+  </delete>
+
+  <insert id="insertLine" parameterType="com.health.app.approval.ApprovalLineDTO">
+    INSERT INTO approval_lines (
+      doc_ver_id, seq, line_role_code, user_id,
+      status_code, acted_at, comment, signature_file_id,
+      create_user, create_date, update_user, update_date, use_yn
+    ) VALUES (
+      #{docVerId}, #{seq}, #{lineRoleCode}, #{approverId},
+      #{lineStatusCode}, #{actedAt}, #{comment}, #{signatureFileId},
+      #{createUser}, NOW(), #{updateUser}, NOW(), 1
+    )
+  </insert>
+
+  <select id="selectLinesByDocVerId"
+          parameterType="long"
+          resultType="com.health.app.approval.ApprovalLineDTO">
+    SELECT
+      l.line_id          AS lineId,
+      l.doc_ver_id       AS docVerId,
+      l.seq              AS seq,
+      l.line_role_code   AS lineRoleCode,
+      l.user_id          AS approverId,
+      u.name             AS approverName,
+      l.status_code      AS lineStatusCode,
+      l.acted_at         AS actedAt,
+      l.comment          AS comment,
+      l.signature_file_id AS signatureFileId,
+      l.create_user      AS createUser,
+      l.create_date      AS createDate,
+      l.update_user      AS updateUser,
+      l.update_date      AS updateDate,
+      l.use_yn           AS useYn
+    FROM approval_lines l
+    JOIN users u ON u.user_id = l.user_id
+    WHERE l.doc_ver_id = #{docVerId}
+      AND l.use_yn = 1
+    ORDER BY l.seq
+  </select>
+
+  <!-- ==================================================
+       결재자 트리
+       ================================================== -->
+  <select id="selectHeadOfficeApprovers" resultType="map">
+    SELECT
+      u.user_id         AS userId,
+      u.name            AS name,
+      u.department_code AS deptCode,
+      u.role_code       AS roleCode
+    FROM users u
+    WHERE u.branch_id IS NULL
+      AND u.use_yn = 1
+    ORDER BY u.department_code, u.name
+  </select>
+
+  <select id="selectBranchApprovers" resultType="map">
+    SELECT
+      u.user_id   AS userId,
+      u.name      AS name,
+      u.branch_id AS branchId,
+      u.role_code AS roleCode
+    FROM users u
+    WHERE u.branch_id IS NOT NULL
+      AND u.use_yn = 1
+    ORDER BY u.branch_id, u.name
+  </select>
+
+  <select id="selectBranches" resultType="map">
+    SELECT
+      b.branch_id   AS branchId,
+      b.branch_name AS branchName
+    FROM branch b
+    ORDER BY b.branch_id
+  </select>
+
+  <!-- ==================================================
+       결재 요청(상신)
+       ================================================== -->
+  <select id="selectDrafterIdByDocVerId" resultType="long">
+    SELECT d.drafter_user_id
+    FROM approval_documents d
+    JOIN approval_document_versions v ON v.doc_id = d.doc_id
+    WHERE v.doc_ver_id = #{docVerId}
+    LIMIT 1
+  </select>
+
+  <select id="countLinesByDocVerId" resultType="int">
+    SELECT COUNT(*)
+    FROM approval_lines
+    WHERE doc_ver_id = #{docVerId}
+      AND use_yn = 1
+  </select>
+
+  <select id="selectDocStatusByDocVerId" resultType="string">
+    SELECT d.status_code
+    FROM approval_documents d
+    JOIN approval_document_versions v ON v.doc_id = d.doc_id
+    WHERE v.doc_ver_id = #{docVerId}
+    LIMIT 1
+  </select>
+
+  <update id="updateDocumentStatusByDocVerId">
+    UPDATE approval_documents d
+    JOIN approval_document_versions v ON v.doc_id = d.doc_id
+    SET d.status_code = #{statusCode},
+        d.update_user = #{updateUser},
+        d.update_date = NOW()
+    WHERE v.doc_ver_id = #{docVerId}
+  </update>
+
+  <!-- ✅ 인터페이스에 updateUser가 있으므로 반영 -->
+  <update id="updateVersionStatusByDocVerId">
+    UPDATE approval_document_versions
+    SET ver_status_code = #{verStatusCode},
+        update_user     = #{updateUser},
+        update_date     = NOW()
+    WHERE doc_ver_id = #{docVerId}
+  </update>
+
+  <update id="updateAllLinesStatusByDocVerId">
+    UPDATE approval_lines
+    SET status_code        = #{lineStatusCode},
+        acted_at           = NULL,
+        comment            = NULL,
+        signature_file_id  = NULL,
+        update_user        = #{updateUser},
+        update_date        = NOW()
+    WHERE doc_ver_id = #{docVerId}
+      AND use_yn = 1
+  </update>
+
+  <update id="updateFirstLineToPending">
+    UPDATE approval_lines
+    SET status_code = #{lineStatusCode},
+        update_user = #{updateUser},
+        update_date = NOW()
+    WHERE doc_ver_id = #{docVerId}
+      AND use_yn = 1
+      AND seq = (
+        SELECT t.min_seq
+        FROM (
+          SELECT MIN(seq) AS min_seq
+          FROM approval_lines
+          WHERE doc_ver_id = #{docVerId}
+            AND use_yn = 1
+        ) t
+      )
+  </update>
+
+  <!-- ==================================================
+       출력(휴가)
+       ================================================== -->
+  <select id="selectVacationPrint"
+          parameterType="long"
+          resultType="com.health.app.approval.VacationPrintDTO">
+    SELECT
+        d.doc_id          AS docId,
+        v.doc_ver_id      AS docVerId,
+        d.doc_no          AS docNo,
+        d.type_code       AS typeCode,
+        d.form_code       AS formCode,
+        d.status_code     AS statusCode,
+
+        d.drafter_user_id AS drafterUserId,
+
+        u.name            AS drafterName,
+        cd.code_desc      AS drafterDeptName,
+        cr.code_desc      AS drafterPosition,
+
+        b.branch_name     AS drafterBranchName,
+        v.create_date     AS draftDate,
+
+        u.name            AS employeeName,
+        cd.code_desc      AS departmentName,
+        cr.code_desc      AS positionName,
+
+        e.ext_txt4        AS mainDuty,
+        e.ext_code1       AS leaveType,
+        e.ext_txt1        AS leaveTypeEtc,
+        e.ext_txt2        AS leaveReason,
+
+        e.ext_no1         AS leaveDays,
+        e.ext_txt3        AS handoverNote,
+
+        DATE_FORMAT(u.create_date, '%Y년 %m월 %d일') AS joinDateStr,
+        DATE_FORMAT(e.ext_dt1, '%Y년 %m월 %d일')     AS leaveStartDateStr,
+        DATE_FORMAT(e.ext_dt2, '%Y년 %m월 %d일')     AS leaveEndDateStr,
+        DATE_FORMAT(e.ext_dt3, '%Y년 %m월 %d일')     AS writtenDateStr
+    FROM approval_document_versions v
+    JOIN approval_documents d ON d.doc_id = v.doc_id
+    LEFT JOIN users u         ON u.user_id = d.drafter_user_id
+    LEFT JOIN branch b        ON b.branch_id = d.drafter_branch_id
+    LEFT JOIN approval_document_ext e
+      ON e.doc_ver_id = v.doc_ver_id
+     AND e.use_yn = 1
+
+    LEFT JOIN common_code cd
+      ON cd.code_group = 'DEPARTMENT_CODE'
+     AND cd.code = u.department_code
+
+    LEFT JOIN common_code cr
+      ON cr.code_group = 'ROLE'
+     AND cr.code = u.role_code
+
+    WHERE v.doc_ver_id = #{docVerId}
+      AND v.use_yn = 1
+      AND d.use_yn = 1
+  </select>
+
+  <select id="selectPrintLines"
+          parameterType="long"
+          resultType="com.health.app.approval.ApprovalPrintLineDTO">
+    SELECT
+        l.seq               AS lineNo,
+        l.line_role_code    AS role,
+        l.user_id           AS userId,
+        u.name              AS userName,
+        l.status_code       AS decisionCode,
+        l.comment           AS comment,
+        l.signature_file_id AS signatureFileId,
+        l.acted_at          AS decidedDate
+    FROM approval_lines l
+    LEFT JOIN users u ON u.user_id = l.user_id
+    WHERE l.doc_ver_id = #{docVerId}
+      AND l.use_yn = 1
+    ORDER BY l.seq ASC
+  </select>
+
+  <!-- ==================================================
+       processDecision()용 (대기 라인 조회/업데이트)
+       ★ 중요: 컬럼명은 status_code 로 통일 (현재 XML에 line_status_code가 섞여있어 오류 원인)
+       ================================================== -->
+  <select id="selectCurrentPendingLineId" resultType="long">
+    SELECT line_id
+    FROM approval_lines
+    WHERE doc_ver_id = #{docVerId}
+      AND status_code = 'ALS002'
+      AND use_yn = 1
+    ORDER BY seq
+    LIMIT 1
+  </select>
+
+  <!-- ✅ 서명/결재일시/업데이트유저까지 저장 -->
+  <update id="updateLineStatusByLineId">
+    UPDATE approval_lines
+    SET status_code       = #{statusCode},
+        comment           = #{comment},
+        signature_file_id = #{signatureFileId},
+        acted_at          = NOW(),
+        update_user       = #{updateUser},
+        update_date       = NOW()
+    WHERE line_id = #{lineId}
+  </update>
+
+  <!-- ✅ 다음 라인 pending 처리 + update_user 반영 -->
+  <update id="updateNextLineToPending">
+    UPDATE approval_lines
+    SET status_code = #{pendingCode},
+        update_user = #{updateUser},
+        update_date = NOW()
+    WHERE doc_ver_id = #{docVerId}
+      AND use_yn = 1
+      AND status_code = 'ALS001'
+      AND seq = (
+        SELECT MIN(seq)
+        FROM approval_lines
+        WHERE doc_ver_id = #{docVerId}
+          AND use_yn = 1
+          AND status_code = 'ALS001'
+      )
+  </update>
+
 </mapper>

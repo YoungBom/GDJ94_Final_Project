@@ -18,7 +18,7 @@
        ===================== -->
   <div class="card mb-3">
     <div class="card-body">
-      <h5 class="card-title mb-2">결재 처리</h5>
+      <h5 class="card-title mb-2">결재 처리</h5><br><br>
       <p class="mb-1">문서번호: <strong>${doc.docNo}</strong></p>
       <p class="mb-1">양식: ${doc.formCode}</p>
       <p class="mb-1">상태: ${doc.statusCode}</p>
@@ -68,7 +68,7 @@
      style="overflow:auto; max-width:100%; display:flex; justify-content:center;">
 	  <iframe
 	  src="${pageContext.request.contextPath}/approval/view?docVerId=${doc.docVerId}&preview=1"
-	  style="width:1448px; height:1100px; border:0; display:block; flex:0 0 auto;">
+	  style="width:1200px; height:1100px; border:0; display:block; flex:0 0 auto;">
 	</iframe>
 	</div>
 
@@ -82,8 +82,8 @@
        ===================== -->
   <div class="card mb-4">
     <div class="card-body">
-      <h6 class="card-title mb-2">결재 처리</h6>
-
+      <h6 class="card-title mb-2">결재 처리</h6> 
+	<br><br>
       <form action="${pageContext.request.contextPath}/approval/handle" method="post">
         <input type="hidden" name="docVerId" value="${doc.docVerId}" />
 

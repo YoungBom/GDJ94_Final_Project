@@ -9,7 +9,8 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.health.app.approval.ApprovalProductDTO;
+import com.health.app.signature.SignatureDTO;
+import com.health.app.signature.SignatureMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,7 +19,8 @@ import lombok.RequiredArgsConstructor;
 public class ApprovalService {
 
     private final ApprovalMapper approvalMapper;
-    private final ApprovalProductMapper approvalProductMapper; // ✅ 신규 주입
+    private final ApprovalProductMapper approvalProductMapper;
+    private final SignatureMapper signatureMapper; // ✅ 추가 (대표 서명 조회용)
 
     /* ==================================================
      * 받은 결재함
@@ -205,11 +207,10 @@ public class ApprovalService {
     }
 
     /* ==================================================
-     * ✅ approval 전용 상품 조회
+     * approval 전용 상품 조회
      * ================================================== */
     @Transactional(readOnly = true)
     public List<ApprovalProductDTO> getProductsByBranch(Long branchId) {
-        // 현재는 branchId 조건 없이 전체 상품
         return approvalProductMapper.selectProductsByBranch(branchId);
     }
 
@@ -221,6 +222,9 @@ public class ApprovalService {
         return approvalMapper.selectBranches();
     }
 
+    /* ==================================================
+     * 출력 데이터
+     * ================================================== */
     @Transactional(readOnly = true)
     public ApprovalPrintDTO getPrintData(Long docVerId) {
 
@@ -238,9 +242,13 @@ public class ApprovalService {
         return doc;
     }
 
+    /* ==================================================
+     * 결재 처리 (승인/반려)  ✅ 서명 저장 포함
+     * ================================================== */
     @Transactional
-    public void processDecision(Long docVerId, String action, String comment) {
+    public void processDecision(Long loginUserId, Long docVerId, String action, String comment) {
 
+        if (loginUserId == null) throw new IllegalArgumentException("loginUserId is required");
         if (docVerId == null) throw new IllegalArgumentException("docVerId is required");
         if (action == null || action.isBlank()) throw new IllegalArgumentException("action is required");
 
@@ -249,29 +257,43 @@ public class ApprovalService {
             throw new IllegalStateException("처리할 결재 라인이 없습니다. docVerId=" + docVerId);
         }
 
+        // ✅ 현재 결재자 대표서명(file_id) 조회 → approval_lines.signature_file_id로 저장
+        Long signatureFileId = null;
+        SignatureDTO sign = signatureMapper.selectPrimaryByUserId(loginUserId);
+        if (sign != null) signatureFileId = sign.getFileId();
+
         if ("APPROVE".equalsIgnoreCase(action)) {
 
-            approvalMapper.updateLineStatusByLineId(lineId, "ALS003", comment);           
-            int moved = approvalMapper.updateNextLineToPending(docVerId, "ALS002");
+            approvalMapper.updateLineStatusByLineId(
+                lineId,
+                "ALS003",
+                comment,
+                signatureFileId,
+                loginUserId
+            );
+
+            int moved = approvalMapper.updateNextLineToPending(docVerId, "ALS002", loginUserId);
 
             if (moved == 0) {
-                approvalMapper.updateDocumentStatusByDocVerId(docVerId, "AS003", 0L);   
-                approvalMapper.updateVersionStatusByDocVerId(docVerId, "AVS003", 0L); 
+                approvalMapper.updateDocumentStatusByDocVerId(docVerId, "AS003", loginUserId);
+                approvalMapper.updateVersionStatusByDocVerId(docVerId, "AVS003", loginUserId);
             }
 
         } else if ("REJECT".equalsIgnoreCase(action)) {
 
-            approvalMapper.updateLineStatusByLineId(lineId, "ALS004", comment); 
-            approvalMapper.updateDocumentStatusByDocVerId(docVerId, "AS004", 0L);   
-            approvalMapper.updateVersionStatusByDocVerId(docVerId, "AVS004", 0L); 
+            approvalMapper.updateLineStatusByLineId(
+                lineId,
+                "ALS004",
+                comment,
+                signatureFileId,
+                loginUserId
+            );
+
+            approvalMapper.updateDocumentStatusByDocVerId(docVerId, "AS004", loginUserId);
+            approvalMapper.updateVersionStatusByDocVerId(docVerId, "AVS004", loginUserId);
 
         } else {
             throw new IllegalArgumentException("invalid action: " + action);
         }
     }
-
-    
-
 }
-
-
