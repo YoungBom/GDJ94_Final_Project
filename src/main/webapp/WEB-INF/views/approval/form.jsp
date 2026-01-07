@@ -18,10 +18,10 @@
       <label class="form-label">문서 유형</label>
       <select class="form-select" name="typeCode" id="approvalTypeCode" required>
         <option value="">선택</option>
-        <option value="AT001">기안서</option>
-        <option value="AT002">업무보고서</option>
-        <option value="AT003">품의서</option>
-        <option value="AT004">지출결의서</option>
+        <option value="AT001">지출결의서</option>
+        <option value="AT002">정산결재서</option>
+        <option value="AT003">매출결의서</option>
+        <option value="AT004">재고조정요청서</option>
         <option value="AT005">구매요청서(PR)</option>
         <option value="AT006">발주서(PO)</option>
         <option value="AT007">출장 신청서</option>
@@ -32,8 +32,10 @@
         <option value="AT012">인사 발령/변경 품의서</option>
       </select>
     </div>
-	<!-- form_code (DB NOT NULL) -->
-			<input type="hidden" name="formCode" id="formCode" value="" />
+
+    <!-- form_code (DB NOT NULL) -->
+    <input type="hidden" name="formCode" id="formCode" value="" />
+
     <!-- 문서유형별 추가 입력 -->
     <div class="card mb-3">
       <div class="card-header">문서유형별 추가 입력</div>
@@ -44,6 +46,38 @@
           <jsp:include page="fields/fields_default.jsp"/>
         </div>
 
+        <!-- AT001: 지출결의서 -->
+        <div class="doc-extra" data-type="AT001" style="display:none;">
+          <jsp:include page="fields/fields_expense.jsp"/>
+        </div>
+
+        <!-- AT002: 정산결재서 -->
+		<div class="doc-extra" data-type="AT002" style="display:none;">
+		  <jsp:include page="fields/fields_settlement.jsp"/>
+		</div>
+		
+		<!-- AT003: 매출결의서(매출보고서) -->
+		<div class="doc-extra" data-type="AT003" style="display:none;">
+		  <jsp:include page="fields/fields_sales.jsp"/>
+		</div>
+
+
+        <!-- AT004: 재고조정요청서 (신규) -->
+        <div class="doc-extra" data-type="AT004" style="display:none;">
+          <jsp:include page="fields/fields_inventory_adjust.jsp"/>
+        </div>
+
+        <!-- AT005: 구매요청서(PR) -->
+        <div class="doc-extra" data-type="AT005" style="display:none;">
+          <jsp:include page="fields/fields_pr.jsp"/>
+        </div>
+
+        <!-- AT006: 발주서(PO) -->
+        <div class="doc-extra" data-type="AT006" style="display:none;">
+          <jsp:include page="fields/fields_po.jsp"/>
+        </div>
+
+        <!-- AT007/AT008/AT010~AT012: 기존 유지 -->
         <div class="doc-extra" data-type="AT009" style="display:none;">
           <jsp:include page="fields/fields_leave.jsp"/>
         </div>
@@ -54,18 +88,6 @@
 
         <div class="doc-extra" data-type="AT008" style="display:none;">
           <jsp:include page="fields/fields_attendance.jsp"/>
-        </div>
-
-        <div class="doc-extra" data-type="AT005" style="display:none;">
-          <jsp:include page="fields/fields_pr.jsp"/>
-        </div>
-
-        <div class="doc-extra" data-type="AT006" style="display:none;">
-          <jsp:include page="fields/fields_po.jsp"/>
-        </div>
-
-        <div class="doc-extra" data-type="AT004" style="display:none;">
-          <jsp:include page="fields/fields_expense.jsp"/>
         </div>
 
         <div class="doc-extra" data-type="AT010" style="display:none;">
@@ -79,7 +101,6 @@
         <div class="doc-extra" data-type="AT012" style="display:none;">
           <jsp:include page="fields/fields_hr_change.jsp"/>
         </div>
-		
 
       </div>
     </div>
@@ -110,7 +131,6 @@
 </div>
 
 <script src="/approval/js/formChange.js"></script>
-
 <script>
   function submitTemp() {
     document.getElementById("tempYn").value = "Y";
