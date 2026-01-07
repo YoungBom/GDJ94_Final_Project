@@ -1,0 +1,15 @@
+<link rel="stylesheet" href="/approval/css/print_overlay.css" />
+
+<div class="print-wrap<c:if test='${param.preview eq "1"}'> is-preview</c:if>">
+  <div class="print-page">
+
+    <img class="print-bg"
+         src="${bgImageUrl}"
+         alt="print background" />
+
+    <div class="overlay">
+      <%@ include file="_fields_vacation.jspf" %>
+    </div>
+
+  </div>
+</div>

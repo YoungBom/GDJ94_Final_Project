@@ -12,21 +12,21 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class ApprovalDraftDTO {
 
     // ====== documents ======
-    private Long docId;                 // PK (insert 후 채워짐)
+    private Long docId;                
     private String docNo; 
     private String typeCode;
     private String formCode;
-    private String statusCode;          // DRAFT 등
+    private String statusCode;          
     private Long drafterId;
     private Long branchId;
-    private Long currentDocVerId;       // update로 세팅
+    private Long currentDocVerId;      
     private Long createUser;
     private Long updateUser;
 
     // ====== versions ======
-    private Long docVerId;              // PK (insert 후 채워짐)
-    private Long versionNo;             // 1
-    private String verStatusCode;       // DRAFT
+    private Long docVerId;             
+    private Long versionNo;            
+    private String verStatusCode;       
     private String title;
     private String body;
 
