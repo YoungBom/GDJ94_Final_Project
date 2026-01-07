@@ -11,7 +11,6 @@ public class VacationPrintDTO extends ApprovalPrintDTO {
     private String employeeName;
     private String departmentName;
     private String positionName;
-    private LocalDate joinDate;     // DB에 없으면 null로 둬도 JSP는 그냥 공백 출력
 
     private String mainDuty;
 
@@ -20,14 +19,14 @@ public class VacationPrintDTO extends ApprovalPrintDTO {
     private String leaveTypeEtc;    // 기타 텍스트
     private String leaveReason;
 
-    // 휴가 기간/일수
-    private LocalDate leaveStartDate;
-    private LocalDate leaveEndDate;
     private Long leaveDays;
 
     // 인수인계
     private String handoverNote;
 
-    // 하단 작성일
-    private LocalDate writtenDate;
+    private String joinDateStr;
+    private String leaveStartDateStr;
+    private String leaveEndDateStr;
+    private String writtenDateStr;
+
 }

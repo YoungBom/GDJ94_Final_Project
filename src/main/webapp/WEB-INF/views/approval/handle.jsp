@@ -63,14 +63,16 @@
        ===================== -->
   <div class="card mb-3">
     <div class="card-body">
-      <h6 class="card-title mb-2">보고서 내용</h6>
 
-      <div class="border rounded mb-3">
-		  <iframe
-		    src="${pageContext.request.contextPath}/approval/view?docVerId=${doc.docVerId}"
-		    style="width:100%; height:1100px; border:0;">
-		  </iframe>
-		</div>
+      <div class="border rounded mb-3"
+     style="overflow:auto; max-width:100%; display:flex; justify-content:center;">
+	  <iframe
+	  src="${pageContext.request.contextPath}/approval/view?docVerId=${doc.docVerId}&preview=1"
+	  style="width:1448px; height:1100px; border:0; display:block; flex:0 0 auto;">
+	</iframe>
+	</div>
+
+
 
     </div>
   </div>
