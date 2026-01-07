@@ -12,7 +12,8 @@ public class UserAdminDTO {
 	private String baseAddress;
 	private String detailAddress;
 	
-	private Long createUser;
+    private Long createUser;   // 등록자
+    private Long updateUser;   // 수정자
 	
     private Long userId;
     private String loginId;
@@ -37,4 +38,5 @@ public class UserAdminDTO {
     private String lockStatusCode;
 
     private String createDate;
+    private String updateDate;
 }

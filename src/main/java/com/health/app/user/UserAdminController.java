@@ -49,6 +49,7 @@ public class UserAdminController {
         return "userManagement/add";
     }
     
+    // 사용자 등록
     @PostMapping("/add")
     public String addUser(UserAdminDTO dto) {
 
@@ -63,4 +64,31 @@ public class UserAdminController {
         userAdminService.addUser(dto);
         return "redirect:/userManagement/list";
     }
+    
+    // 사용자 수정
+    @GetMapping("/edit")
+    public String editForm(Long userId, Model model) {
+
+        UserAdminDTO user = userAdminService.getUserAdminDetail(userId);
+        model.addAttribute("user", user);
+
+        return "userManagement/edit";
+    }
+    
+    @PostMapping("/edit")
+    public String editUser(UserAdminDTO dto) {
+
+        Authentication auth =
+            SecurityContextHolder.getContext().getAuthentication();
+
+        LoginUser loginUser =
+            (LoginUser) auth.getPrincipal();
+
+        dto.setUpdateUser(loginUser.getUserId());
+
+        userAdminService.updateUser(dto);
+
+        return "redirect:/userManagement/detail?userId=" + dto.getUserId();
+    }
+
 }

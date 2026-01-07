@@ -12,4 +12,6 @@ public interface UserAdminMapper {
 
     void insertUser(UserAdminDTO dto);
 
+    void updateUser(UserAdminDTO dto);
+
 }

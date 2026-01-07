@@ -37,4 +37,10 @@ public class UserAdminService {
         userAdminMapper.insertUser(dto);
     }
     
+    public void updateUser(UserAdminDTO dto) {
+
+        userAdminMapper.updateUser(dto);
+    }
+
+    
 }

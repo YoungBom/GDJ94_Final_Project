@@ -61,6 +61,11 @@
 	    u.name             AS name,
 	    u.email            AS email,
 	    u.phone            AS phone,
+	    
+        u.branch_id        AS branchId,
+	    u.post_no          AS postNo,
+	    u.base_address     AS baseAddress,
+	    u.detail_address   AS detailAddress,
 	
 	    u.role_code        AS roleCode,
 	    cr.code_desc       AS roleName,
@@ -133,5 +138,26 @@
 	)
 	]]>
 	</insert>
+	
+	<update id="updateUser"
+	        parameterType="com.health.app.user.UserAdminDTO">
+	<![CDATA[
+	UPDATE users
+	SET
+	    name = #{name},
+	    email = #{email},
+	    phone = #{phone},
+	    post_no = #{postNo},
+	    base_address = #{baseAddress},
+	    detail_address = #{detailAddress},
+	    department_code = #{departmentCode},
+	    role_code = #{roleCode},
+	    branch_id = #{branchId},
+	    update_user = #{updateUser},
+	    update_date = NOW()
+	WHERE user_id = #{userId}
+	]]>
+	</update>
+
 
 </mapper>
