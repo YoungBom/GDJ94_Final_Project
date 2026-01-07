@@ -7,4 +7,9 @@ import org.apache.ibatis.annotations.Mapper;
 public interface UserAdminMapper {
 
     List<UserAdminDTO> selectUserAdminList();
+    
+    UserAdminDTO selectUserAdminDetail(Long userId);
+
+    void insertUser(UserAdminDTO dto);
+
 }
