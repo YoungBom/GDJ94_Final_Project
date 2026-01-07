@@ -110,4 +110,19 @@ public class UserAdminController {
         return "redirect:/userManagement/detail?userId=" + userId;
     }
 
+    // 비밀번호 초기화 요청 처리
+    @PostMapping("/reset-password")
+    public String resetPassword(Long userId) {
+
+        Authentication auth =
+            SecurityContextHolder.getContext().getAuthentication();
+
+        LoginUser loginUser =
+            (LoginUser) auth.getPrincipal();
+
+        userAdminService.resetPassword(userId, loginUser.getUserId());
+
+        return "redirect:/userManagement/detail?userId=" + userId;
+    }
+
 }

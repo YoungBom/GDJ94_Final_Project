@@ -128,5 +128,29 @@ public class UserAdminService {
         );
     }
 
-    
+    // 관리자 비밀번호 초기화 처리
+    @Transactional
+    public void resetPassword(Long userId, Long adminUserId) {
+
+        // 1. 대상 사용자 조회
+        UserAdminDTO user = userAdminMapper.selectUserAdminDetail(userId);
+
+        // 2. 초기 비밀번호 정책
+        String rawPassword = user.getLoginId() + "!123";
+        String encodedPassword = passwordEncoder.encode(rawPassword);
+
+        // 3. users 업데이트
+        userAdminMapper.updatePassword(userId, encodedPassword, adminUserId);
+
+        // 4. 이력 기록
+        userAdminMapper.insertUserHistory(
+            userId,
+            "password",
+            "********",
+            "RESET",
+            "관리자에 의한 비밀번호 초기화",
+            adminUserId
+        );
+    }
+
 }

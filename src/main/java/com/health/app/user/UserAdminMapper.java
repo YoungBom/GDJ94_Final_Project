@@ -28,4 +28,6 @@ public interface UserAdminMapper {
             String statusCode,
             Long updateUser);
 
+	void updatePassword(Long userId, String password, Long updateUser);
+
 }

@@ -200,4 +200,13 @@
 	WHERE user_id = #{userId}
 	</update>
 
+	<update id="updatePassword">
+	UPDATE users
+	SET
+	    password = #{password},
+	    update_user = #{updateUser},
+	    update_date = NOW()
+	WHERE user_id = #{userId}
+	</update>
+
 </mapper>

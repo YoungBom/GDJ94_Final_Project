@@ -130,6 +130,26 @@
                 </div>
             </div>
 
+			<!-- 비밀번호 초기화 -->
+			<div class="card card-outline card-danger mt-3">
+			    <div class="card-header">
+			        <h3 class="card-title">비밀번호 초기화</h3>
+			    </div>
+			
+			    <div class="card-body text-center">
+			        <form action="/userManagement/reset-password" method="post"
+			              onsubmit="return confirm('비밀번호를 초기화하시겠습니까?');">
+			            <input type="hidden" name="userId" value="${user.userId}" />
+			            <button type="submit" class="btn btn-danger">
+			                비밀번호 초기화
+			            </button>
+			        </form>
+			        <small class="text-muted d-block mt-2">
+			            초기 비밀번호는 <b>아이디 + !123</b> 으로 설정됩니다.
+			        </small>
+			    </div>
+			</div>
+
         </div>
     </section>
 </div>
