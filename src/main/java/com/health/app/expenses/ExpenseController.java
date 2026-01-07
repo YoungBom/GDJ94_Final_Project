@@ -1,9 +1,9 @@
 package com.health.app.expenses;
 
-import com.health.app.expenses.dto.ExpenseDetailDto;
-import com.health.app.expenses.dto.ExpenseDto;
-import com.health.app.expenses.dto.ExpenseSearchDto;
-import com.health.app.expenses.service.ExpenseService;
+import com.health.app.expenses.ExpenseDetailDto;
+import com.health.app.expenses.ExpenseDto;
+import com.health.app.expenses.ExpenseSearchDto;
+import com.health.app.expenses.ExpenseService;
 import com.health.app.security.model.LoginUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

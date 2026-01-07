@@ -1,7 +1,7 @@
 package com.health.app.settlements;
 
-import com.health.app.settlements.dto.*;
-import com.health.app.settlements.service.SettlementService;
+import com.health.app.settlements.*;
+import com.health.app.settlements.SettlementService;
 import com.health.app.security.model.LoginUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

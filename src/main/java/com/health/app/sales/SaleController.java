@@ -1,9 +1,5 @@
 package com.health.app.sales;
 
-import com.health.app.sales.dto.SaleDetailDto;
-import com.health.app.sales.dto.SaleDto;
-import com.health.app.sales.dto.SaleSearchDto;
-import com.health.app.sales.service.SaleService;
 import com.health.app.security.model.LoginUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

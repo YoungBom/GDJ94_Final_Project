@@ -1,7 +1,7 @@
 package com.health.app.statistics;
 
-import com.health.app.statistics.dto.*;
-import com.health.app.statistics.service.StatisticsService;
+import com.health.app.statistics.*;
+import com.health.app.statistics.StatisticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
