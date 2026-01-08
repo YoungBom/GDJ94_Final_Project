@@ -25,6 +25,28 @@ public class ApprovalService {
     public List<ApprovalMyDocRowDTO> getMyDocs(Long drafterId) {
         return approvalMapper.selectMyDocs(drafterId);
     }
+    public ApprovalDraftDTO getDraftForEdit(Long docVerId, Long userId) {
+
+        ApprovalDraftDTO draft = approvalMapper.selectDraftByDocVerId(docVerId);
+
+        if (draft == null) {
+            throw new IllegalArgumentException("존재하지 않는 문서입니다.");
+        }
+
+        // 기안자만 수정 가능
+        if (draft.getDrafterId() == null || !draft.getDrafterId().equals(userId)) {
+            throw new SecurityException("수정 권한이 없습니다.");
+        }
+
+        // 수정 가능 상태
+        String st = draft.getStatusCode();
+        if (!("AS001".equals(st) || "AS004".equals(st) || "AS005".equals(st))) {
+            throw new IllegalStateException("현재 상태에서는 수정할 수 없습니다.");
+        }
+
+        return draft;
+    }
+
 
     /* ==================================================
      * 받은 결재함
@@ -79,6 +101,87 @@ public class ApprovalService {
 
         return dto;
     }
+    @Transactional
+    public void updateDraft(Long loginUserId, ApprovalDraftDTO dto) {
+
+        if (dto.getDocVerId() == null) {
+            throw new IllegalArgumentException("docVerId is required");
+        }
+
+        ApprovalDraftDTO current = getDraftForEdit(dto.getDocVerId(), loginUserId);
+
+        // 수정 정책: 문서유형/양식 변경 불가
+        dto.setTypeCode(current.getTypeCode());
+        dto.setFormCode(current.getFormCode());
+
+        // 작성자 고정
+        dto.setDrafterId(current.getDrafterId());
+
+        // 상태 정책(원하면 유지로 변경 가능)
+        dto.setStatusCode("AS001");
+        dto.setVerStatusCode("AVS001");
+
+        dto.setUpdateUser(loginUserId);
+
+        if (dto.getTitle() == null) dto.setTitle("");
+        if (dto.getBody() == null) dto.setBody("");
+
+        approvalMapper.updateDocumentVersionByDocVerId(dto);
+
+        int extUpdated = approvalMapper.updateDocumentExtByDocVerId(dto);
+        if (extUpdated == 0) {
+            approvalMapper.insertDocumentExt(dto);
+        }
+    }
+    
+    @Transactional
+    public void resubmit(Long loginUserId, Long docVerId) {
+
+        ApprovalDraftDTO draft = approvalMapper.selectDraftByDocVerId(docVerId);
+        if (draft == null) throw new IllegalArgumentException("존재하지 않는 문서입니다.");
+
+        if (draft.getDrafterId() == null || !draft.getDrafterId().equals(loginUserId)) {
+            throw new SecurityException("기안자만 재상신할 수 있습니다.");
+        }
+
+        String st = draft.getStatusCode();
+        if (!("AS001".equals(st) || "AS004".equals(st) || "AS005".equals(st))) {
+            throw new IllegalStateException("현재 상태에서는 재상신할 수 없습니다.");
+        }
+
+        // 결재선 존재 체크
+        int lineCount = approvalMapper.countLinesByDocVerId(docVerId);
+        if (lineCount <= 0) throw new IllegalStateException("결재선이 없습니다. 결재선을 먼저 설정하세요.");
+
+        // 문서/버전 상태 결재중
+        approvalMapper.updateDocumentStatusByDocVerId(docVerId, "AS002", loginUserId);
+        approvalMapper.updateVersionStatusByDocVerId(docVerId, "AVS002", loginUserId);
+
+        // 라인 초기화 후 1번만 pending
+        approvalMapper.updateAllLinesStatusByDocVerId(docVerId, "ALS001", loginUserId);
+        approvalMapper.updateFirstLineToPending(docVerId, "ALS002", loginUserId);
+    }
+
+    
+    @Transactional
+    public void recall(Long loginUserId, Long docVerId) {
+
+        if (docVerId == null) throw new IllegalArgumentException("docVerId is required");
+
+        int can = approvalMapper.canRecallDoc(docVerId, loginUserId);
+        if (can <= 0) {
+            throw new IllegalStateException("상신 취소가 불가능한 상태입니다.");
+        }
+
+        // ✅ 문서 상태를 회수(AS005)로 변경
+        approvalMapper.updateDocumentStatusByDocVerId(docVerId, "AS005", loginUserId);
+        approvalMapper.updateVersionStatusByDocVerId(docVerId, "AVS001", loginUserId);
+
+        // ✅ 결재선은 다시 '대기전(ALS001)'로 되돌림 + 첫 라인 pending 해제
+        // (원하면 전체 초기화 없이 1번 라인만 ALS001로 바꿔도 됨)
+        approvalMapper.updateAllLinesStatusByDocVerId(docVerId, "ALS001", loginUserId);
+    }
+
 
     /* ==================================================
      * 결재선 저장
@@ -317,7 +420,7 @@ public class ApprovalService {
         boolean canEdit = false;
         if (doc != null && isDrafter) {
             String st = doc.getDocStatusCode();
-            canEdit = "AS001".equals(st) || "AS005".equals(st);
+            canEdit = "AS001".equals(st) || "AS004".equals(st) || "AS005".equals(st);
         }
 
         page.setCanRecall(canRecall);

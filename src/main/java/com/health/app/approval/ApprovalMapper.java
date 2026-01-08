@@ -8,6 +8,12 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface ApprovalMapper {
+	// draft 로드(이미 서비스에서 쓰고 있음. Mapper에 없으면 추가 필요)
+	ApprovalDraftDTO selectDraftByDocVerId(@Param("docVerId") Long docVerId);
+
+	// 수정 저장(버전/확장)
+	int updateDocumentVersionByDocVerId(ApprovalDraftDTO dto);
+	int updateDocumentExtByDocVerId(ApprovalDraftDTO dto);
 
 	/* ==================================================
 	 * 기안자 문서함(내가 기안한 문서 목록)

@@ -219,12 +219,31 @@
                 <button type="submit" class="btn btn-warning">상신 취소</button>
               </form>
             </c:if>
+<c:if test="${not empty msg}">
+  <div class="alert alert-warning alert-dismissible fade show" role="alert">
+    <c:out value="${msg}" />
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+</c:if>
 
             <!-- 수정: 정책에 맞게 (임시/회수) -->
             <c:if test="${page.canEdit}">
               <a class="btn btn-secondary" href="/approval/form?docVerId=${docVerId}">수정</a>
             </c:if>
+			<c:if test="${page.canEdit}">
+  <!-- 결재선 재설정 화면으로 이동 -->
+  <a class="btn btn-secondary" href="/approval/line?docVerId=${docVerId}">결재선 수정</a>
 
+  <!-- 재상신(실제 submit) -->
+  <form method="post" action="/approval/resubmit" class="mt-2">
+    <input type="hidden" name="docVerId" value="${docVerId}" />
+    <c:if test="${not empty _csrf}">
+      <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+    </c:if>
+    <button type="submit" class="btn btn-primary">재상신</button>
+  </form>
+</c:if>
+			
             <a class="btn btn-outline-dark" href="/approval/view?docVerId=${docVerId}">출력/미리보기</a>
             <a class="btn btn-outline-secondary" href="/approval/list">목록</a>
 

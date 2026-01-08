@@ -4,6 +4,114 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.health.app.approval.ApprovalMapper">
+<!-- ==================================================
+     수정 폼 로드용 draft 조회
+     - docVerId로 documents + versions + ext 를 한번에 로드
+================================================== -->
+<select id="selectDraftByDocVerId"
+        resultType="com.health.app.approval.ApprovalDraftDTO">
+  SELECT
+      -- documents
+      d.doc_id             AS docId,
+      d.doc_no             AS docNo,
+      d.type_code          AS typeCode,
+      d.form_code          AS formCode,
+      d.status_code        AS statusCode,
+      d.drafter_user_id    AS drafterId,
+      d.drafter_branch_id  AS branchId,
+      d.current_doc_ver_id AS currentDocVerId,
+      d.create_user        AS createUser,
+      d.update_user        AS updateUser,
+
+      -- versions
+      v.doc_ver_id         AS docVerId,
+      v.version_no         AS versionNo,
+      v.ver_status_code    AS verStatusCode,
+      v.title              AS title,
+      v.body               AS body,
+
+      -- ext
+      e.ext_dt1            AS extDt1,
+      e.ext_dt2            AS extDt2,
+      e.ext_dt3            AS extDt3,
+      e.ext_dt4            AS extDt4,
+      e.ext_no1            AS extNo1,
+      e.ext_no2            AS extNo2,
+      e.ext_no3            AS extNo3,
+      e.ext_no4            AS extNo4,
+      e.ext_txt1           AS extTxt1,
+      e.ext_txt2           AS extTxt2,
+      e.ext_txt3           AS extTxt3,
+      e.ext_txt4           AS extTxt4,
+      e.ext_txt5           AS extTxt5,
+      e.ext_txt6           AS extTxt6,
+      e.ext_code1          AS extCode1,
+      e.ext_code2          AS extCode2,
+      e.ext_code3          AS extCode3,
+      e.ext_code4          AS extCode4
+
+  FROM approval_document_versions v
+  JOIN approval_documents d
+    ON d.doc_id = v.doc_id
+   AND d.use_yn = 1
+  LEFT JOIN approval_document_ext e
+    ON e.doc_ver_id = v.doc_ver_id
+   AND e.use_yn = 1
+  WHERE v.doc_ver_id = #{docVerId}
+    AND v.use_yn = 1
+</select>
+<!-- ==================================================
+     수정 저장: versions + documents 상태 반영
+================================================== -->
+<update id="updateDocumentVersionByDocVerId"
+        parameterType="com.health.app.approval.ApprovalDraftDTO">
+  UPDATE approval_document_versions v
+  JOIN approval_documents d
+    ON d.doc_id = v.doc_id
+   AND d.use_yn = 1
+  SET
+      v.title        = #{title},
+      v.body         = #{body},
+      v.ver_status_code = #{verStatusCode},
+
+      d.status_code  = #{statusCode},
+      d.update_user  = #{updateUser},
+      d.update_date  = NOW()
+  WHERE v.doc_ver_id = #{docVerId}
+    AND v.use_yn = 1
+</update>
+<update id="updateDocumentExtByDocVerId"
+        parameterType="com.health.app.approval.ApprovalDraftDTO">
+  UPDATE approval_document_ext
+  SET
+      ext_dt1 = #{extDt1},
+      ext_dt2 = #{extDt2},
+      ext_dt3 = #{extDt3},
+      ext_dt4 = #{extDt4},
+
+      ext_no1 = #{extNo1},
+      ext_no2 = #{extNo2},
+      ext_no3 = #{extNo3},
+      ext_no4 = #{extNo4},
+
+      ext_txt1 = #{extTxt1},
+      ext_txt2 = #{extTxt2},
+      ext_txt3 = #{extTxt3},
+      ext_txt4 = #{extTxt4},
+      ext_txt5 = #{extTxt5},
+      ext_txt6 = #{extTxt6},
+
+      ext_code1 = #{extCode1},
+      ext_code2 = #{extCode2},
+      ext_code3 = #{extCode3},
+      ext_code4 = #{extCode4},
+
+      update_user = #{updateUser},
+      update_date = NOW()
+  WHERE doc_ver_id = #{docVerId}
+    AND use_yn = 1
+</update>
+
   <!-- ==================================================
      기안자 문서함(내가 기안한 문서 목록)
      - approval_documents.current_doc_ver_id 기준으로 현재 버전 조인
@@ -328,12 +436,14 @@
     WHERE v.doc_ver_id = #{docVerId}
   </update>
 
-  <!-- ✅ 인터페이스에 updateUser가 있으므로 반영 -->
-  <update id="updateVersionStatusByDocVerId">
-    UPDATE approval_document_versions
-    SET ver_status_code = #{verStatusCode}
-    WHERE doc_ver_id = #{docVerId}
-  </update>
+<update id="updateVersionStatusByDocVerId">
+  UPDATE approval_document_versions
+  SET ver_status_code = #{verStatusCode}
+  WHERE doc_ver_id = #{docVerId}
+    AND use_yn = 1
+</update>
+
+
 
   <update id="updateAllLinesStatusByDocVerId">
     UPDATE approval_lines
