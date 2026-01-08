@@ -18,8 +18,14 @@ public class BranchService {
         return branchMapper.selectBranchList();
     }
     
+    // 지점 상세 조회
     public BranchDTO getBranchDetail(Long branchId) {
         return branchMapper.selectBranchDetail(branchId);
+    }
+    
+    // 지점 이력 조회
+    public List<BranchHistoryDTO> getBranchHistoryList(Long branchId) {
+        return branchMapper.selectBranchHistoryList(branchId);
     }
     
     public void registerBranch(BranchDTO branchDTO, Long loginUserId) {
@@ -42,13 +48,36 @@ public class BranchService {
         branchMapper.updateBranch(dto);
 
         // 4️⃣ 변경 이력 저장 (null-safe)
+        
+        if (!Objects.equals(before.getBranchName(), dto.getBranchName())) {
+            branchMapper.insertBranchUpdateLog(
+                dto.getBranchId(),
+                "branch_name",
+                before.getBranchName(),
+                dto.getBranchName(),
+                "지점 이름 수정",
+                loginUserId
+            );
+        }
+        
         if (!Objects.equals(before.getBaseAddress(), dto.getBaseAddress())) {
             branchMapper.insertBranchUpdateLog(
                 dto.getBranchId(),
                 "base_address",
                 before.getBaseAddress(),
                 dto.getBaseAddress(),
-                "지점 정보 수정",
+                "지점 기본 주소 수정",
+                loginUserId
+            );
+        }
+        
+        if (!Objects.equals(before.getDetailAddress(), dto.getDetailAddress())) {
+            branchMapper.insertBranchUpdateLog(
+                dto.getBranchId(),
+                "detail_address",
+                before.getDetailAddress(),
+                dto.getDetailAddress(),
+                "지점 상세 주소 수정",
                 loginUserId
             );
         }
@@ -59,7 +88,7 @@ public class BranchService {
                 "manager_phone",
                 before.getManagerPhone(),
                 dto.getManagerPhone(),
-                "지점 정보 수정",
+                "담당자 연락처 수정",
                 loginUserId
             );
         }
@@ -70,7 +99,7 @@ public class BranchService {
                 "operating_hours",
                 before.getOperatingHours(),
                 dto.getOperatingHours(),
-                "지점 정보 수정",
+                "지점 운영시간 수정",
                 loginUserId
             );
         }
