@@ -63,6 +63,8 @@ public class SecurityConfig {
                         "/login",
                         "/users/join",        // 회원가입 화면
                         "/users/joinProc",    // 회원가입 처리
+                        "/users/password/find",
+                        "/users/password/findProc",
                         "/error"
                     ).permitAll()
 

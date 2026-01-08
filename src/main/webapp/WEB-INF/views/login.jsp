@@ -128,7 +128,11 @@
 			<p class="mb-1">
   				<a href="<c:url value='/users/join'/>">회원가입</a>
 			</p>
-          <p class="mb-1"><a href="#">비밀번호를 잊으셨나요?</a></p>
+          <p class="mb-1">
+			    <a href="<c:url value='/users/password/find'/>">
+			        비밀번호를 잊으셨나요?
+			    </a>
+		  </p>
         </div>
         <!-- /.login-card-body -->
       </div>
