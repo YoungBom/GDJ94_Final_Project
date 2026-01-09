@@ -168,7 +168,7 @@ public class ApprovalController {
                          @RequestParam Long docVerId,
                          RedirectAttributes ra) {
         try {
-            approvalService.submit(loginUser.getUserId(), docVerId);
+            approvalService.resubmit(loginUser.getUserId(), docVerId); // ✅ 여기만 변경
             ra.addFlashAttribute("msg", "결재 요청되었습니다.");
             return "redirect:/approval/detail?docVerId=" + docVerId;
         } catch (Exception e) {
@@ -176,6 +176,7 @@ public class ApprovalController {
             return "redirect:/approval/line?docVerId=" + docVerId;
         }
     }
+
 
     @PostMapping("saveLinesForm")
     @ResponseBody
