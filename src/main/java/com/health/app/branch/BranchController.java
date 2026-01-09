@@ -33,7 +33,11 @@ public class BranchController {
     @GetMapping("/detail")
     public String branchDetail(@RequestParam Long branchId, Model model) {
         BranchDTO branch = branchService.getBranchDetail(branchId);
+        // 지점 상세
         model.addAttribute("branch", branch);
+        //지점 변경 이력
+        model.addAttribute("historyList", branchService.getBranchHistoryList(branchId));
+        
         return "branch/detail"; // /WEB-INF/views/branch/detail.jsp
     }
     

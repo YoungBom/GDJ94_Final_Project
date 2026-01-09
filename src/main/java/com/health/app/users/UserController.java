@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -111,7 +112,7 @@ public class UserController {
     }
     
     @PostMapping("/updateProc")
-    public String updateProc(UserDTO userDTO, Authentication authentication, RedirectAttributes redirectAttributes) {
+    public String updateProc(UserDTO userDTO, Authentication authentication, HttpSession session, RedirectAttributes redirectAttributes) {
 
         String loginId = authentication.getName();
 
@@ -125,6 +126,9 @@ public class UserController {
         }
 
         userService.updateUser(userDTO);
+        
+        // 세션 이름 즉시 갱신 (이 줄이 핵심)
+        session.setAttribute("LOGIN_USER_NAME", userDTO.getName());
         
         // ✅ 수정 완료 메시지
         redirectAttributes.addFlashAttribute(
@@ -207,4 +211,38 @@ public class UserController {
         // 3️⃣ 가입 후 로그인 페이지로
         return "redirect:/login";
     }
+    
+    // 로그인창에서 비밀번호 찾기
+    @GetMapping("/password/find")
+    public String findPasswordForm() {
+        return "users/password_find";
+    }
+
+    // 로그인창에서 비밀번호 찾기
+    @PostMapping("/password/findProc")
+    public String findPasswordProc(String loginId,
+                                   String email,
+                                   RedirectAttributes redirectAttributes) {
+
+        boolean exists = userService.existsByLoginIdAndEmail(loginId, email);
+
+        if (!exists) {
+            redirectAttributes.addFlashAttribute(
+                "errorMessage",
+                "아이디 또는 이메일이 일치하지 않습니다."
+            );
+            return "redirect:/users/password/find";
+        }
+
+        // 🔥 임시 비밀번호 발급
+        userService.resetPassword(loginId);
+
+        redirectAttributes.addFlashAttribute(
+            "successMessage",
+            "임시 비밀번호를 이메일로 발송했습니다."
+        );
+
+        return "redirect:/login";
+    }
+
 }
