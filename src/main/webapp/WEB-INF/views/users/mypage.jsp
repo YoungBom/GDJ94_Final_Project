@@ -151,7 +151,5 @@
 
 <jsp:include page="../includes/admin_footer.jsp" />
 
-<!-- AdminLTE JS -->
-<script src="<c:url value='/js/adminlte.js'/>"></script>
 </body>
 </html>
