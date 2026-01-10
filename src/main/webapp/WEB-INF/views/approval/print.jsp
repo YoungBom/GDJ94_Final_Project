@@ -1,16 +1,24 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
-<%@ taglib prefix="c" uri="jakarta.tags.core"%>
+<%
+  String bg = (String) request.getAttribute("bgImageUrl");
+  String fields = (String) request.getAttribute("fieldsJspf");
 
-<c:set var="doc" value="${print}" />
+  // fieldsJspf가 "/WEB-INF/views/approval/print/..."로 오면 "print/..."로 정규화
+  if (fields != null && fields.startsWith("/WEB-INF/views/approval/")) {
+      fields = fields.substring("/WEB-INF/views/approval/".length());
+  }
+%>
 
-<div style="position:fixed; top:0; left:0; z-index:999999;
-            background:#fff; border:2px solid #000; padding:8px; font-size:14px;">
-  hasPrint = ${print != null}
-  / typeCode = <c:out value="${doc.typeCode}" />
-  / docVerId = <c:out value="${doc.docVerId}" />
-  / route =
-  <c:choose>
-    <c:when test="${doc.typeCode eq 'AT009'}">vacation_print.jsp</c:when>
-    <c:otherwise>ext_common_router.jsp</c:otherwise>
-  </c:choose>
+<div style="position:relative; width:1250px; margin:0 auto; background:#fff;">
+  <img src="<%= bg %>" style="width:100%; height:auto; display:block;" />
+
+  <div style="position:absolute; left:0; top:0; width:100%; height:100%;">
+    <%
+      if (fields != null) {
+          request.getRequestDispatcher("/WEB-INF/views/approval/" + fields).include(request, response);
+      } else {
+          out.print("fieldsJspf is null");
+      }
+    %>
+  </div>
 </div>

@@ -212,34 +212,37 @@ public class ApprovalController {
         String typeCode = print.getTypeCode();
 
         switch (typeCode) {
-            case "AT001":
-                model.addAttribute("bgImageUrl", "/approval/formPng/expense.png");
-                model.addAttribute("fieldsJspf", "/WEB-INF/views/approval/print/_fields_expense.jspf");
-                break;
+	        case "AT001":
+	        	  model.addAttribute("bgImageUrl", "/approval/formPng/expense.png");
+	        	  model.addAttribute("fieldsJspf", "print/_fields_expense.jspf");
+	        	  break;
+	
+	        	case "AT002":
+	        	  model.addAttribute("bgImageUrl", "/approval/formPng/settlement.png");
+	        	  model.addAttribute("fieldsJspf", "print/_fields_settlement.jspf");
+	        	  break;
+	
+	        	case "AT003":
+	        	  model.addAttribute("bgImageUrl", "/approval/formPng/sales.jpg");
+	        	  model.addAttribute("fieldsJspf", "print/_fields_sales.jspf");
+	        	  break;
+	
+	        	case "AT005":
+	        	  model.addAttribute("bgImageUrl", "/approval/formPng/purchase_request.jpg");
+	        	  model.addAttribute("fieldsJspf", "print/_fields_purchase_request_pr.jspf");
+	        	  break;
+	
+	        	case "AT006":
+	        	  model.addAttribute("bgImageUrl", "/approval/formPng/purchase_order.png");
+	        	  model.addAttribute("fieldsJspf", "print/_fields_purchase_order_po.jspf");
+	        	  break;
+	
+	        	case "AT009":
+	        	default:
+	        	  model.addAttribute("bgImageUrl", "/approval/formPng/leave.png");
+	        	  model.addAttribute("fieldsJspf", "print/_fields_vacation.jspf");
+	
 
-            case "AT002":
-                model.addAttribute("bgImageUrl", "/approval/formPng/settlement.png");
-                model.addAttribute("fieldsJspf", "/WEB-INF/views/approval/print/_fields_settlement.jspf");
-                break;
-
-            case "AT003":
-                model.addAttribute("bgImageUrl", "/approval/formPng/sales.jpg");
-                model.addAttribute("fieldsJspf", "/WEB-INF/views/approval/print/_fields_sales.jspf");
-                break;
-
-            case "AT005":
-                model.addAttribute("bgImageUrl", "/approval/formPng/purchase_request.jpg");
-                model.addAttribute("fieldsJspf", "/WEB-INF/views/approval/print/_fields_purchase_request_pr.jspf");
-                break;
-
-            case "AT006":
-                model.addAttribute("bgImageUrl", "/approval/formPng/purchase_order.png");
-                model.addAttribute("fieldsJspf", "/WEB-INF/views/approval/print/_fields_purchase_order_po.jspf");
-                break;
-
-            default:
-                model.addAttribute("bgImageUrl", "/approval/formPng/leave.png");
-                model.addAttribute("fieldsJspf", "/WEB-INF/views/approval/print/_fields_vacation.jspf");
         }
 
         return "approval/print";
