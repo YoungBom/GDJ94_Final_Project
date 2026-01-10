@@ -190,8 +190,8 @@ async function loadBranchOptions() {
         const select = document.getElementById('branchId');
         branches.forEach(branch => {
             const option = document.createElement('option');
-            option.value = branch.value;
-            option.textContent = branch.label;
+            option.value = branch.id;
+            option.textContent = branch.name;
             select.appendChild(option);
         });
     } catch (error) {
