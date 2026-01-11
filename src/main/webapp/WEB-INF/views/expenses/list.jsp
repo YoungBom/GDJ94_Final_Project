@@ -154,10 +154,10 @@ async function loadBranchOptions() {
         const branches = await response.json();
 
         const select = document.getElementById('branchId');
-        branches.forEach(branch => {
+        branches.filter(branch => branch != null && branch.id != null).forEach(branch => {
             const option = document.createElement('option');
-            option.value = branch.value;
-            option.textContent = branch.label;
+            option.value = branch.id;
+            option.textContent = branch.name || '미지정';
             select.appendChild(option);
         });
     } catch (error) {
@@ -230,7 +230,7 @@ function renderPagination(current, total) {
 
     // 이전 버튼
     if (current > 1) {
-        html += `<li class="page-item"><a class="page-link" href="#" onclick="goToPage(${current - 1}); return false;">«</a></li>`;
+        html += '<li class="page-item"><a class="page-link" href="#" onclick="goToPage(' + (current - 1) + '); return false;">«</a></li>';
     }
 
     // 페이지 번호
@@ -238,14 +238,14 @@ function renderPagination(current, total) {
     const endPage = Math.min(total, current + 2);
 
     for (let i = startPage; i <= endPage; i++) {
-        html += `<li class="page-item ${i === current ? 'active' : ''}">
-            <a class="page-link" href="#" onclick="goToPage(${i}); return false;">${i}</a>
-        </li>`;
+        html += '<li class="page-item ' + (i === current ? 'active' : '') + '">' +
+            '<a class="page-link" href="#" onclick="goToPage(' + i + '); return false;">' + i + '</a>' +
+        '</li>';
     }
 
     // 다음 버튼
     if (current < total) {
-        html += `<li class="page-item"><a class="page-link" href="#" onclick="goToPage(${current + 1}); return false;">»</a></li>`;
+        html += '<li class="page-item"><a class="page-link" href="#" onclick="goToPage(' + (current + 1) + '); return false;">»</a></li>';
     }
 
     pagination.innerHTML = html;

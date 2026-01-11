@@ -164,10 +164,10 @@ async function loadBranchOptions() {
         const branches = await response.json();
 
         const select = document.getElementById('branchId');
-        branches.forEach(branch => {
+        branches.filter(branch => branch != null && branch.id != null).forEach(branch => {
             const option = document.createElement('option');
-            option.value = branch.value;
-            option.textContent = branch.label;
+            option.value = branch.id;
+            option.textContent = branch.name || '미지정';
             select.appendChild(option);
         });
     } catch (error) {
@@ -278,23 +278,21 @@ function updateTable(data) {
     tbody.innerHTML = data.map(item => {
         const profitClass = getProfitClass(item.profitStatus);
 
-        return `
-            <tr>
-                <td>${item.periodLabel || item.period}</td>
-                <td>${item.branchName || '전체'}</td>
-                <td class="text-end">${formatNumber(item.salesCount || 0)}</td>
-                <td class="text-end">${formatCurrency(item.salesAmount || 0)}</td>
-                <td class="text-end">${formatNumber(item.expenseCount || 0)}</td>
-                <td class="text-end">${formatCurrency(item.expenseAmount || 0)}</td>
-                <td class="text-end ${profitClass}">${formatCurrency(item.profitAmount || 0)}</td>
-                <td class="text-end ${profitClass}">${(item.profitRate || 0).toFixed(1)}%</td>
-                <td>
-                    <span class="badge ${getProfitBadgeClass(item.profitStatus)}">
-                        ${getProfitStatusName(item.profitStatus)}
-                    </span>
-                </td>
-            </tr>
-        `;
+        return '<tr>' +
+                '<td>' + (item.periodLabel || item.period) + '</td>' +
+                '<td>' + (item.branchName || '전체') + '</td>' +
+                '<td class="text-end">' + formatNumber(item.salesCount || 0) + '</td>' +
+                '<td class="text-end">' + formatCurrency(item.salesAmount || 0) + '</td>' +
+                '<td class="text-end">' + formatNumber(item.expenseCount || 0) + '</td>' +
+                '<td class="text-end">' + formatCurrency(item.expenseAmount || 0) + '</td>' +
+                '<td class="text-end ' + profitClass + '">' + formatCurrency(item.profitAmount || 0) + '</td>' +
+                '<td class="text-end ' + profitClass + '">' + (item.profitRate || 0).toFixed(1) + '%</td>' +
+                '<td>' +
+                    '<span class="badge ' + getProfitBadgeClass(item.profitStatus) + '">' +
+                        getProfitStatusName(item.profitStatus) +
+                    '</span>' +
+                '</td>' +
+            '</tr>';
     }).join('');
 
     // 합계 행
@@ -307,18 +305,17 @@ function updateTable(data) {
 
     const profitClass = totalProfit >= 0 ? 'text-success' : 'text-danger';
 
-    document.getElementById('tableFoot').innerHTML = `
-        <tr class="table-active fw-bold">
-            <td colspan="2">합계</td>
-            <td class="text-end">${formatNumber(totalSalesCount)}</td>
-            <td class="text-end">${formatCurrency(totalSales)}</td>
-            <td class="text-end">${formatNumber(totalExpenseCount)}</td>
-            <td class="text-end">${formatCurrency(totalExpenses)}</td>
-            <td class="text-end ${profitClass}">${formatCurrency(totalProfit)}</td>
-            <td class="text-end ${profitClass}">${totalRate.toFixed(1)}%</td>
-            <td>-</td>
-        </tr>
-    `;
+    document.getElementById('tableFoot').innerHTML =
+        '<tr class="table-active fw-bold">' +
+            '<td colspan="2">합계</td>' +
+            '<td class="text-end">' + formatNumber(totalSalesCount) + '</td>' +
+            '<td class="text-end">' + formatCurrency(totalSales) + '</td>' +
+            '<td class="text-end">' + formatNumber(totalExpenseCount) + '</td>' +
+            '<td class="text-end">' + formatCurrency(totalExpenses) + '</td>' +
+            '<td class="text-end ' + profitClass + '">' + formatCurrency(totalProfit) + '</td>' +
+            '<td class="text-end ' + profitClass + '">' + totalRate.toFixed(1) + '%</td>' +
+            '<td>-</td>' +
+        '</tr>';
 }
 
 // 손익 상태별 클래스

@@ -251,20 +251,20 @@ function renderPagination(current, total) {
     let html = '';
 
     if (current > 1) {
-        html += `<li class="page-item"><a class="page-link" href="#" onclick="goToPage(${current - 1}); return false;">«</a></li>`;
+        html += '<li class="page-item"><a class="page-link" href="#" onclick="goToPage(' + (current - 1) + '); return false;">«</a></li>';
     }
 
     const startPage = Math.max(1, current - 2);
     const endPage = Math.min(total, current + 2);
 
     for (let i = startPage; i <= endPage; i++) {
-        html += `<li class="page-item ${i === current ? 'active' : ''}">
-            <a class="page-link" href="#" onclick="goToPage(${i}); return false;">${i}</a>
-        </li>`;
+        html += '<li class="page-item ' + (i === current ? 'active' : '') + '">' +
+            '<a class="page-link" href="#" onclick="goToPage(' + i + '); return false;">' + i + '</a>' +
+        '</li>';
     }
 
     if (current < total) {
-        html += `<li class="page-item"><a class="page-link" href="#" onclick="goToPage(${current + 1}); return false;">»</a></li>`;
+        html += '<li class="page-item"><a class="page-link" href="#" onclick="goToPage(' + (current + 1) + '); return false;">»</a></li>';
     }
 
     pagination.innerHTML = html;

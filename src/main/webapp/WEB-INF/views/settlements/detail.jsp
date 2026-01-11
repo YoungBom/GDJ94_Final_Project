@@ -230,7 +230,7 @@ async function loadSettlementDetail() {
         document.getElementById('settledAt').textContent = formatDateTime(settlement.settledAt);
 
         // 상태 뱃지
-        const statusBadge = `<span class="badge ${getStatusBadgeClass(settlement.statusCode)}">${getStatusName(settlement.statusCode)}</span>`;
+        const statusBadge = '<span class="badge ' + getStatusBadgeClass(settlement.statusCode) + '">' + getStatusName(settlement.statusCode) + '</span>';
         document.getElementById('statusCode').innerHTML = statusBadge;
 
         // 이력 정보
