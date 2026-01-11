@@ -316,13 +316,11 @@ function setupTableHeader() {
             break;
     }
 
-    headerHtml += `
-        <th class="text-end">매출 건수</th>
-        <th class="text-end">총 매출 금액</th>
-        <th class="text-end">평균 매출 금액</th>
-        <th class="text-end">평균 대비 차이</th>
-        <th class="text-end">비율</th>
-    </tr>`;
+    headerHtml += '<th class="text-end">매출 건수</th>' +
+        '<th class="text-end">총 매출 금액</th>' +
+        '<th class="text-end">평균 매출 금액</th>' +
+        '<th class="text-end">매출 비중</th>' +
+    '</tr>';
 
     document.getElementById('tableHead').innerHTML = headerHtml;
 }
@@ -332,7 +330,7 @@ function updateTable(data) {
     const tbody = document.getElementById('tableBody');
 
     if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center">데이터가 없습니다.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center">데이터가 없습니다.</td></tr>';
         document.getElementById('tableFoot').innerHTML = '';
         return;
     }
@@ -352,15 +350,12 @@ function updateTable(data) {
                 break;
         }
 
-        const diffClass = (item.diffPercent || 0) >= 0 ? 'text-success' : 'text-danger';
-
         return '<tr>' +
             '<td>' + firstColumn + '</td>' +
             '<td class="text-end">' + formatNumber(item.saleCount || 0) + '</td>' +
             '<td class="text-end">' + formatCurrency(item.totalAmount || 0) + '</td>' +
             '<td class="text-end">' + formatCurrency(item.avgAmount || 0) + '</td>' +
-            '<td class="text-end ' + diffClass + '">' + formatCurrency(item.diffAmount || 0) + '</td>' +
-            '<td class="text-end ' + diffClass + '">' + (item.diffPercent || 0).toFixed(1) + '%</td>' +
+            '<td class="text-end">' + (item.percentage || 0).toFixed(1) + '%</td>' +
             '</tr>';
     }).join('');
 
@@ -375,8 +370,7 @@ function updateTable(data) {
             '<td class="text-end">' + formatNumber(totalCount) + '</td>' +
             '<td class="text-end">' + formatCurrency(totalAmount) + '</td>' +
             '<td class="text-end">' + formatCurrency(avgAmount) + '</td>' +
-            '<td class="text-end">-</td>' +
-            '<td class="text-end">-</td>' +
+            '<td class="text-end">100%</td>' +
         '</tr>';
 }
 

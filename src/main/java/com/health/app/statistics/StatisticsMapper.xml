@@ -28,8 +28,8 @@
             </if>
             GROUP BY s.branch_id, b.branch_name
         ),
-        avg_sales AS (
-            SELECT AVG(totalAmount) AS overallAvg
+        total_sales AS (
+            SELECT SUM(totalAmount) AS grandTotal
             FROM branch_sales
         )
         SELECT
@@ -38,10 +38,9 @@
             bs.totalAmount,
             bs.saleCount,
             bs.avgAmount,
-            (bs.totalAmount - av.overallAvg) AS diffAmount,
-            ROUND(((bs.totalAmount - av.overallAvg) / av.overallAvg * 100), 2) AS diffPercent
+            CASE WHEN ts.grandTotal > 0 THEN ROUND((bs.totalAmount / ts.grandTotal * 100), 2) ELSE 0 END AS percentage
         FROM branch_sales bs
-        CROSS JOIN avg_sales av
+        CROSS JOIN total_sales ts
         ORDER BY bs.totalAmount DESC
     </select>
 
@@ -69,8 +68,8 @@
             </if>
             GROUP BY s.category_code
         ),
-        avg_sales AS (
-            SELECT AVG(totalAmount) AS overallAvg FROM category_sales
+        total_sales AS (
+            SELECT SUM(totalAmount) AS grandTotal FROM category_sales
         )
         SELECT
             cs.categoryCode,
@@ -78,10 +77,9 @@
             cs.totalAmount,
             cs.saleCount,
             cs.avgAmount,
-            (cs.totalAmount - av.overallAvg) AS diffAmount,
-            CASE WHEN av.overallAvg > 0 THEN ROUND(((cs.totalAmount - av.overallAvg) / av.overallAvg * 100), 2) ELSE 0 END AS diffPercent
+            CASE WHEN ts.grandTotal > 0 THEN ROUND((cs.totalAmount / ts.grandTotal * 100), 2) ELSE 0 END AS percentage
         FROM category_sales cs
-        CROSS JOIN avg_sales av
+        CROSS JOIN total_sales ts
         ORDER BY cs.totalAmount DESC
     </select>
 
@@ -122,8 +120,8 @@
             </if>
             GROUP BY period, periodLabel
         ),
-        avg_sales AS (
-            SELECT AVG(totalAmount) AS overallAvg FROM period_sales
+        total_sales AS (
+            SELECT SUM(totalAmount) AS grandTotal FROM period_sales
         )
         SELECT
             ps.period,
@@ -131,10 +129,9 @@
             ps.totalAmount,
             ps.saleCount,
             ps.avgAmount,
-            (ps.totalAmount - av.overallAvg) AS diffAmount,
-            CASE WHEN av.overallAvg > 0 THEN ROUND(((ps.totalAmount - av.overallAvg) / av.overallAvg * 100), 2) ELSE 0 END AS diffPercent
+            CASE WHEN ts.grandTotal > 0 THEN ROUND((ps.totalAmount / ts.grandTotal * 100), 2) ELSE 0 END AS percentage
         FROM period_sales ps
-        CROSS JOIN avg_sales av
+        CROSS JOIN total_sales ts
         ORDER BY ps.period ASC
     </select>
 
@@ -161,8 +158,8 @@
             </if>
             GROUP BY e.branch_id, b.branch_name
         ),
-        avg_expenses AS (
-            SELECT AVG(totalAmount) AS overallAvg
+        total_expenses AS (
+            SELECT SUM(totalAmount) AS grandTotal
             FROM branch_expenses
         )
         SELECT
@@ -171,10 +168,9 @@
             be.totalAmount,
             be.expenseCount,
             be.avgAmount,
-            (be.totalAmount - av.overallAvg) AS diffAmount,
-            ROUND(((be.totalAmount - av.overallAvg) / av.overallAvg * 100), 2) AS diffPercent
+            CASE WHEN te.grandTotal > 0 THEN ROUND((be.totalAmount / te.grandTotal * 100), 2) ELSE 0 END AS percentage
         FROM branch_expenses be
-        CROSS JOIN avg_expenses av
+        CROSS JOIN total_expenses te
         ORDER BY be.totalAmount DESC
     </select>
 
@@ -202,8 +198,8 @@
             </if>
             GROUP BY e.category_code
         ),
-        avg_expenses AS (
-            SELECT AVG(totalAmount) AS overallAvg FROM category_expenses
+        total_expenses AS (
+            SELECT SUM(totalAmount) AS grandTotal FROM category_expenses
         )
         SELECT
             ce.categoryCode,
@@ -211,10 +207,9 @@
             ce.totalAmount,
             ce.expenseCount,
             ce.avgAmount,
-            (ce.totalAmount - av.overallAvg) AS diffAmount,
-            CASE WHEN av.overallAvg > 0 THEN ROUND(((ce.totalAmount - av.overallAvg) / av.overallAvg * 100), 2) ELSE 0 END AS diffPercent
+            CASE WHEN te.grandTotal > 0 THEN ROUND((ce.totalAmount / te.grandTotal * 100), 2) ELSE 0 END AS percentage
         FROM category_expenses ce
-        CROSS JOIN avg_expenses av
+        CROSS JOIN total_expenses te
         ORDER BY ce.totalAmount DESC
     </select>
 
@@ -255,8 +250,8 @@
             </if>
             GROUP BY period, periodLabel
         ),
-        avg_expenses AS (
-            SELECT AVG(totalAmount) AS overallAvg FROM period_expenses
+        total_expenses AS (
+            SELECT SUM(totalAmount) AS grandTotal FROM period_expenses
         )
         SELECT
             pe.period,
@@ -264,10 +259,9 @@
             pe.totalAmount,
             pe.expenseCount,
             pe.avgAmount,
-            (pe.totalAmount - av.overallAvg) AS diffAmount,
-            CASE WHEN av.overallAvg > 0 THEN ROUND(((pe.totalAmount - av.overallAvg) / av.overallAvg * 100), 2) ELSE 0 END AS diffPercent
+            CASE WHEN te.grandTotal > 0 THEN ROUND((pe.totalAmount / te.grandTotal * 100), 2) ELSE 0 END AS percentage
         FROM period_expenses pe
-        CROSS JOIN avg_expenses av
+        CROSS JOIN total_expenses te
         ORDER BY pe.period ASC
     </select>
 
