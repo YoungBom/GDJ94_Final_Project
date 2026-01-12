@@ -234,23 +234,24 @@ public class ApprovalService {
         if (!loginUserId.equals(drafterId)) throw new IllegalStateException("기안자만 상신할 수 있습니다.");
 
         int lineCount = approvalMapper.countLinesByDocVerId(docVerId);
-        if (lineCount <= 0) throw new IllegalStateException("결재선이 없습니다. 결재선을 먼저 설정하세요.");
+        if (lineCount <= 0) throw new IllegalStateException("결재선이 없습니다.");
 
         String docStatus = approvalMapper.selectDocStatusByDocVerId(docVerId);
-        if (!"AS001".equals(docStatus)) throw new IllegalStateException("임시저장 문서만 결재 요청할 수 있습니다.");
+        if (!"AS001".equals(docStatus)) throw new IllegalStateException("임시저장 문서만 상신 가능");
 
         approvalMapper.updateDocumentStatusByDocVerId(docVerId, "AS002", loginUserId);
         approvalMapper.updateVersionStatusByDocVerId(docVerId, "AVS002", loginUserId);
         approvalMapper.updateAllLinesStatusByDocVerId(docVerId, "ALS001", loginUserId);
         approvalMapper.updateFirstLineToPending(docVerId, "ALS002", loginUserId);
 
-        // 🔴 🔴 🔴 이게 빠져 있었음
         String typeCode = approvalMapper.selectTypeCodeByDocVerId(docVerId);
+
+        // ✅ AT005, AT006 포함 전부 즉시 반영 (AT009만 제외)
         if (!"AT009".equals(typeCode)) {
             approvalApplyService.applyApprovedDoc(docVerId, loginUserId);
         }
-
     }
+
 
 
     // 재상신(임시/반려/회수만 가능)
