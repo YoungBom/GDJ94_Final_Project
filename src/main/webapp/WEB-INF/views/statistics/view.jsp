@@ -90,7 +90,10 @@
                 <div class="small-box text-bg-success">
                     <div class="inner">
                         <h3 id="netProfit">-</h3>
-                        <p>추정 순이익</p>
+                        <p>추정 순이익 (세후)</p>
+                        <small class="text-white-50" style="font-size: 0.75rem;">
+                            법인세: <span id="corporateTax">-</span>
+                        </small>
                     </div>
                     <div class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
                         <i class="bi bi-currency-dollar"></i>
@@ -185,13 +188,13 @@ let trendChart, profitChart, branchChart;
 
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', function() {
-    // 기본 날짜 설정 (이번 달)
+    // 기본 날짜 설정 (최근 6개월)
     const today = new Date();
-    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+    const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 6, 1);
     const startDateInput = document.getElementById('startDate');
     const endDateInput = document.getElementById('endDate');
 
-    startDateInput.value = formatDate(firstDay);
+    startDateInput.value = formatDate(sixMonthsAgo);
     endDateInput.value = formatDate(today);
 
     // 지점 목록 로드
@@ -246,8 +249,8 @@ async function loadDashboardData() {
     if (!startDate || !endDate) {
         console.warn('[loadDashboardData] 날짜가 비어있어 기본값 사용');
         const today = new Date();
-        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-        startDate = formatDate(firstDay);
+        const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 6, 1);
+        startDate = formatDate(sixMonthsAgo);
         endDate = formatDate(today);
 
         // input 필드에도 다시 설정
@@ -300,13 +303,19 @@ function updateSummaryCards(salesData, expensesData, prevSalesData, prevExpenses
     // 현재 월 집계
     const totalSales = salesData.reduce((sum, item) => sum + (item.totalAmount || 0), 0);
     const totalExpenses = expensesData.reduce((sum, item) => sum + (item.totalAmount || 0), 0);
-    const netProfit = totalSales - totalExpenses;
+    const grossProfit = totalSales - totalExpenses;  // 세전 순이익
+
+    // 법인세 자동 계산 (누진세율)
+    const corporateTax = calculateCorporateTax(grossProfit);
+    const netProfit = grossProfit - corporateTax;  // 세후 순이익 (추정)
     const profitRate = totalSales > 0 ? ((netProfit / totalSales) * 100) : 0;
 
     // 전월 집계 (데이터 없을 경우 빈 배열로 처리)
     const prevTotalSales = (prevSalesData || []).reduce((sum, item) => sum + (item.totalAmount || 0), 0);
     const prevTotalExpenses = (prevExpensesData || []).reduce((sum, item) => sum + (item.totalAmount || 0), 0);
-    const prevNetProfit = prevTotalSales - prevTotalExpenses;
+    const prevGrossProfit = prevTotalSales - prevTotalExpenses;  // 전월 세전 순이익
+    const prevCorporateTax = calculateCorporateTax(prevGrossProfit);
+    const prevNetProfit = prevGrossProfit - prevCorporateTax;  // 전월 세후 순이익
     const prevProfitRate = prevTotalSales > 0 ? ((prevNetProfit / prevTotalSales) * 100) : 0;
 
     // 증감률 계산
@@ -319,6 +328,7 @@ function updateSummaryCards(salesData, expensesData, prevSalesData, prevExpenses
     document.getElementById('totalSales').textContent = formatCurrency(totalSales);
     document.getElementById('totalExpenses').textContent = formatCurrency(totalExpenses);
     document.getElementById('netProfit').textContent = formatCurrency(netProfit);
+    document.getElementById('corporateTax').textContent = formatCurrency(corporateTax);  // 법인세액 표시
     document.getElementById('profitRate').textContent = profitRate.toFixed(1) + '%';
 
     // 증감률 표시
@@ -326,6 +336,34 @@ function updateSummaryCards(salesData, expensesData, prevSalesData, prevExpenses
     document.getElementById('expensesGrowth').innerHTML = formatGrowthRate(expensesGrowth, '지출', true);
     document.getElementById('profitGrowth').innerHTML = formatGrowthRate(profitGrowth, '순이익');
     document.getElementById('rateChange').innerHTML = formatRateChange(rateChange);
+}
+
+/**
+ * 법인세 자동 계산 (누진세율)
+ *
+ * 세율 구조:
+ * - 2억 이하: 9%
+ * - 2억 초과: 2억까지는 9%, 초과분은 19%
+ *
+ * @param {number} profit - 세전 순이익
+ * @returns {number} - 법인세액
+ */
+function calculateCorporateTax(profit) {
+    if (profit <= 0) return 0;  // 이익이 0 이하면 세금 없음
+
+    const threshold = 200000000;  // 2억원
+    const lowRate = 0.09;         // 9% (2억 이하)
+    const highRate = 0.19;        // 19% (2억 초과분)
+
+    if (profit <= threshold) {
+        // 2억 이하: 전체에 9% 적용
+        return profit * lowRate;
+    } else {
+        // 2억 초과: 2억까지는 9%, 초과분은 19%
+        const lowTax = threshold * lowRate;          // 2억 × 9% = 1,800만원
+        const highTax = (profit - threshold) * highRate;  // 초과분 × 19%
+        return lowTax + highTax;
+    }
 }
 
 // 증감률 계산 함수
