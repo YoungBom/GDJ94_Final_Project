@@ -77,7 +77,7 @@
 					                    부서 없음
 					                </c:when>
 					                <c:otherwise>
-					                    ${user.departmentCode}
+					                    ${user.departmentCode} - ${user.departmentName}
 					                </c:otherwise>
 					            </c:choose>
 					        </td>
@@ -109,7 +109,7 @@
 					
 					    <tr>
 					        <th>권한</th>
-					        <td>${user.roleCode}</td>
+					        <td>${user.roleCode} - ${user.roleName}</td>
 					    </tr>
 					
 					    <tr>
@@ -151,7 +151,5 @@
 
 <jsp:include page="../includes/admin_footer.jsp" />
 
-<!-- AdminLTE JS -->
-<script src="<c:url value='/js/adminlte.js'/>"></script>
 </body>
 </html>

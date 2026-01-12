@@ -9,7 +9,11 @@ public interface BranchMapper {
 
     List<BranchDTO> selectBranchList();
     
+    // detail.jsp
     BranchDTO selectBranchDetail(Long branchId);
+    
+    // detail.jsp 밑부분에 지점 이력 조회
+    List<BranchHistoryDTO> selectBranchHistoryList(@Param("branchId") Long branchId);
     
     void insertBranch(BranchDTO branchDTO);
 

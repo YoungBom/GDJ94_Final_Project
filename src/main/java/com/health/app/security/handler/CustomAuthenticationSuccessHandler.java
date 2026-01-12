@@ -6,6 +6,7 @@ import com.health.app.security.model.LoginUser;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -28,6 +29,10 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 
         LoginUser user = (LoginUser) authentication.getPrincipal();
 
+        // 세션 값 세팅 (헤더의 이름 수정 시 즉시 반영)
+        HttpSession session = request.getSession();
+        session.setAttribute("LOGIN_USER_NAME", user.getName());
+        
         // 1) 실패횟수 초기화 / 잠금 해제
         authUserMapper.resetFailCount(user.getUserId());
 
