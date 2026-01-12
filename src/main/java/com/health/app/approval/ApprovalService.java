@@ -24,7 +24,7 @@ public class ApprovalService {
     private final ApprovalProductMapper approvalProductMapper;
     private final SignatureMapper signatureMapper;
     private final CalendarEventMapper calendarEventMapper;
-
+    private final ApprovalApplyService approvalApplyService;
     // 내가 기안한 문서 목록
     @Transactional(readOnly = true)
     public List<ApprovalMyDocRowDTO> getMyDocs(Long drafterId) {
@@ -243,7 +243,16 @@ public class ApprovalService {
         approvalMapper.updateVersionStatusByDocVerId(docVerId, "AVS002", loginUserId);
         approvalMapper.updateAllLinesStatusByDocVerId(docVerId, "ALS001", loginUserId);
         approvalMapper.updateFirstLineToPending(docVerId, "ALS002", loginUserId);
+
+        String typeCode = approvalMapper.selectTypeCodeByDocVerId(docVerId);
+
+        // ✅ AT009(휴가)만 최종승인 시 처리, 나머지(AT001~AT006 포함)는 상신 즉시 반영
+        if (!"AT009".equals(typeCode)) {
+            approvalApplyService.applyApprovedDoc(docVerId, loginUserId);
+        }
     }
+
+
 
     // 재상신(임시/반려/회수만 가능)
     @Transactional
@@ -392,4 +401,9 @@ public class ApprovalService {
 
         return sb.toString();
     }
+    
+    public Long getMyBranchId(Long userId) {
+        return approvalMapper.selectBranchIdByUserId(userId);
+    }
+
 }

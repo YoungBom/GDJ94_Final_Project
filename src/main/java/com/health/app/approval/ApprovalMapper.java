@@ -100,4 +100,8 @@ public interface ApprovalMapper {
 
     // 사용자 조직 정보
     Map<String, Object> selectUserOrg(@Param("userId") Long userId);
+    
+    String selectTypeCodeByDocVerId(@Param("docVerId") Long docVerId);
+    
+    
 }
