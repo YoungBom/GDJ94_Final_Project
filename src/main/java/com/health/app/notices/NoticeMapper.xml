@@ -5,6 +5,7 @@
 
 <mapper namespace="com.health.app.notices.NoticeMapper">
 
+  <!-- 공지 ResultMap -->
   <resultMap id="NoticeMap" type="com.health.app.notices.NoticeDTO">
     <id property="noticeId" column="notice_id"/>
     <result property="title" column="title"/>
@@ -24,8 +25,8 @@
     <result property="publishEndDate" column="publish_end_date"/>
   </resultMap>
 
-  <insert id="insertNotice"
-          parameterType="com.health.app.notices.NoticeDTO"
+  <!-- 공지 등록 -->
+  <insert id="insertNotice" parameterType="com.health.app.notices.NoticeDTO"
           useGeneratedKeys="true" keyProperty="noticeId">
     <![CDATA[
     INSERT INTO notices (
@@ -46,26 +47,27 @@
     ]]>
   </insert>
 
+  <!-- 공지 수정 -->
   <update id="updateNotice" parameterType="com.health.app.notices.NoticeDTO">
     <![CDATA[
     UPDATE notices
-    SET
-      title = #{title},
-      content = #{content},
-      notice_type = #{noticeType},
-      target_type = #{targetType},
-      category_code = #{categoryCode},
-      is_pinned = #{isPinned},
-      status = #{status},
-      update_user = #{updateUser},
-      update_date = NOW(),
-      publish_start_date = #{publishStartDate},
-      publish_end_date = #{publishEndDate}
+    SET title = #{title},
+        content = #{content},
+        notice_type = #{noticeType},
+        target_type = #{targetType},
+        category_code = #{categoryCode},
+        is_pinned = #{isPinned},
+        status = #{status},
+        publish_start_date = #{publishStartDate},
+        publish_end_date = #{publishEndDate},
+        update_user = #{updateUser},
+        update_date = NOW()
     WHERE notice_id = #{noticeId}
       AND use_yn = 1
     ]]>
   </update>
 
+  <!-- 공지 삭제(soft delete) -->
   <update id="softDelete">
     <![CDATA[
     UPDATE notices
@@ -76,6 +78,7 @@
     ]]>
   </update>
 
+  <!-- 단건 조회 -->
   <select id="selectOne" resultMap="NoticeMap">
     <![CDATA[
     SELECT
@@ -87,18 +90,21 @@
       use_yn, publish_start_date, publish_end_date
     FROM notices
     WHERE notice_id = #{noticeId}
+      AND use_yn = 1
     ]]>
   </select>
 
+  <!-- 조회수 증가 -->
   <update id="incrementViewCount">
     <![CDATA[
     UPDATE notices
     SET view_count = view_count + 1
     WHERE notice_id = #{noticeId}
+      AND use_yn = 1
     ]]>
   </update>
 
-  <!-- 목록 쿼리: 비교 연산자(<=, >=) 때문에 CDATA 필수 -->
+  <!-- 사용자 목록 -->
   <select id="selectList" resultMap="NoticeMap">
     <![CDATA[
     SELECT DISTINCT
@@ -124,7 +130,23 @@
     ]]>
   </select>
 
-  <!-- targets: create_user NOT NULL 대응 -->
+  <!-- 관리자 목록 -->
+  <select id="selectAdminList" resultMap="NoticeMap">
+    <![CDATA[
+    SELECT
+      notice_id, title, content,
+      notice_type, target_type, category_code,
+      is_pinned, status,
+      writer_id, view_count,
+      create_date, update_user, update_date,
+      use_yn, publish_start_date, publish_end_date
+    FROM notices
+    WHERE use_yn = 1
+    ORDER BY is_pinned DESC, create_date DESC
+    ]]>
+  </select>
+
+  <!-- 대상 지점 삭제 -->
   <update id="deleteTargets">
     <![CDATA[
     UPDATE notice_targets
@@ -136,6 +158,7 @@
     ]]>
   </update>
 
+  <!-- 대상 지점 등록 -->
   <insert id="insertTarget">
     <![CDATA[
     INSERT INTO notice_targets (
@@ -150,7 +173,45 @@
     ]]>
   </insert>
 
-  <!-- history: create_user NOT NULL, reason NOT NULL 대응 -->
+  <!-- 대상 지점 목록 -->
+  <select id="selectTargetBranches" resultType="com.health.app.branch.BranchDTO">
+    <![CDATA[
+    SELECT b.branch_id AS branchId,
+           b.branch_name AS branchName
+    FROM notice_targets nt
+    JOIN branch b ON b.branch_id = nt.branch_id
+    WHERE nt.notice_id = #{noticeId}
+      AND nt.use_yn = 1
+    ORDER BY b.branch_name
+    ]]>
+  </select>
+
+  <!-- 대상 지점 ID 목록 -->
+  <select id="selectTargetBranchIds" resultType="long">
+    <![CDATA[
+    SELECT branch_id
+    FROM notice_targets
+    WHERE notice_id = #{noticeId}
+      AND use_yn = 1
+    ORDER BY branch_id
+    ]]>
+  </select>
+
+  <!-- 만료 공지 자동 종료 -->
+  <update id="closeExpiredNotices">
+    <![CDATA[
+    UPDATE notices
+    SET status = 'NS003',
+        update_user = #{updateUser},
+        update_date = NOW()
+    WHERE use_yn = 1
+      AND status = 'NS001'
+      AND publish_end_date IS NOT NULL
+      AND publish_end_date < NOW()
+    ]]>
+  </update>
+
+  <!-- 변경 이력 -->
   <insert id="insertHistory" parameterType="com.health.app.notices.NoticeHistoryDTO">
     <![CDATA[
     INSERT INTO notice_history (
@@ -164,16 +225,5 @@
     )
     ]]>
   </insert>
-<select id="selectTargetBranches" resultType="com.health.app.branch.BranchDTO">
-  <![CDATA[
-  SELECT b.branch_id AS branchId,
-         b.branch_name AS branchName
-  FROM notice_targets nt
-  JOIN branch b ON b.branch_id = nt.branch_id
-  WHERE nt.notice_id = #{noticeId}
-    AND nt.use_yn = 1
-  ORDER BY b.branch_name
-  ]]>
-</select>
 
 </mapper>
