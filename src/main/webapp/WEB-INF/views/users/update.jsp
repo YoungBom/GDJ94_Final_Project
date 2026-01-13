@@ -52,13 +52,13 @@
                                 <label class="form-label">부서</label>
                                 <select name="departmentCode" class="form-select">
                                     <option value="">부서 없음</option>
-                                    <option value="DP001" ${user.departmentCode == 'DP001' ? 'selected' : ''}>시스템관리팀 (SYSTEM)</option>
-                                    <option value="DP002" ${user.departmentCode == 'DP002' ? 'selected' : ''}>지점운영팀 (BRANCH)</option>
-                                    <option value="DP003" ${user.departmentCode == 'DP003' ? 'selected' : ''}>회원관리팀 (USER)</option>
-                                    <option value="DP004" ${user.departmentCode == 'DP004' ? 'selected' : ''}>구매·발주팀 (PURCHASE)</option>
-                                    <option value="DP005" ${user.departmentCode == 'DP005' ? 'selected' : ''}>정산·회계팀 (ACCOUNTING)</option>
-                                    <option value="DP006" ${user.departmentCode == 'DP006' ? 'selected' : ''}>기획·공지팀 (PLANNING)</option>
-                                    <option value="DP007" ${user.departmentCode == 'DP007' ? 'selected' : ''}>일정관리팀 (SCHEDULE)</option>
+                                    <option value="DP001" ${user.departmentCode == 'DP001' ? 'selected' : ''}>시스템관리팀</option>
+                                    <option value="DP002" ${user.departmentCode == 'DP002' ? 'selected' : ''}>지점운영팀</option>
+                                    <option value="DP003" ${user.departmentCode == 'DP003' ? 'selected' : ''}>회원관리팀</option>
+                                    <option value="DP004" ${user.departmentCode == 'DP004' ? 'selected' : ''}>구매·발주팀</option>
+                                    <option value="DP005" ${user.departmentCode == 'DP005' ? 'selected' : ''}>정산·회계팀</option>
+                                    <option value="DP006" ${user.departmentCode == 'DP006' ? 'selected' : ''}>기획·공지팀</option>
+                                    <option value="DP007" ${user.departmentCode == 'DP007' ? 'selected' : ''}>일정관리팀</option>
                                 </select>
                             </div>
 
