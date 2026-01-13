@@ -22,10 +22,6 @@
          ====================== -->
     <div class="content-wrapper p-4">
 
-        <!-- 페이지 제목 -->
-        <section class="content-header">
-            <h1>마이페이지</h1>
-        </section>
 
         <!-- ======================
              사용자 정보 카드
