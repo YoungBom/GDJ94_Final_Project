@@ -81,6 +81,8 @@
 	    u.fail_count       AS failCount,
 	    u.lock_status_code AS lockStatusCode,
 	
+	    u.use_yn           AS useYn,
+	    
 	    u.create_date      AS createDate
 	FROM users u
 	LEFT JOIN branch b
@@ -318,6 +320,18 @@
 	ORDER BY createDate DESC
 	]]>
 	</select>
+	
+	
+	<!-- 회원탈퇴 ( use_yn = 0 ) -->
+	<update id="updateUseYn">
+	UPDATE users
+	SET
+	    use_yn = 0,
+	    update_user = #{updateUser},
+	    update_date = NOW()
+	WHERE user_id = #{userId}
+	</update>
+	
 
 
 

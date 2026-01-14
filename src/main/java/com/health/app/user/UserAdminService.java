@@ -48,7 +48,7 @@ public class UserAdminService {
 
         // 1. 지점 변경
         if (!Objects.equals(before.getBranchId(), dto.getBranchId())) {
-
+        	// 혹시라도 변경전 branchId가 없을경우
             if (before.getBranchId() == null) {
 
                 userAdminMapper.insertUserBranchLog(
@@ -189,5 +189,32 @@ public class UserAdminService {
     public List<UserBranchLogDTO> getUserAllHistory(Long userId) {
         return userAdminMapper.selectUserAllHistory(userId);
     }
+    
+    // 회원탈퇴 기능
+    @Transactional
+    public void withdrawUser(Long userId,
+                             Long adminId,
+                             String reason) {
+
+        UserAdminDTO before =
+            userAdminMapper.selectUserAdminDetail(userId);
+
+        // 이미 탈퇴면 종료
+        if (!before.getUseYn()) return;
+
+        // 1. 실제 탈퇴 처리
+        userAdminMapper.updateUseYn(userId, adminId);
+
+        // 2. 이력 저장
+        userAdminMapper.insertUserHistory(
+            userId,
+            "회원 탈퇴",
+            "사용중",
+            "탈퇴",
+            reason,      // 🔥 모달 입력 사유
+            adminId
+        );
+    }
+
 
 }
