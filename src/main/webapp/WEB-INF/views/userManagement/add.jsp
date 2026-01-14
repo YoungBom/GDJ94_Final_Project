@@ -123,6 +123,18 @@
 <!-- 카카오 주소 API -->
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    document.getElementById("postNo")
+        .addEventListener("keydown", e => e.preventDefault());
+
+    document.getElementById("baseAddress")
+        .addEventListener("keydown", e => e.preventDefault());
+
+});
+</script>
+
 <script src="<c:url value='/js/address.js'/>"></script>
 
 <jsp:include page="../includes/admin_footer.jsp" />
