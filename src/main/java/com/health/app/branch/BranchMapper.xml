@@ -23,6 +23,26 @@
 	    ORDER BY b.branch_id DESC
 	</select>
 
+<!-- ADMIN은 지점관리를 눌렀을때 본인 지점만 보이게 -->
+	<select id="selectBranchById"
+	        parameterType="long"
+	        resultType="com.health.app.branch.BranchDTO">
+	    SELECT
+	        b.branch_id       AS branchId,
+	        b.branch_name     AS branchName,
+	        b.manager_name    AS managerName,
+	        b.manager_phone   AS managerPhone,
+	        b.operating_hours AS operatingHours,
+	        b.status_code     AS statusCode,
+	        cc.code_desc      AS statusName
+	    FROM branch b
+	    LEFT JOIN common_code cc
+	        ON cc.code_group = 'BRANCH_STATUS'
+	       AND cc.code = b.status_code
+	    WHERE b.branch_id = #{branchId}
+	      AND b.use_yn = TRUE
+	</select>
+
 
 	<select id="selectBranchDetail"
 	        parameterType="long"

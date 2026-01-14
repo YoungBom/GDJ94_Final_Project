@@ -22,9 +22,9 @@ public class BranchController {
     private final BranchService branchService;
 
     @GetMapping("/list")
-    public String branchList(Model model) {
+    public String branchList(Model model, @AuthenticationPrincipal LoginUser loginUser) {
 
-        List<BranchDTO> list = branchService.getBranchList();
+        List<BranchDTO> list = branchService.getBranchList(loginUser);
         model.addAttribute("branchList", list);
         model.addAttribute("pageTitle", "지점 목록");
         return "branch/list";

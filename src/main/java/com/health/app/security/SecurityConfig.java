@@ -72,9 +72,13 @@ public class SecurityConfig {
                         "/error"
                     ).permitAll()
                 
-                // ✅ 대표 / 본사인사 / 본사관리자 만 접근가능
-                .requestMatchers("/userManagement/**", "/branch/**")
-                .hasAnyRole("GRANDMASTER", "MASTER", "ADMIN")
+                // 🔥 사용자관리
+                .requestMatchers("/userManagement/**")
+                    .hasAnyRole("GRANDMASTER", "MASTER")
+
+                // 🔥 지점관리
+                .requestMatchers("/branch/**")
+                    .hasAnyRole("GRANDMASTER", "MASTER", "ADMIN")
 
                 // 나머지는 인증 필요
                 .anyRequest().authenticated()

@@ -6,6 +6,8 @@ import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.health.app.security.model.LoginUser;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -14,8 +16,23 @@ public class BranchService {
 
     private final BranchMapper branchMapper;
 
-    public List<BranchDTO> getBranchList() {
-        return branchMapper.selectBranchList();
+    public List<BranchDTO> getBranchList(LoginUser loginUser) {
+
+        String role = loginUser.getRoleCode();
+
+        // GRANDMASTER, MASTER → 전체
+        if (role.equals("RL001") || role.equals("RL002")) {
+            return branchMapper.selectBranchList();
+        }
+
+        // ADMIN → 본인 지점만
+        if (role.equals("RL003")) {
+            return branchMapper.selectBranchById(
+                loginUser.getBranchId()
+            );
+        }
+
+        return List.of(); // 접근 불가
     }
     
     // 지점 상세 조회

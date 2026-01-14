@@ -44,7 +44,7 @@
         </li>
         </sec:authorize>
 
-		<sec:authorize access="hasAnyRole('GRANDMASTER','MASTER','ADMIN')">
+		<sec:authorize access="hasAnyRole('GRANDMASTER','MASTER')">
         <li class="nav-item">
           <a href="<c:url value='/userManagement/list'/>" class="nav-link">
             <i class="nav-icon bi bi-people"></i>
