@@ -57,18 +57,31 @@ public class NoticeController {
     // 사용자 목록
     @GetMapping
     public String list(@RequestParam(required = false) Long branchId,
+                       @RequestParam(defaultValue = "1") int page,
+                       @RequestParam(defaultValue = "10") int size,
                        @AuthenticationPrincipal LoginUser user,
                        Model model) {
 
         Long effectiveBranchId = branchId;
 
-        // 파라미터가 없으면 로그인 사용자 지점으로 보정 (approval 쿼리 재사용)
+        // 사용자 목록에서는 기본으로 내 지점 적용(approval 재사용)
         if (effectiveBranchId == null && user != null) {
             effectiveBranchId = approvalMapper.selectBranchIdByUserId(user.getUserId());
         }
 
-        model.addAttribute("list", noticeService.list(effectiveBranchId));
+        int offset = (page - 1) * size;
+
+        model.addAttribute("list", noticeService.listPaged(effectiveBranchId, size, offset));
+        long total = noticeService.countForUserList(effectiveBranchId);
+
+        int totalPages = (int) Math.ceil((double) total / size);
+
         model.addAttribute("branchId", effectiveBranchId);
+        model.addAttribute("page", page);
+        model.addAttribute("size", size);
+        model.addAttribute("total", total);
+        model.addAttribute("totalPages", totalPages);
+
         model.addAttribute("isAdmin", isAdmin(user));
         model.addAttribute("pageTitle", "공지사항");
         putCodeMaps(model);
@@ -78,16 +91,40 @@ public class NoticeController {
 
 
 
+
     // 관리자 목록
     @GetMapping("/admin")
-    public String adminList(@AuthenticationPrincipal LoginUser user, Model model) {
-        if (!isAdmin(user)) return "redirect:/notices";
-        model.addAttribute("list", noticeService.adminList());
-        model.addAttribute("isAdmin", true);
-        model.addAttribute("pageTitle", "공지사항");
+    public String adminList(@RequestParam(required = false) Long branchId,
+                            @RequestParam(required = false) String status,
+                            @RequestParam(required = false) String targetType,
+                            @RequestParam(defaultValue = "1") int page,
+                            @RequestParam(defaultValue = "10") int size,
+                            @AuthenticationPrincipal LoginUser user,
+                            Model model) {
+
+        int offset = (page - 1) * size;
+
+        model.addAttribute("list", noticeService.adminListPaged(branchId, status, targetType, size, offset));
+        long total = noticeService.adminCount(branchId, status, targetType);
+
+        int totalPages = (int) Math.ceil((double) total / size);
+
+        model.addAttribute("branchId", branchId);
+        model.addAttribute("status", status);
+        model.addAttribute("targetType", targetType);
+
+        model.addAttribute("page", page);
+        model.addAttribute("size", size);
+        model.addAttribute("total", total);
+        model.addAttribute("totalPages", totalPages);
+
+        model.addAttribute("isAdmin", isAdmin(user));
+        model.addAttribute("pageTitle", "공지사항(관리자)");
         putCodeMaps(model);
+
         return "notices/admin_list";
     }
+
 
     // 상세
     @GetMapping("/{noticeId}")

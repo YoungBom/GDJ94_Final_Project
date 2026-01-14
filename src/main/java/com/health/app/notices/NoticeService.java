@@ -190,4 +190,20 @@ public class NoticeService {
             n.setPublishEndTimeOnly(null);
         }
     }
+    public List<NoticeDTO> listPaged(Long branchId, int limit, int offset) {
+        return noticeMapper.selectListPaged(branchId, limit, offset);
+    }
+
+    public long countForUserList(Long branchId) {
+        return noticeMapper.countUserList(branchId);
+    }
+
+    public List<NoticeDTO> adminListPaged(Long branchId, String status, String targetType, int limit, int offset) {
+        return noticeMapper.selectAdminListPaged(branchId, status, targetType, limit, offset);
+    }
+
+    public long adminCount(Long branchId, String status, String targetType) {
+        return noticeMapper.countAdminList(branchId, status, targetType);
+    }
+
 }

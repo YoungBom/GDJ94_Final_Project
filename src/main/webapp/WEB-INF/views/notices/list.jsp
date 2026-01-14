@@ -29,12 +29,11 @@
             <table class="table table-bordered table-hover align-middle">
               <thead>
                 <tr>
-                  <th style="width:80px;">ID</th>
+                  <th style="width:50px;" class="text-center">ID</th>
                   <th>제목</th>
-                  <th style="width:120px;">유형</th>
-                  <th style="width:120px;">대상</th>
-                  <th style="width:120px;">상태</th>
-                  <th style="width:90px;">조회수</th>
+                  <th style="width:110px;">유형</th>
+                  <th style="width:120px;">작성자</th>
+                  <th style="width:90px;" class="text-center">조회수</th>
                   <th style="width:170px;">작성일</th>
                   <th style="width:220px;">게시기간</th>
                 </tr>
@@ -43,7 +42,7 @@
               <tbody>
                 <c:forEach items="${list}" var="n">
                   <tr>
-                    <td><c:out value="${n.noticeId}" /></td>
+                    <td class="text-center"><c:out value="${n.noticeId}" /></td>
 
                     <td>
                       <c:if test="${n.isPinned}">
@@ -53,12 +52,10 @@
                         <c:out value="${n.title}" />
                       </a>
                     </td>
+					<td><c:out value="${noticeTypeMap[n.noticeType]}" /></td>
+                    <td><c:out value="${n.writerName}" /></td>
 
-                    <td><c:out value="${noticeTypeMap[n.noticeType]}" /></td>
-                    <td><c:out value="${targetTypeMap[n.targetType]}" /></td>
-                    <td><c:out value="${statusMap[n.status]}" /></td>
-
-                    <td class="text-end"><c:out value="${n.viewCount}" /></td>
+                    <td class="text-center"><c:out value="${n.viewCount}" /></td>
 
                     <td>
 					  <c:choose>
@@ -71,39 +68,56 @@
 
 
                     <td>
-                      <c:choose>
-                        <c:when test="${empty n.publishStartDate && empty n.publishEndDate}">
-                          <div>시작: 즉시</div>
-                          <div>종료: 무기한</div>
-                        </c:when>
-                        <c:otherwise>
-                          <div>
-                            시작:
-                            <c:choose>
-                              <c:when test="${not empty n.publishStartDateOnly}">
-								  <c:out value="${n.publishStartDateOnly}" /> <c:out value="${n.publishStartTimeOnly}" />
-								</c:when>
-								<c:when test="${not empty n.publishStartDate}">
-								  <c:out value="${n.publishStartDate}" />
-								</c:when>
-                              <c:otherwise>즉시</c:otherwise>
-                            </c:choose>
-                          </div>
-                          <div>
-                            종료:
-                            <c:choose>
-                              <c:when test="${not empty n.publishEndDateOnly}">
-								  <c:out value="${n.publishEndDateOnly}" /> <c:out value="${n.publishEndTimeOnly}" />
-								</c:when>
-								<c:when test="${not empty n.publishEndDate}">
-								  <c:out value="${n.publishEndDate}" />
-								</c:when>
-                              <c:otherwise>무기한</c:otherwise>
-                            </c:choose>
-                          </div>
-                        </c:otherwise>
-                      </c:choose>
-                    </td>
+					  <c:choose>
+					    <c:when test="${empty n.publishStartDate && empty n.publishEndDate}">
+					      <div class="small text-muted">시작: <span class="text-dark">즉시</span></div>
+					      <div class="small text-muted">종료: <span class="text-dark">무기한</span></div>
+					    </c:when>
+					
+					    <c:otherwise>
+					      <div class="small text-muted">
+					        시작:
+					        <span class="text-dark">
+					          <c:choose>
+					            <c:when test="${not empty n.publishStartDateOnly}">
+					              <c:out value="${n.publishStartDateOnly}" />
+					              <c:if test="${not empty n.publishStartTimeOnly}">
+					                <c:out value=" ${n.publishStartTimeOnly}" />
+					              </c:if>
+					            </c:when>
+					
+					            <c:when test="${not empty n.publishStartDate}">
+					              <c:out value="${fn:replace(n.publishStartDate, 'T', ' ')}" />
+					            </c:when>
+					
+					            <c:otherwise>즉시</c:otherwise>
+					          </c:choose>
+					        </span>
+					      </div>
+					
+					      <div class="small text-muted">
+					        종료:
+					        <span class="text-dark">
+					          <c:choose>
+					            <c:when test="${not empty n.publishEndDateOnly}">
+					              <c:out value="${n.publishEndDateOnly}" />
+					              <c:if test="${not empty n.publishEndTimeOnly}">
+					                <c:out value=" ${n.publishEndTimeOnly}" />
+					              </c:if>
+					            </c:when>
+					
+					            <c:when test="${not empty n.publishEndDate}">
+					              <c:out value="${fn:replace(n.publishEndDate, 'T', ' ')}" />
+					            </c:when>
+					
+					            <c:otherwise>무기한</c:otherwise>
+					          </c:choose>
+					        </span>
+					      </div>
+					    </c:otherwise>
+					  </c:choose>
+					</td>
+
 
                   </tr>
                 </c:forEach>
@@ -116,5 +130,44 @@
     </div>
   </div>
 </div>
+<c:if test="${totalPages > 1}">
+  <nav aria-label="공지사항 페이지네이션" class="mt-3">
+    <ul class="pagination justify-content-center">
+
+      <!-- Prev -->
+      <li class="page-item ${page <= 1 ? 'disabled' : ''}">
+        <a class="page-link"
+           href="<c:url value='/notices'>
+                    <c:param name='branchId' value='${branchId}'/>
+                    <c:param name='page' value='${page-1}'/>
+                    <c:param name='size' value='${size}'/>
+                 </c:url>">이전</a>
+      </li>
+
+      <!-- Pages -->
+      <c:forEach begin="1" end="${totalPages}" var="p">
+        <li class="page-item ${p == page ? 'active' : ''}">
+          <a class="page-link"
+             href="<c:url value='/notices'>
+                      <c:param name='branchId' value='${branchId}'/>
+                      <c:param name='page' value='${p}'/>
+                      <c:param name='size' value='${size}'/>
+                   </c:url>">${p}</a>
+        </li>
+      </c:forEach>
+
+      <!-- Next -->
+      <li class="page-item ${page >= totalPages ? 'disabled' : ''}">
+        <a class="page-link"
+           href="<c:url value='/notices'>
+                    <c:param name='branchId' value='${branchId}'/>
+                    <c:param name='page' value='${page+1}'/>
+                    <c:param name='size' value='${size}'/>
+                 </c:url>">다음</a>
+      </li>
+
+    </ul>
+  </nav>
+</c:if>
 
 <jsp:include page="../includes/admin_footer.jsp" />
