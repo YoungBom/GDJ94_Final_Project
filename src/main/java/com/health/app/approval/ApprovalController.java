@@ -48,12 +48,11 @@ public class ApprovalController {
                                Model model) {
 
         model.addAttribute("branches", approvalService.getBranches());
-
         if (docVerId != null) {
             ApprovalDraftDTO draft = approvalService.getDraftForEdit(docVerId, loginUser.getUserId());
             model.addAttribute("draft", draft);
             model.addAttribute("mode", "edit");
-            model.addAttribute("pageTitle", "전자결재");
+            model.addAttribute("pageTitle", "전자수정");
             model.addAttribute("products",
                     draft.getBranchId() != null
                             ? approvalService.getProductsByBranch(draft.getBranchId())
@@ -61,6 +60,7 @@ public class ApprovalController {
         } else {
             model.addAttribute("mode", "new");
             model.addAttribute("products", java.util.Collections.emptyList());
+            model.addAttribute("pageTitle", "전자작성");
         }
 
         return "approval/form";
