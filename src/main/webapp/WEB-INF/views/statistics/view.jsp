@@ -51,9 +51,25 @@
         </div>
 
         <!-- 요약 카드 -->
+        <style>
+            /* 대시보드 요약 카드 높이 통일 */
+            .summary-card .small-box {
+                height: 155px;
+                margin-bottom: 0;
+            }
+            .summary-card .small-box .inner {
+                padding: 15px;
+            }
+            .summary-card .card-description {
+                font-size: 0.7rem;
+                color: #6c757d;
+                margin-top: 0.5rem;
+                min-height: 2.5rem;
+            }
+        </style>
         <div class="row mb-4">
             <!-- 총 매출 -->
-            <div class="col-lg-3 col-6">
+            <div class="col-lg-3 col-6 summary-card">
                 <div class="small-box text-bg-primary">
                     <div class="inner">
                         <h3 id="totalSales">-</h3>
@@ -64,10 +80,11 @@
                         <span id="salesGrowth" class="ms-2">-</span>
                     </div>
                 </div>
+                <div class="card-description">&nbsp;</div>
             </div>
 
             <!-- 총 지출 -->
-            <div class="col-lg-3 col-6">
+            <div class="col-lg-3 col-6 summary-card">
                 <div class="small-box text-bg-danger">
                     <div class="inner">
                         <h3 id="totalExpenses">-</h3>
@@ -78,10 +95,11 @@
                         <span id="expensesGrowth" class="ms-2">-</span>
                     </div>
                 </div>
+                <div class="card-description">&nbsp;</div>
             </div>
 
             <!-- 순이익 -->
-            <div class="col-lg-3 col-6">
+            <div class="col-lg-3 col-6 summary-card">
                 <div class="small-box text-bg-success">
                     <div class="inner">
                         <h3 id="netProfit">-</h3>
@@ -95,14 +113,14 @@
                         <span id="profitGrowth" class="ms-2">-</span>
                     </div>
                 </div>
-                <small class="text-muted d-block mt-1" style="font-size: 0.7rem;">
+                <div class="card-description">
                     ※ 계산기준: (매출 - 지출) - 법인세<br>
                     ※ 법인세율: 2억 이하 9%, 2억 초과 19%
-                </small>
+                </div>
             </div>
 
             <!-- 수익률 -->
-            <div class="col-lg-3 col-6">
+            <div class="col-lg-3 col-6 summary-card">
                 <div class="small-box text-bg-warning">
                     <div class="inner">
                         <h3 id="profitRate" class="text-white">-</h3>
@@ -112,6 +130,9 @@
                         <i class="bi bi-percent"></i>
                         <span id="rateChange" class="ms-2">-</span>
                     </div>
+                </div>
+                <div class="card-description">
+                    ※ 수익률 = (순이익 / 매출) × 100
                 </div>
             </div>
         </div>
@@ -295,14 +316,15 @@ async function loadDashboardData() {
 
     console.log('[loadDashboardData] 조회 조건:', { startDate, endDate, branchId });
 
-    // 전월 기간 계산 (증감률 비교용)
+    // 작년 동기 기간 계산 (증감률 비교용)
     const currentStart = new Date(startDate);
-    const prevMonthEnd = new Date(currentStart.getFullYear(), currentStart.getMonth(), 0); // 전월 마지막날
-    const prevMonthStart = new Date(prevMonthEnd.getFullYear(), prevMonthEnd.getMonth(), 1); // 전월 첫날
-    const prevStartDate = formatDate(prevMonthStart);
-    const prevEndDate = formatDate(prevMonthEnd);
+    const currentEnd = new Date(endDate);
+    const lastYearStart = new Date(currentStart.getFullYear() - 1, currentStart.getMonth(), currentStart.getDate());
+    const lastYearEnd = new Date(currentEnd.getFullYear() - 1, currentEnd.getMonth(), currentEnd.getDate());
+    const prevStartDate = formatDate(lastYearStart);
+    const prevEndDate = formatDate(lastYearEnd);
 
-    console.log('[loadDashboardData] 전월 기간:', { prevStartDate, prevEndDate });
+    console.log('[loadDashboardData] 작년 동기 기간:', { prevStartDate, prevEndDate });
 
     try {
         // 기본 데이터 요청 목록
@@ -311,7 +333,7 @@ async function loadDashboardData() {
             fetch('/statistics/api/sales/by-period?startDate=' + startDate + '&endDate=' + endDate + '&branchId=' + branchId + '&groupBy=monthly').then(r => r.json()),
             fetch('/statistics/api/expenses/by-period?startDate=' + startDate + '&endDate=' + endDate + '&branchId=' + branchId + '&groupBy=monthly').then(r => r.json()),
             fetch('/statistics/api/comparison?startDate=' + startDate + '&endDate=' + endDate + '&branchId=' + branchId + '&groupBy=monthly').then(r => r.json()),
-            // 전월 데이터 (증감률 계산용)
+            // 작년 동기 데이터 (증감률 계산용)
             fetch('/statistics/api/sales/by-period?startDate=' + prevStartDate + '&endDate=' + prevEndDate + '&branchId=' + branchId + '&groupBy=monthly').then(r => r.json()),
             fetch('/statistics/api/expenses/by-period?startDate=' + prevStartDate + '&endDate=' + prevEndDate + '&branchId=' + branchId + '&groupBy=monthly').then(r => r.json())
         ];
@@ -371,12 +393,12 @@ function updateSummaryCards(salesData, expensesData, prevSalesData, prevExpenses
     const netProfit = grossProfit - corporateTax;  // 세후 순이익 (추정)
     const profitRate = totalSales > 0 ? ((netProfit / totalSales) * 100) : 0;
 
-    // 전월 집계 (NaN 방지)
+    // 작년 동기 집계 (NaN 방지)
     const prevTotalSales = (prevSalesData || []).reduce((sum, item) => sum + safeNumber(item.totalAmount), 0);
     const prevTotalExpenses = (prevExpensesData || []).reduce((sum, item) => sum + safeNumber(item.totalAmount), 0);
-    const prevGrossProfit = prevTotalSales - prevTotalExpenses;  // 전월 세전 순이익
+    const prevGrossProfit = prevTotalSales - prevTotalExpenses;  // 작년 동기 세전 순이익
     const prevCorporateTax = calculateCorporateTax(prevGrossProfit);
-    const prevNetProfit = prevGrossProfit - prevCorporateTax;  // 전월 세후 순이익
+    const prevNetProfit = prevGrossProfit - prevCorporateTax;  // 작년 동기 세후 순이익
     const prevProfitRate = prevTotalSales > 0 ? ((prevNetProfit / prevTotalSales) * 100) : 0;
 
     // 증감률 계산
@@ -431,7 +453,7 @@ function calculateCorporateTax(profit) {
 function calculateGrowthRate(current, previous) {
     if (previous === 0) {
         if (current === 0) return 0;
-        return 100; // 전월 0원에서 현재 값이 있으면 100% 증가로 표시
+        return 100; // 작년 0원에서 현재 값이 있으면 100% 증가로 표시
     }
     return ((current - previous) / previous) * 100;
 }
@@ -439,25 +461,25 @@ function calculateGrowthRate(current, previous) {
 // 증감률 포맷팅 함수
 function formatGrowthRate(rate, label, isExpense = false) {
     if (rate === 0) {
-        return '전월 대비 <span class="text-white-50">0%</span>';
+        return '작년 대비 <span class="text-white-50">0%</span>';
     }
 
     const icon = rate > 0 ? '↑' : '↓';
     const absRate = Math.abs(rate).toFixed(1);
 
-    return '전월 대비 <span class="text-white">' + icon + ' ' + absRate + '%</span>';
+    return '작년 대비 <span class="text-white">' + icon + ' ' + absRate + '%</span>';
 }
 
 // 수익률 변화 포맷팅 함수
 function formatRateChange(change) {
     if (change === 0) {
-        return '전월 대비 <span class="text-white-50">0%p</span>';
+        return '작년 대비 <span class="text-white-50">0%p</span>';
     }
 
     const icon = change > 0 ? '↑' : '↓';
     const absChange = Math.abs(change).toFixed(1);
 
-    return '전월 대비 <span class="text-white">' + icon + ' ' + absChange + '%p</span>';
+    return '작년 대비 <span class="text-white">' + icon + ' ' + absChange + '%p</span>';
 }
 
 // 매출/지출 추이 차트 초기화
