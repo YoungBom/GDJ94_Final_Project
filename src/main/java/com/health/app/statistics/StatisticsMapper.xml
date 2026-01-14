@@ -266,32 +266,35 @@
     </select>
 
     <!-- =========================================================
-         ST-007: 정산 대상 매출 조회 (미정산 매출)
+         ST-007: 정산 대상 매출 조회 (전자결재 매출결의서 기준)
        ========================================================= -->
     <select id="selectUnsettledSales" parameterType="com.health.app.statistics.StatisticsSearchDto"
             resultType="com.health.app.statistics.UnsettledSaleDto">
         SELECT
-            s.sale_id AS saleId,
-            s.sale_no AS saleNo,
-            s.branch_id AS branchId,
+            ad.doc_id AS saleId,
+            ad.doc_no AS saleNo,
+            ade.ext_no1 AS branchId,
             b.branch_name AS branchName,
-            s.sold_at AS soldAt,
-            s.category_code AS categoryCode,
-            s.total_amount AS totalAmount,
-            s.status_code AS statusCode,
-            CASE WHEN ssm.settlement_id IS NOT NULL THEN TRUE ELSE FALSE END AS settled,
-            ssm.settlement_id AS settlementId
-        FROM sales s
-        JOIN branch b ON b.branch_id = s.branch_id
-        LEFT JOIN settlement_sale_map ssm ON ssm.sale_id = s.sale_id AND ssm.use_yn = 1
-        WHERE s.use_yn = 1
-          AND b.use_yn = 1
-          AND s.status_code = 'COMPLETED'
-          AND DATE(s.sold_at) BETWEEN #{startDate} AND #{endDate}
+            ad.completed_at AS soldAt,
+            'SALES_DOC' AS categoryCode,
+            ade.ext_no2 AS totalAmount,
+            ad.status_code AS statusCode,
+            FALSE AS settled,
+            NULL AS settlementId
+        FROM approval_documents ad
+        JOIN approval_document_versions adv
+            ON adv.doc_ver_id = ad.current_doc_ver_id AND adv.use_yn = 1
+        LEFT JOIN approval_document_ext ade
+            ON ade.doc_ver_id = adv.doc_ver_id AND ade.use_yn = 1
+        LEFT JOIN branch b ON b.branch_id = ade.ext_no1
+        WHERE ad.use_yn = 1
+          AND ad.form_code = 'DF003'
+          AND ad.status_code = 'AS003'
+          AND DATE(ad.completed_at) BETWEEN #{startDate} AND #{endDate}
         <if test="branchId != null and branchId != 0">
-          AND s.branch_id = #{branchId}
+          AND ade.ext_no1 = #{branchId}
         </if>
-        ORDER BY s.sold_at DESC, s.sale_id DESC
+        ORDER BY ad.completed_at DESC, ad.doc_id DESC
     </select>
 
     <!-- =========================================================

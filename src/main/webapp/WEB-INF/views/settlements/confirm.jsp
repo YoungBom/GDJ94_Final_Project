@@ -324,9 +324,10 @@ async function createSettlement() {
     }
 }
 
-// 카테고리 이름
+// 카테고리 이름 (전자결재 매출결의서)
 function getCategoryName(code) {
     const categories = {
+        'SALES_DOC': '매출결의서',
         'MEMBERSHIP': '회원권',
         'PT': 'PT',
         'GOODS': '용품',
@@ -335,9 +336,14 @@ function getCategoryName(code) {
     return categories[code] || code;
 }
 
-// 상태 이름
+// 상태 이름 (전자결재 상태)
 function getStatusName(code) {
     const statuses = {
+        'AS001': '임시저장',
+        'AS002': '진행중',
+        'AS003': '결재완료',
+        'AS004': '반려',
+        'AS005': '취소',
         'PENDING': '대기',
         'CONFIRMED': '확정',
         'CANCELLED': '취소'
@@ -345,9 +351,14 @@ function getStatusName(code) {
     return statuses[code] || code;
 }
 
-// 상태 뱃지 클래스
+// 상태 뱃지 클래스 (전자결재 상태)
 function getStatusBadgeClass(code) {
     const classes = {
+        'AS001': 'bg-secondary',
+        'AS002': 'bg-warning',
+        'AS003': 'bg-success',
+        'AS004': 'bg-danger',
+        'AS005': 'bg-secondary',
         'PENDING': 'bg-warning',
         'CONFIRMED': 'bg-success',
         'CANCELLED': 'bg-secondary'

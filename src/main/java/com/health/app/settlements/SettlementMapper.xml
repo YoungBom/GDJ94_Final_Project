@@ -115,8 +115,17 @@
             st.settled_at       AS settledAt,
             st.settled_by       AS settledBy,
             sb.name             AS settledByName,
-            (SELECT COUNT(*) FROM settlement_sale_map WHERE settlement_id = st.settlement_id AND use_yn = 1) AS salesCount,
-            (SELECT COUNT(*) FROM settlement_expense_map WHERE settlement_id = st.settlement_id AND use_yn = 1) AS expenseCount,
+            (SELECT COUNT(*) FROM approval_documents ad
+                JOIN approval_document_versions adv ON adv.doc_ver_id = ad.current_doc_ver_id AND adv.use_yn = 1
+                LEFT JOIN approval_document_ext ade ON ade.doc_ver_id = adv.doc_ver_id AND ade.use_yn = 1
+                WHERE ad.use_yn = 1
+                AND ad.form_code = 'DF003'
+                AND ad.status_code = 'AS003'
+                AND DATE(ad.completed_at) BETWEEN st.from_date AND st.to_date
+                AND (st.branch_id IS NULL OR ade.ext_no1 = st.branch_id)) AS salesCount,
+            (SELECT COUNT(*) FROM expenses e WHERE e.use_yn = 1 AND e.settlement_flag = TRUE
+                AND DATE(e.expense_at) BETWEEN st.from_date AND st.to_date
+                AND (st.branch_id IS NULL OR e.branch_id = st.branch_id)) AS expenseCount,
             st.create_user      AS createUser,
             cu.name             AS createUserName,
             st.create_date      AS createDate,
