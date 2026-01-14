@@ -196,7 +196,7 @@ const userPermissions = {
 };
 
 // 페이지 로드 시 초기화
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     // 기본 날짜 설정 (최근 6개월)
     const today = new Date();
     const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 6, 1);
@@ -206,22 +206,16 @@ document.addEventListener('DOMContentLoaded', function() {
     startDateInput.value = formatDate(sixMonthsAgo);
     endDateInput.value = formatDate(today);
 
-    // 지점 목록 로드
-    loadBranchOptions();
+    // 지점 목록 로드 (await로 완료 대기)
+    await loadBranchOptions();
 
     // 차트 초기화
     initCharts();
 
-    // ✅ 날짜 설정 후 초기 데이터 자동 로드
-    // requestAnimationFrame으로 DOM 업데이트 완료 후 실행
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            // 날짜 값이 제대로 설정되었는지 확인 후 로드
-            if (startDateInput.value && endDateInput.value) {
-                loadDashboardData();
-            }
-        });
-    });
+    // ✅ 지점 옵션 로드 완료 후 초기 데이터 로드
+    if (startDateInput.value && endDateInput.value) {
+        loadDashboardData();
+    }
 
     // 폼 제출 이벤트
     document.getElementById('filterForm').addEventListener('submit', function(e) {

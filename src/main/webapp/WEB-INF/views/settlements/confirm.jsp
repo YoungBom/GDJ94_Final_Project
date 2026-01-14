@@ -146,15 +146,18 @@ const userPermissions = {
 };
 
 // 페이지 로드
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     // 기본 날짜 설정 (이번 달)
     const today = new Date();
     const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
     document.getElementById('startDate').value = formatDate(firstDay);
     document.getElementById('endDate').value = formatDate(today);
 
-    // 지점 목록 로드
-    loadBranchOptions();
+    // 지점 목록 로드 - await로 완료 대기
+    await loadBranchOptions();
+
+    // 초기 데이터 로드
+    loadUnsettledSales();
 
     // 폼 제출 이벤트
     document.getElementById('filterForm').addEventListener('submit', function(e) {

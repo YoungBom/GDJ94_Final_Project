@@ -146,9 +146,9 @@ const userPermissions = {
 };
 
 // 페이지 로드
-document.addEventListener('DOMContentLoaded', function() {
-    // 지점 목록 로드
-    loadBranchOptions();
+document.addEventListener('DOMContentLoaded', async function() {
+    // 지점 목록 로드 - await로 완료 대기
+    await loadBranchOptions();
 
     // 검색 폼 이벤트
     document.getElementById('searchForm').addEventListener('submit', function(e) {

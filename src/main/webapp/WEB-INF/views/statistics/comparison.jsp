@@ -152,15 +152,15 @@ const userPermissions = {
 };
 
 // 페이지 로드 시 초기화
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     // 기본 날짜 설정 (최근 6개월)
     const today = new Date();
     const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 6, 1);
     document.getElementById('startDate').value = formatDate(sixMonthsAgo);
     document.getElementById('endDate').value = formatDate(today);
 
-    // 지점 목록 로드
-    loadBranchOptions();
+    // 지점 목록 로드 - await로 완료 대기
+    await loadBranchOptions();
 
     // 차트 초기화
     initChart();
