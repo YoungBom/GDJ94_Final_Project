@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core"%>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions"%>
 
 <jsp:include page="../includes/admin_header.jsp" />
 
@@ -60,14 +61,14 @@
 
                     <td class="text-end"><c:out value="${n.viewCount}" /></td>
 
-                    <td>
-                      <c:choose>
-                        <c:when test="${not empty n.createDate}">
-                          <c:out value="${n.createDate}" />
-                        </c:when>
-                        <c:otherwise>-</c:otherwise>
-                      </c:choose>
-                    </td>
+                     <td>
+					  <c:choose>
+					    <c:when test="${not empty n.createDate}">
+					      <c:out value="${fn:replace(n.createDate, 'T', ' ')}" />
+					    </c:when>
+					    <c:otherwise>-</c:otherwise>
+					  </c:choose>
+					</td>
 
                     <td>
                       <c:choose>
@@ -79,18 +80,24 @@
                           <div>
                             시작:
                             <c:choose>
-                              <c:when test="${not empty n.publishStartDate}">
-                                <c:out value="${n.publishStartDate}" />
-                              </c:when>
+                              <c:when test="${not empty n.publishStartDateOnly}">
+								  <c:out value="${n.publishStartDateOnly}" /> <c:out value="${n.publishStartTimeOnly}" />
+								</c:when>
+								<c:when test="${not empty n.publishStartDate}">
+								  <c:out value="${n.publishStartDate}" />
+								</c:when>
                               <c:otherwise>즉시</c:otherwise>
                             </c:choose>
                           </div>
                           <div>
                             종료:
                             <c:choose>
-                              <c:when test="${not empty n.publishEndDate}">
-                                <c:out value="${n.publishEndDate}" />
-                              </c:when>
+                              <c:when test="${not empty n.publishEndDateOnly}">
+								  <c:out value="${n.publishEndDateOnly}" /> <c:out value="${n.publishEndTimeOnly}" />
+								</c:when>
+								<c:when test="${not empty n.publishEndDate}">
+								  <c:out value="${n.publishEndDate}" />
+								</c:when>
                               <c:otherwise>무기한</c:otherwise>
                             </c:choose>
                           </div>

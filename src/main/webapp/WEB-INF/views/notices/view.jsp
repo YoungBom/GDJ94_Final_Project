@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core"%>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions"%>
 
 <jsp:include page="../includes/admin_header.jsp" />
 
@@ -65,49 +66,63 @@
           </div>
 
           <div class="col-md-3">
-            <div class="border rounded p-3 h-100">
-              <div class="text-muted small mb-1">작성일</div>
-              <div class="fw-semibold">
-                <c:choose>
-                  <c:when test="${not empty notice.createDate}">
-                    <c:out value="${notice.createDate}" />
-                  </c:when>
-                  <c:otherwise>-</c:otherwise>
-                </c:choose>
-              </div>
-            </div>
-          </div>
-        </div>
+			  <div class="border rounded p-3 h-100">
+			    <div class="text-muted small mb-1">작성일</div>
+			    <div class="fw-semibold">
+			      <c:choose>
+			        <c:when test="${not empty notice.createDate}">
+			          <c:out value="${fn:replace(notice.createDate, 'T', ' ')}" />
+			        </c:when>
+			        <c:otherwise>-</c:otherwise>
+			      </c:choose>
+			    </div>
+			  </div>
+			</div>
+
 
         <div class="border rounded p-3 mb-4">
-          <div class="text-muted small mb-2">게시기간</div>
-          <c:choose>
-            <c:when test="${empty notice.publishStartDate && empty notice.publishEndDate}">
-              <div>시작: 즉시</div>
-              <div>종료: 무기한</div>
-            </c:when>
-            <c:otherwise>
-              <div>
-                시작:
-                <c:choose>
-                  <c:when test="${not empty notice.publishStartDate}">
-                    <c:out value="${notice.publishStartDate}" />
-                  </c:when>
-                  <c:otherwise>즉시</c:otherwise>
-                </c:choose>
-              </div>
-              <div>
-                종료:
-                <c:choose>
-                  <c:when test="${not empty notice.publishEndDate}">
-                    <c:out value="${notice.publishEndDate}" />
-                  </c:when>
-                  <c:otherwise>무기한</c:otherwise>
-                </c:choose>
-              </div>
-            </c:otherwise>
-          </c:choose>
-        </div>
+		  <div class="text-muted small mb-2">게시기간</div>
+		
+		  <c:choose>
+		    <c:when test="${empty notice.publishStartDate && empty notice.publishEndDate}">
+		      <div>시작: 즉시</div>
+		      <div>종료: 무기한</div>
+		    </c:when>
+		
+		    <c:otherwise>
+		      <div>
+		        시작:
+		        <c:choose>
+		          <c:when test="${not empty notice.publishStartDateOnly}">
+		            <c:out value="${notice.publishStartDateOnly}" /> <c:out value="${notice.publishStartTimeOnly}" />
+		          </c:when>
+		
+		          <c:when test="${not empty notice.publishStartDate}">
+		            <c:out value="${fn:replace(notice.publishStartDate, 'T', ' ')}" />
+		          </c:when>
+		
+		          <c:otherwise>즉시</c:otherwise>
+		        </c:choose>
+		      </div>
+		
+		      <div>
+		        종료:
+		        <c:choose>
+		          <c:when test="${not empty notice.publishEndDateOnly}">
+		            <c:out value="${notice.publishEndDateOnly}" /> <c:out value="${notice.publishEndTimeOnly}" />
+		          </c:when>
+		
+		          <c:when test="${not empty notice.publishEndDate}">
+		            <c:out value="${fn:replace(notice.publishEndDate, 'T', ' ')}" />
+		          </c:when>
+		
+		          <c:otherwise>무기한</c:otherwise>
+		        </c:choose>
+		      </div>
+		    </c:otherwise>
+		  </c:choose>
+		</div>
+
 
         <c:if test="${notice.targetType eq 'TT002'}">
           <div class="border rounded p-3 mb-4">
