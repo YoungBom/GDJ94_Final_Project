@@ -45,27 +45,38 @@ public class ApprovalController {
     @GetMapping("form")
     public String approvalForm(@AuthenticationPrincipal LoginUser loginUser,
                                @RequestParam(required = false) Long docVerId,
+                               @RequestParam(required = false, defaultValue = "approval") String entry,
                                Model model) {
 
         model.addAttribute("branches", approvalService.getBranches());
+
+        // 수정 모드면 기존 문서 유형이 고정이므로 entry는 의미 없게 처리(강제 approval로 통일)
         if (docVerId != null) {
             ApprovalDraftDTO draft = approvalService.getDraftForEdit(docVerId, loginUser.getUserId());
             model.addAttribute("draft", draft);
             model.addAttribute("mode", "edit");
             model.addAttribute("pageTitle", "전자수정");
+
             model.addAttribute("products",
                     draft.getBranchId() != null
                             ? approvalService.getProductsByBranch(draft.getBranchId())
                             : java.util.Collections.emptyList());
+
+            model.addAttribute("entry", "approval"); // edit에서는 고정
+
         } else {
             model.addAttribute("mode", "new");
-            model.addAttribute("products", approvalService.getProductsByBranch(null)); // draft 사용 금지
+            model.addAttribute("products", approvalService.getProductsByBranch(null));
             model.addAttribute("pageTitle", "전자작성");
 
+            // new에서는 entry를 그대로 전달 (approval / buy)
+            model.addAttribute("entry", entry);
         }
+
         model.addAttribute("handoverCandidates", approvalService.getHandoverCandidates(loginUser.getUserId()));
         return "approval/form";
     }
+
 
 
     // 서명 페이지
