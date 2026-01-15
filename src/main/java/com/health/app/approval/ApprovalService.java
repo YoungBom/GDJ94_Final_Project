@@ -116,7 +116,7 @@ public class ApprovalService {
         dto.setTitle(Optional.ofNullable(dto.getTitle()).orElse(""));
         dto.setBody(Optional.ofNullable(dto.getBody()).orElse(""));
         String bodyHtml = dto.getBody();
-        String plain = Jsoup.parse(bodyHtml == null ? "" : bodyHtml).text(); // 태그 제거
+        String plain = Jsoup.parse(bodyHtml == null ? "" : bodyHtml).text();
         dto.setExtTxt2(plain);
         approvalMapper.insertDocument(dto);
         approvalMapper.insertDocumentVersion(dto);
@@ -144,7 +144,9 @@ public class ApprovalService {
 
         dto.setTitle(Optional.ofNullable(dto.getTitle()).orElse(""));
         dto.setBody(Optional.ofNullable(dto.getBody()).orElse(""));
-
+        String bodyHtml = dto.getBody();
+        String plain = Jsoup.parse(bodyHtml == null ? "" : bodyHtml).text();
+        dto.setExtTxt2(plain);
         approvalMapper.updateDocumentVersionByDocVerId(dto);
 
         if (approvalMapper.updateDocumentExtByDocVerId(dto) == 0) {
