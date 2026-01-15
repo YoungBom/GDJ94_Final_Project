@@ -32,7 +32,7 @@ public class UserAdminController {
 
         List<UserAdminDTO> users = userAdminService.getUserAdminList();
         model.addAttribute("users", users);
-        model.addAttribute("pageTitle", "사용자 목록");
+        model.addAttribute("pageTitle", "사용자 관리");
         
         return "userManagement/list";
     }
@@ -44,7 +44,7 @@ public class UserAdminController {
         UserAdminDTO user = userAdminService.getUserAdminDetail(userId);
 
         model.addAttribute("user", user);
-        model.addAttribute("pageTitle", "사용자 상세 / 변경 이력");
+        model.addAttribute("pageTitle", "사용자 상세 · 변경 이력");
         
         model.addAttribute("historyList",
                 userAdminService.getUserAllHistory(userId));

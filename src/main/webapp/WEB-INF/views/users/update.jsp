@@ -5,6 +5,7 @@
 
 <jsp:include page="../includes/admin_header.jsp" />
 
+
 <div class="content-wrapper p-4">
 
     <!-- 메인 콘텐츠 -->
@@ -23,7 +24,7 @@
 
                             <!-- 이름 -->
                             <div class="mb-3">
-                                <label class="form-label">이름</label>
+                                <label class="form-label required-label">이름</label>
                                 <input type="text"
                                        name="name"
                                        class="form-control"
@@ -33,20 +34,22 @@
 
                             <!-- 이메일 -->
                             <div class="mb-3">
-                                <label class="form-label">이메일</label>
+                                <label class="form-label required-label">이메일</label>
                                 <input type="email"
                                        name="email"
                                        class="form-control"
-                                       value="${user.email}">
+                                       value="${user.email}"
+                                       required>
                             </div>
 
                             <!-- 전화번호 -->
                             <div class="mb-3">
-                                <label class="form-label">전화번호</label>
+                                <label class="form-label required-label">전화번호</label>
                                 <input type="text"
                                        name="phone"
                                        class="form-control"
-                                       value="${user.phone}">
+                                       value="${user.phone}"
+                                       required>
                             </div>
 
                             <!-- 부서 -->
@@ -70,11 +73,12 @@
                             <!-- 소속 지점 -->
                             <sec:authorize access="hasAnyRole('GRANDMASTER','MASTER','ADMIN')">
                             <div class="mb-3">
-                                <label class="form-label">소속 지점 ID</label>
+                                <label class="form-label required-label">소속 지점 ID</label>
                                 <input type="number"
                                        name="branchId"
                                        class="form-control"
-                                       value="${user.branchId}">
+                                       value="${user.branchId}"
+                                       required>
                             </div>
 							</sec:authorize>
 							<!-- 주소 -->
@@ -88,23 +92,23 @@
 					        </div>
 					        
                             <div class="mb-3">
-                                <label class="form-label">우편번호</label>
+                                <label class="form-label required-label">우편번호</label>
                                 <input type="text"
                                        name="postNo"
                                        id="postNo"
                                        class="form-control"
                                        value="${user.postNo}"
-                                       readonly>
+                                       required readonly>
                             </div>
 							
                             <div class="mb-3">
-                                <label class="form-label">기본 주소</label>
+                                <label class="form-label required-label">기본 주소</label>
                                 <input type="text"
                                        name="baseAddress"
                                        id="baseAddress"
                                        class="form-control"
                                        value="${user.baseAddress}"
-                                       readonly>
+                                       required readonly>
                             </div>
 
                             <div class="mb-3">
