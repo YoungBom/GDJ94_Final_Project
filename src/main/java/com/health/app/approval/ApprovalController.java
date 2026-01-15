@@ -66,7 +66,7 @@ public class ApprovalController {
 
         } else {
             model.addAttribute("mode", "new");
-            model.addAttribute("products", approvalService.getProductsByBranch(null));
+            model.addAttribute("products", java.util.Collections.emptyList());
             model.addAttribute("pageTitle", "전자작성");
 
             // new에서는 entry를 그대로 전달 (approval / buy)
@@ -236,8 +236,10 @@ public class ApprovalController {
     @GetMapping("products")
     @ResponseBody
     public List<ApprovalProductDTO> products(@RequestParam(required = false) Long branchId) {
+        System.out.println("[/approval/products] branchId=" + branchId);
         return approvalService.getProductsByBranch(branchId);
     }
+
 
     // 출력 뷰(휴가 양식)
     @GetMapping("view")

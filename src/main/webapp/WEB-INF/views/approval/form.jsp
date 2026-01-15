@@ -51,7 +51,7 @@
 		      <option value="AT009" <c:if test="${draft.typeCode == 'AT009'}">selected</c:if>>휴가 신청서</option>
 			  <option value="AT005" <c:if test="${draft.typeCode == 'AT005'}">selected</c:if>>구매요청서(PR)</option>
 		      <option value="AT006" <c:if test="${draft.typeCode == 'AT006'}">selected</c:if>>발주서(PO)</option>
-		      <option value="AT004" <c:if test="${draft.typeCode == 'AT004'}">selected</c:if> disabled>재고조정요청서</option>
+		      <option value="AT004" <c:if test="${draft.typeCode == 'AT004'}">selected</c:if>>재고조정요청서</option>
 		      <option value="AT007" <c:if test="${draft.typeCode == 'AT007'}">selected</c:if> disabled>출장 신청서</option>
 		      <option value="AT008" <c:if test="${draft.typeCode == 'AT008'}">selected</c:if> disabled>근태 신청서</option>
 		      <option value="AT010" <c:if test="${draft.typeCode == 'AT010'}">selected</c:if> disabled>휴직 신청서</option>
