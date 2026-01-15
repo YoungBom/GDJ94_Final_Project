@@ -66,6 +66,9 @@
     <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/lang/summernote-ko-KR.min.js"></script>
    
+    <!-- input태그 안에 required 속성을 가진 것들은 빨간색으로 색칠 -->
+    <link rel="stylesheet" href="/css/requiredRed.css">
+    
   </head>
   <!--end::Head-->
 

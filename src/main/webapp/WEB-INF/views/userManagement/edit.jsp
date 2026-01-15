@@ -21,15 +21,15 @@
 
                             <!-- 아이디 (수정 불가) -->
                             <div class="col-md-6 mb-3">
-                                <label>아이디</label>
+                                <label class="form-label required-label">아이디</label>
                                 <input type="text"
                                        class="form-control"
                                        value="${user.loginId}"
-                                       readonly>
+                                       required readonly>
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label>이름</label>
+                                <label class="form-label required-label">이름</label>
                                 <input type="text"
                                        name="name"
                                        class="form-control"
@@ -38,24 +38,26 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label>이메일</label>
+                                <label class="form-label required-label">이메일</label>
                                 <input type="email"
                                        name="email"
                                        class="form-control"
-                                       value="${user.email}">
+                                       value="${user.email}"
+                                       required>
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label>연락처</label>
+                                <label class="form-label required-label">연락처</label>
                                 <input type="text"
                                        name="phone"
                                        class="form-control"
-                                       value="${user.phone}">
+                                       value="${user.phone}"
+                                       required>
                             </div>
 
-                            <!-- 지점 ID -->
+                            <!-- 소속 지점 ID -->
                             <div class="col-md-6 mb-3">
-                                <label>지점 ID</label>
+                                <label class="form-label required-label">소속 지점 ID</label>
                                 <input type="number"
                                        name="branchId"
                                        class="form-control"
@@ -73,7 +75,7 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label>우편번호</label>
+                                <label class="form-label required-label">우편번호</label>
                                 <input type="text"
                                        name="postNo"
                                        id="postNo"
@@ -83,7 +85,7 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label>기본주소</label>
+                                <label class="form-label required-label">기본주소</label>
                                 <input type="text"
                                        name="baseAddress"
                                        id="baseAddress"
@@ -129,12 +131,12 @@
                             
                             <!-- 수정 사유 -->
 							<div class="mb-3">
-							    <label class="form-label fw-bold">수정 사유</label>
+							    <label class="form-label required-label"">수정 사유</label>
 							    <textarea name="reason"
 							              class="form-control"
 							              rows="3"
-							              placeholder="수정 사유를 입력하세요"
-							              required></textarea>
+							              required>
+							    </textarea>
 							</div>
 
                         </div>

@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="<c:url value='/css/adminlte.css'/>">
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/requiredRed.css">
 </head>
 
 <body class="register-page bg-body-secondary">
@@ -42,7 +43,7 @@
                     <div class="input-group-text">
                         <span class="bi bi-person"></span>
                     </div>
-                    <input type="text" name="loginId" class="form-control" placeholder="아이디(필수 입력)" required>
+                    <input type="text" name="loginId" class="form-control" placeholder="아이디" required>
                 </div>
 
                 <!-- 비밀번호 -->
@@ -50,7 +51,7 @@
                     <div class="input-group-text">
                         <span class="bi bi-lock-fill"></span>
                     </div>
-                    <input type="password" name="password" class="form-control" placeholder="비밀번호(필수 입력)" required>
+                    <input type="password" name="password" class="form-control" placeholder="비밀번호" required>
                 </div>
 
                 <!-- 이름 -->
@@ -58,7 +59,7 @@
                     <div class="input-group-text">
                         <span class="bi bi-card-text"></span>
                     </div>
-                    <input type="text" name="name" class="form-control" placeholder="이름(필수 입력)" required>
+                    <input type="text" name="name" class="form-control" placeholder="이름" required>
                 </div>
 
                 <!-- 이메일 -->
@@ -66,7 +67,7 @@
                     <div class="input-group-text">
                         <span class="bi bi-envelope"></span>
                     </div>
-                    <input type="email" name="email" class="form-control" placeholder="이메일(필수 입력)" required>
+                    <input type="email" name="email" class="form-control" placeholder="이메일" required>
                 </div>
 
                 <!-- 전화번호 -->
@@ -74,7 +75,7 @@
                     <div class="input-group-text">
                         <span class="bi bi-telephone"></span>
                     </div>
-                    <input type="text" name="phone" class="form-control" placeholder="전화번호">
+                    <input type="text" name="phone" class="form-control" placeholder="전화번호" required>
                 </div>
                 
 				<!-- 부서 코드 (SELECT) -->
@@ -99,7 +100,7 @@
 				    <div class="input-group-text">
 				        <span class="bi bi-building"></span>
 				    </div>
-				    <input type="number" name="branchId" class="form-control" placeholder="소속 지점 ID (예: 1), (필수입력)" min="1" required>
+				    <input type="number" name="branchId" class="form-control" placeholder="소속 지점 ID (예: 1)" min="1" required>
 				</div>
 				
 				<div class="mb-3">
@@ -115,7 +116,7 @@
                     <div class="input-group-text">
                         <span class="bi bi-geo-alt"></span>
                     </div>
-                    <input type="text" name="postNo" id="postNo" class="form-control" placeholder="우편번호(필수 입력)" required>
+                    <input type="text" name="postNo" id="postNo" class="form-control" placeholder="우편번호" required>
                 </div>
 				
                 <!-- 기본주소 -->
@@ -123,7 +124,7 @@
                     <div class="input-group-text">
                         <span class="bi bi-house"></span>
                     </div>
-                    <input type="text" name="baseAddress" id="baseAddress" class="form-control" placeholder="기본 주소(필수 입력)" required>
+                    <input type="text" name="baseAddress" id="baseAddress" class="form-control" placeholder="기본 주소" required>
                 </div>
 
                 <!-- 상세주소 -->
@@ -159,17 +160,7 @@
 
 <script src="<c:url value='/js/address.js'/>"></script>
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    document.getElementById("postNo")
-        .addEventListener("keydown", e => e.preventDefault());
-
-    document.getElementById("baseAddress")
-        .addEventListener("keydown", e => e.preventDefault());
-
-});
-</script>
+<script src="<c:url value='/js/unable_postNo_baseAddress.js'/>"></script>
 
 <script src="<c:url value='/js/adminlte.js'/>"></script>
 

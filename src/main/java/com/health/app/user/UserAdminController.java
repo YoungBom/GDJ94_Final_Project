@@ -26,16 +26,34 @@ public class UserAdminController {
 
     private final UserAdminService userAdminService;
 
-    // 사용자 관리 목록
+ // 사용자 관리 목록
     @GetMapping("/list")
-    public String userList(Model model) {
+    public String userList(
+            @AuthenticationPrincipal LoginUser loginUser,
+            Model model
+    ) {
 
-        List<UserAdminDTO> users = userAdminService.getUserAdminList();
+        String roleCode = loginUser.getRoleCode();
+        Long branchId = loginUser.getBranchId();
+
+        List<UserAdminDTO> users;
+
+        // ADMIN → 본인 지점만
+        if ("RL003".equals(roleCode)) {  
+            users = userAdminService.getUserAdminListByBranch(branchId);
+        }
+        // MASTER, GRANDMASTER → 전체
+        else {
+            users = userAdminService.getUserAdminList();
+        }
+
         model.addAttribute("users", users);
-        model.addAttribute("pageTitle", "사용자 목록");
-        
+        model.addAttribute("pageTitle", "사용자 관리");
+
         return "userManagement/list";
     }
+
+
     
     // 사용자 상세화면 (이력 데이터 조회 추가)
     @GetMapping("/detail")
@@ -44,7 +62,7 @@ public class UserAdminController {
         UserAdminDTO user = userAdminService.getUserAdminDetail(userId);
 
         model.addAttribute("user", user);
-        model.addAttribute("pageTitle", "사용자 상세 / 변경 이력");
+        model.addAttribute("pageTitle", "사용자 상세 · 변경 이력");
         
         model.addAttribute("historyList",
                 userAdminService.getUserAllHistory(userId));
