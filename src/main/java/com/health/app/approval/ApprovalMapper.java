@@ -103,6 +103,8 @@ public interface ApprovalMapper {
     
     String selectTypeCodeByDocVerId(@Param("docVerId") Long docVerId);
     
-    
+    int autoApproveAllLines(@Param("docVerId") Long docVerId,
+            @Param("updateUser") Long updateUser,
+            @Param("comment") String comment);
     
 }

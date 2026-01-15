@@ -404,12 +404,15 @@
     WHERE v.doc_ver_id = #{docVerId}
   </update>
 
-  <update id="updateVersionStatusByDocVerId">
-    UPDATE approval_document_versions
-    SET ver_status_code = #{verStatusCode}
-    WHERE doc_ver_id = #{docVerId}
-      AND use_yn = 1
-  </update>
+<update id="updateVersionStatusByDocVerId">
+  UPDATE approval_document_versions
+  SET ver_status_code = #{verStatusCode},
+      update_user = #{updateUser},
+      update_date = NOW()
+  WHERE doc_ver_id = #{docVerId}
+    AND use_yn = 1
+</update>
+
 
   <update id="updateAllLinesStatusByDocVerId">
     UPDATE approval_lines
@@ -676,4 +679,15 @@
     AND v.use_yn = 1
 </select>
 
+<update id="autoApproveAllLines">
+  UPDATE approval_lines
+  SET status_code       = 'ALS003',
+      acted_at          = NOW(),
+      comment           = #{comment},
+      signature_file_id = NULL,
+      update_user       = #{updateUser},
+      update_date       = NOW()
+  WHERE doc_ver_id = #{docVerId}
+    AND use_yn = 1
+</update>
 </mapper>

@@ -3,29 +3,30 @@
 
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 
+<!-- 누적 JSON 저장 -->
 <input type="hidden" name="extTxt6" id="invItemsJson" />
 
 <div class="row g-2">
   <div class="col-md-8">
-    <label class="form-label">지점</label>
+    <label class="form-label"><span style="color:red; font-weight: normal;">*</span>지점</label>
     <select class="form-select" name="extNo1" id="branchId" required>
       <option value="">지점 선택</option>
       <c:forEach var="b" items="${branches}">
         <option value="${b.branchId}"><c:out value="${b.branchName}"/></option>
       </c:forEach>
     </select>
-    <div class="form-text">extNo1 = branchId</div>
   </div>
 
   <div class="col-md-4">
-    <label class="form-label">작성일</label>
+    <label class="form-label"><span style="color:red; font-weight: normal;">*</span>작성일</label>
     <input type="date" class="form-control" name="extDt1" required />
-    <div class="form-text">extDt1 = 작성일</div>
   </div>
 
   <div class="col-md-8">
-    <label class="form-label mt-2">상품</label>
-    <select class="form-select" name="extNo2" id="productId" required>
+    <label class="form-label mt-2"><span style="color:red; font-weight: normal;">*</span>상품</label>
+
+    <!-- ★ 행 추가용 입력이므로 required 제거 -->
+    <select class="form-select" name="extNo2" id="productId">
       <option value="">상품 선택</option>
       <c:forEach var="p" items="${products}">
         <option value="${p.productId}"
@@ -41,12 +42,12 @@
         </option>
       </c:forEach>
     </select>
-    <div class="form-text">extNo2 = productId</div>
+
     <div class="form-text" id="stockInfo">현재 재고: -</div>
   </div>
 
   <div class="col-md-4">
-    <label class="form-label mt-2">조정 유형</label>
+    <label class="form-label mt-2"><span style="color:red; font-weight: normal;">*</span>조정 유형</label>
     <div class="d-flex gap-3 align-items-center" style="height: 38px;">
       <label class="form-check mb-0">
         <input class="form-check-input" type="radio" name="extCode1" value="INCREASE" checked>
@@ -57,13 +58,13 @@
         <span class="form-check-label">감소</span>
       </label>
     </div>
-    <div class="form-text">extCode1 = 조정유형</div>
   </div>
 
   <div class="col-md-4">
     <label class="form-label mt-2">조정 수량(절대값)</label>
-    <input type="number" class="form-control" name="extNo3" id="adjustQty" min="1" step="1" required />
-    <div class="form-text">extNo3 = 조정수량</div>
+
+    <!-- ★ 행 추가용 입력이므로 required 제거 -->
+    <input type="number" class="form-control" name="extNo3" id="adjustQty" min="1" step="1" />
   </div>
 
   <div class="col-12 mt-2">
@@ -74,7 +75,6 @@
       <label class="form-check mb-0"><input class="form-check-input" type="radio" name="extCode2" value="MISINPUT"> <span class="form-check-label">오입력</span></label>
       <label class="form-check mb-0"><input class="form-check-input" type="radio" name="extCode2" value="ETC"> <span class="form-check-label">기타</span></label>
     </div>
-    <div class="form-text">extCode2 = 조정사유</div>
   </div>
 
   <div class="col-12 mt-2">
@@ -102,11 +102,11 @@
         <tbody id="invInputTbody">
           <tr id="invInputRow">
             <td class="text-center">-</td>
-            <td><input type="text" class="form-control form-control-sm inv-item" /></td>
-            <td class="text-center"><input type="text" class="form-control form-control-sm inv-type text-center" readonly /></td>
-            <td><input type="number" class="form-control form-control-sm inv-stock text-end" readonly /></td>
-            <td><input type="number" class="form-control form-control-sm inv-adj text-end" readonly /></td>
-            <td><input type="text" class="form-control form-control-sm inv-operator" maxlength="50" /></td>
+            <td><input type="text" class="form-control form-control-sm inv-item bg-secondary-subtle" readonly /></td>
+            <td class="text-center"><input type="text" class="form-control form-control-sm inv-type text-center bg-secondary-subtle" readonly note="type" /></td>
+            <td><input type="number" class="form-control form-control-sm inv-stock text-end bg-secondary-subtle" readonly /></td>
+            <td><input type="number" class="form-control form-control-sm inv-adj text-end bg-secondary-subtle" readonly /></td>
+            <td><input type="text" class="form-control form-control-sm inv-operator bg-secondary-subtle" maxlength="50" /></td>
             <td><input type="text" class="form-control form-control-sm inv-remark" maxlength="100" /></td>
           </tr>
         </tbody>
@@ -117,34 +117,54 @@
   </div>
 </div>
 <script>
+// (옵션) typeCode가 필요하면 쓰되, 이제는 가드에 의존하지 않음
+function getCurrentTypeCode() {
+  const sel = document.getElementById("approvalTypeCode");
+  if (sel && sel.value) return sel.value;
+
+  const any = document.querySelector('[name="typeCode"]'); // input/select 모두 포함
+  return any ? (any.value || "") : "";
+}
+
+// AT004(재고조정) 화면인지: 전용 요소 존재 여부로 판단 (가장 안전)
+function isAT004Page() {
+  return !!document.getElementById("invItemsJson")
+      && !!document.getElementById("productId")
+      && !!document.getElementById("invTable")
+      && !!document.getElementById("btnInvAdd");
+}
+
 (function () {
   "use strict";
 
-  // ctx 안전 주입 (ctx와 pageContext 혼용하지 말고 하나로 통일)
   var ctx = "<c:out value='${pageContext.request.contextPath}'/>";
-
-  // id 중복/동적교체 대비: "보이는" select를 우선 선택
-  function pickVisibleSelect(selector) {
-    var els = Array.from(document.querySelectorAll(selector));
-    if (els.length === 0) return null;
-    // 화면에 실제로 렌더되는 요소 우선
-    var visible = els.find(function (el) { return el && el.offsetParent !== null; });
-    return visible || els[0];
-  }
+  window.__LOGIN_USER_NAME__ = "<c:out value='${loginUser.name}'/>";
+  window.__LOGIN_USER_ID__   = "<c:out value='${loginUser.userId}'/>";
 
   function el(id) { return document.getElementById(id); }
 
-  // DOM ready 유사 처리 (JSP는 보통 하단에 스크립트가 와서 즉시 실행돼도 됨)
-  function init() {
+  function pickVisible(selector) {
+    var els = Array.from(document.querySelectorAll(selector));
+    if (!els.length) return null;
+    var visible = els.find(function (x) { return x && x.offsetParent !== null; });
+    return visible || els[0];
+  }
 
-    // 여기서부터는 id 중복을 고려해서 querySelector 기반으로 잡는다
-    var branchSel  = pickVisibleSelect('select[name="extNo1"]'); // 지점은 name으로 고정
+  function toInt(v) {
+    var n = Number(v);
+    if (!Number.isFinite(n)) return 0;
+    return Math.max(0, Math.trunc(n));
+  }
+
+  function init() {
+    // 다른 보고서 화면에서는 이 스크립트가 아무것도 하지 않도록 차단
+    if (!isAT004Page()) return;
+
+    var branchSel  = pickVisible('select[name="extNo1"]');
     var productSel = el("productId");
     var qtyEl      = el("adjustQty");
     var jsonEl     = el("invItemsJson");
     var stockInfo  = el("stockInfo");
-
-   
 
     var inputRow    = el("invInputRow");
     var invItem     = inputRow ? inputRow.querySelector(".inv-item") : null;
@@ -159,6 +179,27 @@
     var btnDel     = el("btnInvDelete");
     var chkAll     = el("invCheckAll");
 
+    if (!branchSel || !productSel || !qtyEl || !jsonEl) {
+      console.error("inventory_adjust.jsp: required elements not found");
+      return;
+    }
+
+    // ★ 저장(submit) 시 JSON이 비었으면 막기
+    //    - AT004 페이지의 폼에만 적용되도록 invItemsJson이 포함된 form 기준으로 필터링
+    document.addEventListener("submit", function (e) {
+      if (!isAT004Page()) return;
+
+      const form = el("invItemsJson")?.closest("form");
+      if (!form) return;
+      if (e.target !== form) return;
+
+      if (!jsonEl.value || !jsonEl.value.trim()) {
+        e.preventDefault();
+        alert("조정 내역을 1건 이상 추가하세요.");
+        btnAdd && btnAdd.focus();
+      }
+    }, true);
+
     function getAdjustType() {
       var r = document.querySelector("input[name='extCode1']:checked");
       return r ? r.value : "INCREASE";
@@ -166,11 +207,6 @@
     function setAdjustType(value) {
       var r = document.querySelector("input[name='extCode1'][value='" + value + "']");
       if (r) r.checked = true;
-    }
-    function toInt(v) {
-      var n = Number(v);
-      if (!Number.isFinite(n)) return 0;
-      return Math.max(0, Math.trunc(n));
     }
 
     function selectedOpt() {
@@ -191,6 +227,15 @@
       return Number.isFinite(s) ? s : null;
     }
 
+    // ★ 조정 직원: 항상 로그인 사용자로 고정 + 입력 불가
+    function setDefaultOperator() {
+      if (!invOperator) return;
+      var nm = (window.__LOGIN_USER_NAME__ || "").trim();
+      invOperator.value = nm;
+      invOperator.readOnly = true;
+    }
+    setDefaultOperator();
+
     function resetInputOnly() {
       productSel.value = "";
       qtyEl.value = "";
@@ -200,8 +245,9 @@
       if (invType) invType.value = "";
       if (invStock) invStock.value = "";
       if (invAdj) invAdj.value = "";
-      if (invOperator) invOperator.value = "";
       if (invRemark) invRemark.value = "";
+
+      setDefaultOperator();
 
       if (stockInfo) stockInfo.textContent = "현재 재고: -";
       if (chkAll) chkAll.checked = false;
@@ -244,13 +290,34 @@
       var url = ctx + "/approval/products?branchId=" + encodeURIComponent(branchId);
 
       try {
-        var res = await fetch(url, { headers: { "Accept": "application/json" } });
-        if (!res.ok) throw new Error("HTTP " + res.status);
+        var res = await fetch(url, {
+          method: "GET",
+          credentials: "same-origin",
+          cache: "no-store",
+          headers: { "Accept": "application/json" }
+        });
+
+        var ct = (res.headers.get("content-type") || "").toLowerCase();
+
+        if (!res.ok) {
+          var t = await res.text();
+          console.error("[products] HTTP", res.status, "CT=", ct, "BODY=", t.slice(0, 400));
+          throw new Error("HTTP " + res.status);
+        }
+
+        if (!ct.includes("application/json")) {
+          var html = await res.text();
+          console.error("[products] Non-JSON response. CT=", ct, "BODY=", html.slice(0, 400));
+          throw new Error("Non-JSON response");
+        }
 
         var products = await res.json();
+        console.log("[products] branchId=", branchId, "size=", (products || []).length, products && products[0]);
         rebuildProductOptions(products);
+
       } catch (e) {
-        alert("상품 목록을 불러오지 못했습니다.");
+        console.error(e);
+        alert("상품 목록을 불러오지 못했습니다. (F12 콘솔/네트워크 확인)");
         rebuildProductOptions([]);
       }
     }
@@ -258,17 +325,20 @@
     function recalcPreview() {
       var type = getAdjustType();
       var adj  = toInt(qtyEl.value);
+      var signedQty = (type === "DECREASE") ? -adj : adj;
 
       if (invType) invType.value = (type === "DECREASE") ? "감소" : "증가";
-      if (invAdj) invAdj.value  = adj ? String(adj) : "";
+      if (invAdj)  invAdj.value  = adj ? String(signedQty) : "";
 
       var stock = selectedStock();
       if (invStock) invStock.value = (stock == null) ? "" : String(stock);
       if (stockInfo) stockInfo.textContent = "현재 재고: " + (stock == null ? "-" : stock);
 
-      if (productSel.value && invItem && !invItem.value.trim()) {
+      if (productSel.value && invItem) {
         invItem.value = selectedProductText();
       }
+
+      setDefaultOperator();
     }
 
     function textOf(tr, sel) {
@@ -279,6 +349,7 @@
 
     function rebuildJson() {
       if (!listTbody) return;
+
       var rows = Array.from(listTbody.querySelectorAll("tr.inv-row"));
       var items = rows.map(function (tr) {
         return {
@@ -290,6 +361,7 @@
           signedQty: Number(tr.dataset.signedQty),
           stockQty: tr.dataset.stockQty ? Number(tr.dataset.stockQty) : null,
           operator: textOf(tr, ".col-operator"),
+          operatorId: window.__LOGIN_USER_ID__ ? Number(window.__LOGIN_USER_ID__) : null,
           remark: textOf(tr, ".col-remark"),
           price: tr.dataset.price ? Number(tr.dataset.price) : null
         };
@@ -299,11 +371,11 @@
     }
 
     function addItem() {
-      var branchId = toInt(branchSel.value);
-      if (!branchId) return alert("지점을 선택하세요.");
+      var bId = toInt(branchSel.value);
+      if (!bId) return alert("지점을 선택하세요.");
 
-      var productId = toInt(productSel.value);
-      if (!productId) return alert("상품을 선택하세요.");
+      var pId = toInt(productSel.value);
+      if (!pId) return alert("상품을 선택하세요.");
 
       var adj = toInt(qtyEl.value);
       if (adj <= 0) return alert("조정 수량을 입력하세요.");
@@ -316,14 +388,14 @@
         return alert("재고(" + stock + ")보다 큰 수량은 감소 처리할 수 없습니다.");
       }
 
-      var name = (invItem && invItem.value ? invItem.value : "").trim() || selectedProductText();
-      var operator = (invOperator && invOperator.value ? invOperator.value : "").trim();
-      var remark   = (invRemark && invRemark.value ? invRemark.value : "").trim();
-      var price    = selectedPrice();
+      var operator = (window.__LOGIN_USER_NAME__ || "").trim();
+      var name   = selectedProductText();
+      var remark = (invRemark && invRemark.value ? invRemark.value : "").trim();
+      var price  = selectedPrice();
 
       var tr = document.createElement("tr");
       tr.className = "inv-row";
-      tr.dataset.productId = String(productId);
+      tr.dataset.productId = String(pId);
       tr.dataset.adjustType = type;
       tr.dataset.adjustQty  = String(adj);
       tr.dataset.signedQty  = String(signedQty);
@@ -372,33 +444,19 @@
       });
     }
 
-    // 지점 변경: "위임"으로 한번 더 안전장치 (id 중복/DOM교체 방어)
+    // 지점 변경 -> 상품 다시 로드
     document.addEventListener("change", function (e) {
       if (e.target && e.target.matches('select[name="extNo1"]')) {
-        // branchSel이 교체되었을 수 있으니 갱신
-        branchSel = pickVisibleSelect('select[name="extNo1"]') || e.target;
+        branchSel = pickVisible('select[name="extNo1"]') || e.target;
         loadProductsByBranch(branchSel.value);
       }
     });
 
-    productSel.addEventListener("change", function () {
-      if (!productSel.value) {
-        if (invItem) invItem.value = "";
-        recalcPreview();
-        return;
-      }
-      if (invItem) invItem.value = selectedProductText();
-      recalcPreview();
-    });
-
+    productSel.addEventListener("change", recalcPreview);
     document.querySelectorAll("input[name='extCode1']").forEach(function (r) {
       r.addEventListener("change", recalcPreview);
     });
-
     qtyEl.addEventListener("input", recalcPreview);
-    [invItem, invOperator, invRemark].filter(Boolean).forEach(function (x) {
-      x.addEventListener("input", recalcPreview);
-    });
 
     // 초기 상태
     if (branchSel.value) {
@@ -409,7 +467,6 @@
     }
   }
 
-  // DOMContentLoaded가 이미 지난 경우 대비
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
   } else {

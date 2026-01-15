@@ -48,9 +48,11 @@ public class ApprovalController {
                                @RequestParam(required = false, defaultValue = "approval") String entry,
                                Model model) {
 
+        // ★ new/edit 공통으로 항상 내려주기
+        model.addAttribute("loginUser", loginUser);
+
         model.addAttribute("branches", approvalService.getBranches());
 
-        // 수정 모드면 기존 문서 유형이 고정이므로 entry는 의미 없게 처리(강제 approval로 통일)
         if (docVerId != null) {
             ApprovalDraftDTO draft = approvalService.getDraftForEdit(docVerId, loginUser.getUserId());
             model.addAttribute("draft", draft);
@@ -62,20 +64,19 @@ public class ApprovalController {
                             ? approvalService.getProductsByBranch(draft.getBranchId())
                             : java.util.Collections.emptyList());
 
-            model.addAttribute("entry", "approval"); // edit에서는 고정
+            model.addAttribute("entry", "approval");
 
         } else {
             model.addAttribute("mode", "new");
             model.addAttribute("products", java.util.Collections.emptyList());
             model.addAttribute("pageTitle", "전자작성");
-
-            // new에서는 entry를 그대로 전달 (approval / buy)
             model.addAttribute("entry", entry);
         }
 
         model.addAttribute("handoverCandidates", approvalService.getHandoverCandidates(loginUser.getUserId()));
         return "approval/form";
     }
+
 
 
 
@@ -236,7 +237,6 @@ public class ApprovalController {
     @GetMapping("products")
     @ResponseBody
     public List<ApprovalProductDTO> products(@RequestParam(required = false) Long branchId) {
-        System.out.println("[/approval/products] branchId=" + branchId);
         return approvalService.getProductsByBranch(branchId);
     }
 
