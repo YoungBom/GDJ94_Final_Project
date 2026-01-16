@@ -71,7 +71,7 @@
           <a href="#" class="nav-link" data-lte-toggle="treeview">
             <i class="nav-icon bi bi-truck"></i>
             <p>
-              구매/입고
+              구매/발주
               <i class="nav-arrow bi bi-chevron-right"></i>
             </p>
           </a>
