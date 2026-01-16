@@ -1,161 +1,37 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<form method="get" action="<c:url value='/inventory'/>" class="row g-2 mb-3">
+    <!-- 검색 시 항상 1페이지부터 -->
+    <input type="hidden" name="page" value="1"/>
+    <input type="hidden" name="size" value="${size}"/>
 
-<jsp:include page="../includes/admin_header.jsp" />
+    <div class="col-md-3">
+        <label class="form-label">지점</label>
+        <select name="branchId" class="form-select" <c:if test="${branchLocked}">disabled</c:if>>
+            <c:if test="${not branchLocked}">
+                <option value="">전체</option>
+            </c:if>
 
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">재고 현황</h3>
-            </div>
-
-            <div class="card-body">
-
-                <%-- 디버그용: 필요 시 사용 --%>
-                <%-- <div style="color:red;">listSize=${fn:length(list)}</div> --%>
-
-                <!-- 검색/필터 폼 -->
-                <form method="get" action="<c:url value='/inventory'/>" class="row g-2 mb-3">
-
-                    <!-- 지점 선택 -->
-                    <div class="col-md-3">
-                        <label class="form-label">지점</label>
-                        <select name="branchId" class="form-select">
-                            <option value="">전체</option>
-
-							    <!-- 1. 본사 먼저 -->
-							    <c:forEach var="branch" items="${branches}">
-							        <c:if test="${branch.id == 1}">
-							            <option value="${branch.id}"
-							                <c:if test="${not empty branchId and branchId == branch.id}">selected</c:if>>
-							                ${branch.name}
-							            </option>
-							        </c:if>
-							    </c:forEach>
-							
-							    <!-- 2. 나머지 지점 -->
-							    <c:forEach var="branch" items="${branches}">
-							        <c:if test="${branch.id != 1}">
-							            <option value="${branch.id}"
-							                <c:if test="${not empty branchId and branchId == branch.id}">selected</c:if>>
-							                ${branch.name}
-							            </option>
-							        </c:if>
-							    </c:forEach>
-
-                        </select>
-                    </div>
-
-                    <!-- 상품명 키워드 -->
-                    <div class="col-md-4">
-                        <label class="form-label">상품명</label>
-                        <input type="text" name="keyword" class="form-control"
-                               value="${keyword}" placeholder="상품명 검색" />
-                    </div>
-
-                    <!-- 부족재고만 -->
-                    <div class="col-md-3 d-flex align-items-end">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox"
-                                   id="onlyLowStock" name="onlyLowStock" value="true"
-                                   <c:if test="${onlyLowStock == true}">checked</c:if>>
-                            <label class="form-check-label" for="onlyLowStock">
-                                부족재고만 보기
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- 조회 버튼 -->
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button class="btn btn-primary w-100" type="submit">조회</button>
-                    </div>
-
-                </form>
-
-                <!-- 결과 테이블 -->
-                <table class="table table-bordered table-hover align-middle inventory-table">
-                    <thead>
-                    <tr>
-                        <th style="width: 150px">지점</th>
-                        <th>상품</th>
-                        <th class="text-end qty-col" style="width: 100px">현재수량</th>
-                        <th class="text-end qty-col" style="width: 100px">기준수량</th>
-                        <th class="text-center status-col" style="width: 100px">부족여부</th>
-                        <th class="text-center action-col" style="width: 100px">상세</th>
-                    </tr>
-                    </thead>
-
-                    <tbody>
-                    <c:choose>
-                        <c:when test="${empty list}">
-                            <tr>
-                                <td colspan="6" class="text-center text-muted">
-                                    조회 결과가 없습니다.
-                                </td>
-                            </tr>
-                        </c:when>
-
-                        <c:otherwise>
-                            <c:forEach var="row" items="${list}">
-                                <!-- 링크는 var로 먼저 만들고 href에는 변수만 넣는다(깨짐 방지) -->
-                                <c:url var="detailUrl" value="/inventory/detail">
-                                    <c:param name="branchId" value="${row.branchId}"/>
-                                    <c:param name="productId" value="${row.productId}"/>
-                                </c:url>
-
-                                <tr>
-                                    <td class="text-truncate" style="max-width: 240px;">${row.branchName}</td>
-                                    <td class="text-truncate" style="max-width: 360px;">${row.productName}</td>
-
-                                    <!-- 숫자는 무조건 오른쪽 정렬 -->
-                                    <td class="text-end">${row.quantity}</td>
-                                    <td class="text-end">${row.thresholdValue}</td>
-
-                                    <!-- 상태는 가운데 정렬 -->
-                                    <td class="text-center">
-                                        <c:choose>
-                                            <c:when test="${row.lowStock == 1}">
-                                                <span class="badge bg-danger status-badge">부족</span>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <span class="badge bg-success status-badge">정상</span>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
-
-                                    <!-- 버튼도 가운데 정렬 -->
-                                    <td class="text-center">
-                                        <a class="btn btn-sm btn-outline-secondary" href="${detailUrl}">
-                                            보기
-                                        </a>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                        </c:otherwise>
-                    </c:choose>
-                    </tbody>
-                </table>
-
-                <!-- 혹시 다른 CSS가 table 정렬을 덮어써도 깨지지 않게 보강 -->
-                <style>
-                    .inventory-table .qty-col { width: 110px; }
-                    .inventory-table .status-col { width: 110px; }
-                    .inventory-table .action-col { width: 110px; }
-
-                    .inventory-table th.text-end,
-                    .inventory-table td.text-end { text-align: right !important; }
-
-                    .inventory-table th.text-center,
-                    .inventory-table td.text-center { text-align: center !important; }
-
-                    .inventory-table .status-badge { min-width: 44px; display: inline-block; }
-                </style>
-
-            </div>
-        </div>
+            <c:forEach var="branch" items="${branches}">
+                <option value="${branch.id}"
+                        <c:if test="${not empty branchId and branchId == branch.id}">selected</c:if>>
+                        ${branch.name}
+                </option>
+            </c:forEach>
+        </select>
     </div>
-</div>
+    ...
+</form>
 
-<jsp:include page="../includes/admin_footer.jsp" />
+<c:if test="${branchLocked}">
+    <div class="alert alert-info py-2">
+        현재 계정은 <strong>지점 단위(READONLY)</strong>로 동작합니다. (본인 지점 재고만 조회 가능)
+    </div>
+</c:if>
+
+<!-- 테이블 아래 -->
+<c:if test="${totalPages > 1}">
+    <nav aria-label="재고 페이지네이션" class="mt-3">
+        <ul class="pagination justify-content-center mb-0">
+            ...
+        </ul>
+    </nav>
+</c:if>
