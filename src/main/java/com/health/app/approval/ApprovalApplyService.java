@@ -113,7 +113,7 @@ public class ApprovalApplyService {
                 .expenseAt(expenseAt)
                 .categoryCode("ETC")
                 .amount(amount)
-                .description(draft.getExtTxt3())
+                .description(plain)
                 .memo(plain)
                 .settlementFlag(true)
                 .createUser(actorUserId)
