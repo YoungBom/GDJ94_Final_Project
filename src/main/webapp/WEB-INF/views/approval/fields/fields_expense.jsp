@@ -8,7 +8,7 @@
 
   <!-- 지점 -->
   <div class="col-md-6">
-    <label class="form-label"><span style="color:red;">*</span>지점</label>
+    <label class="form-label required-label">지점</label>
     <select class="form-select" name="extNo1" id="branchId" required>
       <option value="">지점 선택</option>
       <c:forEach var="b" items="${branches}">
@@ -38,9 +38,9 @@
       <table class="table table-sm table-bordered align-middle" id="expenseTable">
         <thead class="table-light">
           <tr>
-            <th><span style="color:red;">*</span>지출 항목</th>
-            <th style="width: 140px;"><span style="color:red;">*</span>지출금액</th>
-            <th style="width: 150px;"><span style="color:red;">*</span>지출 일자</th>
+            <th class="required-label">지출 항목</th>
+            <th style="width: 140px;" class="required-label">지출금액</th>
+            <th style="width: 150px;" class="required-label">지출 일자</th>
             <th>비고</th>
             <th style="width: 80px;"></th>
           </tr>
