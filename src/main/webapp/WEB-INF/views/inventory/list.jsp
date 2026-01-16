@@ -65,12 +65,12 @@
                 <table class="table table-bordered table-hover align-middle inventory-table">
                     <thead>
                     <tr>
-                        <th>지점</th>
+                        <th style="width: 150px">지점</th>
                         <th>상품</th>
-                        <th class="text-end qty-col">현재수량</th>
-                        <th class="text-end qty-col">기준수량</th>
-                        <th class="text-center status-col">부족여부</th>
-                        <th class="text-center action-col">상세</th>
+                        <th class="text-end qty-col" style="width: 100px">현재수량</th>
+                        <th class="text-end qty-col" style="width: 100px">기준수량</th>
+                        <th class="text-center status-col" style="width: 100px">부족여부</th>
+                        <th class="text-center action-col" style="width: 100px">상세</th>
                     </tr>
                     </thead>
 

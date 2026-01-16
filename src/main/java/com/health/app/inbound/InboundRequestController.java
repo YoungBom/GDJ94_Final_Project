@@ -22,6 +22,7 @@ public class InboundRequestController {
     public String newForm(Model model) {
         model.addAttribute("products", inboundRequestService.getProductOptions());
         model.addAttribute("form", new InboundRequestFormDto());
+        model.addAttribute("pageTitle", "재고 현황");
         return "inbound/new";
     }
 
@@ -53,7 +54,7 @@ public class InboundRequestController {
         List<InboundRequestListDto> list = inboundRequestService.getInboundRequestList(statusCode);
         model.addAttribute("list", list);
         model.addAttribute("statusCode", statusCode);
-
+        model.addAttribute("pageTitle", "재고 현황");
         return "inbound/list";
     }
 
@@ -62,7 +63,7 @@ public class InboundRequestController {
     public String detail(@RequestParam Long inboundRequestId, Model model) {
         InboundRequestDetailDto header = inboundRequestService.getInboundRequestDetail(inboundRequestId);
         List<InboundRequestItemDto> items = inboundRequestService.getInboundRequestItems(inboundRequestId);
-
+        model.addAttribute("pageTitle", "재고 현황");
         model.addAttribute("header", header);
         model.addAttribute("items", items);
 

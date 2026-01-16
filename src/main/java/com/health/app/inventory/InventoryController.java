@@ -27,7 +27,7 @@ public class InventoryController {
 
         model.addAttribute("branches", branches);
         model.addAttribute("list", list);
-
+        model.addAttribute("pageTitle", "재고 현황");
         model.addAttribute("branchId", branchId);
         model.addAttribute("keyword", keyword);
         model.addAttribute("onlyLowStock", onlyLowStock);
@@ -47,7 +47,7 @@ public class InventoryController {
 
         model.addAttribute("detail", detail);
         model.addAttribute("history", history);
-
+        model.addAttribute("pageTitle", "감사 로그");
         return "inventory/detail";
     }
 
