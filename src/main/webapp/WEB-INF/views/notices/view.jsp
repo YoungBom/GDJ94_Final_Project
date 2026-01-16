@@ -6,12 +6,6 @@
 
 <style>
   .page-wrap { background:#f7f8fb; }
-	.notice-content {
-	  white-space: pre-wrap;
-	  line-height: 1.8;
-	  text-align: left !important; /* ✅ 강제 */
-	  margin: 0;
-	}
 
   /* Card tone */
   .soft-card { border:1px solid rgba(0,0,0,.06); border-radius:14px; }
@@ -21,7 +15,6 @@
   /* Typography */
   .kv-title { color:#6c757d; font-size:.85rem; }
   .kv-value { font-weight:700; }
-  .notice-content { white-space:pre-wrap; line-height:1.8; }
 
   /* Icons */
   .mini-icon{
@@ -52,22 +45,37 @@
   .mt-tight { margin-top:.75rem !important; }
 
   /* Summary cards */
-  .summary-card .card-body{ padding:.85rem 1rem; }  /* 기존보다 얇게 */
+  .summary-card .card-body{ padding:.85rem 1rem; }
   .summary-card .kv-value{ font-size:1.05rem; }
-  .notice-content p {
-  margin: 0 0 8px 0;
-}
 
-.notice-content ul {
-  margin: 0 0 8px 16px;
-  padding: 0;
-}
+  /* =========================
+     공지 본문(HTML) 스타일: 여기만 유지
+     - pre-wrap 금지 (HTML 공백/들여쓰기 과다 원인)
+     ========================= */
+  .notice-content{
+    padding: 0;
+    margin: 0;
+    text-align: left;
+    white-space: normal;   /* 핵심: pre-wrap 제거 */
+    line-height: 1.7;
+  }
 
-.notice-content li {
-  margin: 0 0 4px 0;
-}
-  
+  .notice-content p{
+    margin: 0 0 10px 0;
+  }
+
+  .notice-content ul,
+  .notice-content ol{
+    margin: 0 0 10px 0;
+    padding-left: 18px;
+  }
+
+  .notice-content li{
+    margin: 0 0 6px 0;
+    line-height: 1.6;
+  }
 </style>
+
 
 <div class="page-wrap p-3">
   <div class="container-fluid">
