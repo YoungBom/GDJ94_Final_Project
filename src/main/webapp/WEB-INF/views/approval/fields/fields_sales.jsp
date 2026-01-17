@@ -8,7 +8,7 @@
 
   <!-- 지점 : extNo1 = branchId -->
   <div class="col-md-6">
-    <label class="form-label"><span style="color:red;">*</span>지점</label>
+    <label class="form-label required-label">지점</label>
     <select class="form-select" name="extNo1" id="salesBranchId" required>
       <option value="">지점 선택</option>
       <c:forEach var="b" items="${branches}">
@@ -25,12 +25,6 @@
     <input type="number" class="form-control bg-secondary-subtle" name="extNo2" id="salesTotal" readonly />
   </div>
 
-  <!-- 비고(공통) : extTxt2 -->
-  <div class="col-12">
-    <label class="form-label">비고</label>
-    <input type="text" class="form-control" name="extTxt2" maxlength="500" />
-  </div>
-
   <!-- 매출 내역(다건) -->
   <div class="col-12">
     <div class="d-flex justify-content-between align-items-center">
@@ -42,9 +36,9 @@
       <table class="table table-sm table-bordered align-middle" id="salesTable">
         <thead class="table-light">
           <tr>
-            <th style="width: 180px;"><span style="color:red;">*</span>매출 항목</th>
-            <th style="width: 140px;"><span style="color:red;">*</span>매출 금액</th>
-            <th style="width: 150px;"><span style="color:red;">*</span>판매일자</th>
+            <th style="width: 180px;" class="required-label">매출 항목</th>
+            <th style="width: 140px;" class="required-label">매출 금액</th>
+            <th style="width: 150px;" class="required-label">판매일자</th>
             <th>비고</th>
             <th style="width: 80px;"></th>
           </tr>

@@ -8,32 +8,26 @@ import java.util.List;
 @Mapper
 public interface InventoryMapper {
 
-    // 1) 목록
     List<InventoryViewDto> selectInventoryList(
             @Param("branchId") Long branchId,
             @Param("keyword") String keyword,
             @Param("onlyLowStock") Boolean onlyLowStock
     );
 
-    // 2) 지점 옵션
     List<OptionDto> selectBranchOptions();
 
-    // 3) 상품 옵션(선택)
     List<OptionDto> selectProductOptions(@Param("branchId") Long branchId);
 
-    // 4) 상세
     InventoryDetailDto selectInventoryDetail(
             @Param("branchId") Long branchId,
             @Param("productId") Long productId
     );
 
-    // 5) 이력
     List<InventoryHistoryViewDto> selectInventoryHistory(
             @Param("branchId") Long branchId,
             @Param("productId") Long productId
     );
 
-    // 6) 수량 업데이트
     int updateInventoryQuantity(
             @Param("branchId") Long branchId,
             @Param("productId") Long productId,
@@ -42,7 +36,6 @@ public interface InventoryMapper {
             @Param("updateUser") Long updateUser
     );
 
-    // 7) 이력 insert
     int insertInventoryHistory(
             @Param("branchId") Long branchId,
             @Param("productId") Long productId,
@@ -52,5 +45,37 @@ public interface InventoryMapper {
             @Param("refType") String refType,
             @Param("refId") Long refId,
             @Param("createUser") Long createUser
+    );
+
+    int updateLowStockThreshold(
+            @Param("branchId") Long branchId,
+            @Param("productId") Long productId,
+            @Param("lowStockThreshold") Long lowStockThreshold,
+            @Param("updateUser") Long updateUser
+    );
+
+    //  inventory_id 조회
+    Long selectInventoryId(@Param("branchId") Long branchId, @Param("productId") Long productId);
+
+    //  감사로그 저장 (DB 컬럼명에 맞춤)
+    int insertAuditLog(
+            @Param("actorUserId") Long actorUserId,
+            @Param("actionType") String actionType,
+            @Param("targetType") String targetType,
+            @Param("targetId") Long targetId,
+            @Param("beforeValue") String beforeValue,
+            @Param("afterValue") String afterValue,
+            @Param("reason") String reason,
+            @Param("createUser") Long createUser
+    );
+
+    //  감사로그 조회 (branch/product 필터 포함)
+    List<AuditLogDto> selectAuditLogs(
+            @Param("from") String from,
+            @Param("to") String to,
+            @Param("actionType") String actionType,
+            @Param("branchId") Long branchId,
+            @Param("productId") Long productId,
+            @Param("keyword") String keyword
     );
 }
