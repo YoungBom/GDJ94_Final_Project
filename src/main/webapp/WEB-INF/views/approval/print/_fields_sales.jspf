@@ -14,12 +14,11 @@
   <c:out value="${ext.writtenDateStr}"/>
 </div>
 
-<!-- 기간 -->
+<!-- 지점/기간/총액 등은 프로젝트 저장 규칙에 맞춰 extNo/extDt에 매핑됨 -->
 <div class="field" style="left:220px; top:340px; width:520px;">
   <c:out value="${ext.extDt1}"/> ~ <c:out value="${ext.extDt2}"/>
 </div>
 
-<!-- 정산 요약 -->
 <div class="field" style="left:220px; top:395px; width:1150px;">
   <c:out value="${ext.extTxt2}"/>
 </div>

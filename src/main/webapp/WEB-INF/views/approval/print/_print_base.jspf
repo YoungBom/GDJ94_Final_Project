@@ -1,27 +1,14 @@
-<%@ taglib prefix="c" uri="jakarta.tags.core"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/approval/css/print_overlay.css" />
 
-<c:set var="bg" value="${param.bg}" />
+<c:set var="bg" value="${empty bgImageUrl ? formBgImage : bgImageUrl}" />
+<c:set var="fields" value="${fieldsJspf}" />
 
-<style>
-  .print-wrap { background:#eee; padding:20px 0; }
-  .print-page {
-    position: relative;
-    width: 1400px;
-    height: 1700px;
-    margin: 0 auto;
-    background: #fff;
-    background-image: url('<c:out value="${bg}"/>');
-    background-repeat: no-repeat;
-    background-size: 1400px 1700px;
-  }
-
-  .field { position:absolute; font-size:20px; line-height:1.4; color:#111; }
-  .field-sm { font-size:13px; }
-  .field-lg { font-size:16px; font-weight:600; }
-  .center { text-align:center; }
-  .right { text-align:right; }
-  .pre { white-space:pre-wrap; }
-</style>
-
-<div class="print-wrap">
+<div class="print-wrap<c:if test='${param.preview eq "1"}'> is-preview</c:if>">
   <div class="print-page">
+    <img class="print-bg" src="${bg}" alt="print background" />
+    <div class="overlay">
+      <jsp:include page="${fields}" />
+    </div>
+  </div>
+</div>

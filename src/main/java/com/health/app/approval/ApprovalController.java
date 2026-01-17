@@ -252,25 +252,13 @@ public class ApprovalController {
     }
 
 
-    // 출력 뷰(휴가 양식)
+    // 출력 뷰(보고서 이미지 오버레이)
     @GetMapping("view")
     public String view(@RequestParam Long docVerId, Model model) {
         model.addAttribute("doc", approvalService.getPrintData(docVerId));
         model.addAttribute("docVerId", docVerId);
-
-        String typeCode = approvalMapper.selectTypeCodeByDocVerId(docVerId);
-
-        // 휴가(AT009)는 기존 출력 서식 유지
-        if ("AT009".equals(typeCode)) {
-            model.addAttribute("bgImageUrl", "/approval/formPng/leave.png");
-            model.addAttribute("fieldsJspf", "/WEB-INF/views/approval/print/_fields_vacation.jspf");
-            return "approval/print/vacation_print";
-        }
-
-        // 그 외 문서는 공통 프린트 뷰(텍스트 기반)로 출력
-        return "approval/print/generic_print";
+        return "approval/print/overlay_print";
     }
-
     // 결재 처리 화면(GET)
     @GetMapping("handle")
     public String handle(@RequestParam Long docVerId, Model model) {

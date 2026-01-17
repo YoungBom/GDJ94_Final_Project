@@ -14,16 +14,10 @@
   <c:out value="${ext.writtenDateStr}"/>
 </div>
 
-<!-- 기간 -->
-<div class="field" style="left:220px; top:340px; width:520px;">
-  <c:out value="${ext.extDt1}"/> ~ <c:out value="${ext.extDt2}"/>
-</div>
-
-<!-- 정산 요약 -->
-<div class="field" style="left:220px; top:395px; width:1150px;">
+<div class="field" style="left:220px; top:340px; width:1150px;">
   <c:out value="${ext.extTxt2}"/>
 </div>
 
-<div class="field pre" style="left:220px; top:460px; width:1150px; height:1180px;">
+<div class="field pre" style="left:220px; top:400px; width:1150px; height:1240px;">
   <c:out value="${ext.extTxt6}"/>
 </div>

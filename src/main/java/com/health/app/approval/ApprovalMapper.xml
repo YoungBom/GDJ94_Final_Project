@@ -101,22 +101,20 @@
       b.branch_name AS drafterBranchName,
 
       /* 확장 필드 */
-		e.ext_dt1    AS extDt1,
-		e.ext_dt2    AS extDt2,
-		e.ext_dt3    AS extDt3,
-		e.ext_dt4    AS extDt4,
-		e.ext_no1    AS extNo1,
-		e.ext_no2    AS extNo2,
-		e.ext_no3    AS extNo3,
-		e.ext_txt1   AS extTxt1,
-		e.ext_txt2   AS extTxt2,
-		e.ext_txt3   AS extTxt3,
-		e.ext_txt4   AS extTxt4,
-		e.ext_txt6   AS extTxt6,
-		e.ext_code1  AS extCode1,
-		
-		/* 작성일 문자열(공통) */
-		DATE_FORMAT(e.ext_dt3, '%Y년 %m월 %d일') AS writtenDateStr
+      e.ext_dt1    AS extDt1,
+      e.ext_dt2    AS extDt2,
+      e.ext_no1    AS extNo1,
+      e.ext_no2    AS extNo2,
+      e.ext_no3    AS extNo3,
+      e.ext_txt1   AS extTxt1,
+      e.ext_txt2   AS extTxt2,
+      e.ext_txt3   AS extTxt3,
+      e.ext_txt4   AS extTxt4,
+      e.ext_txt6   AS extTxt6,
+      e.ext_code1  AS extCode1,
+
+      /* 작성일 문자열(휴가처럼 날짜 포맷) */
+      DATE_FORMAT(e.ext_dt3, '%Y년 %m월 %d일') AS writtenDateStr
 
   FROM approval_document_versions v
   JOIN approval_documents d
