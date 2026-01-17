@@ -332,11 +332,7 @@ public class ApprovalApplyService {
 
     private void applyInboundRequest(ApprovalDraftDTO draft, Long actorUserId) {
 
-        String vendorName = safeTrim(draft.getExtTxt1()); // 거래처명(필수)
-        if (vendorName.isEmpty()) {
-            throw new IllegalArgumentException("AT006: 거래처명(extTxt1)이 없습니다.");
-        }
-
+       
         if (draft.getExtDt1() == null) { // 납기일(필수)
             throw new IllegalArgumentException("AT006: 납기일(extDt1)이 없습니다.");
         }
@@ -351,7 +347,6 @@ public class ApprovalApplyService {
         // 1) Header 저장
         InboundRequestHeaderDto header = new InboundRequestHeaderDto();
         header.setInboundRequestNo(generateInboundRequestNo());
-        header.setVendorName(vendorName);
         header.setStatusCode("IR_REQ");
         header.setRequestedAt(LocalDateTime.now());
         header.setRequestedBy(actorUserId);
