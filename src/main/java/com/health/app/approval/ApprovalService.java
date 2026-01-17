@@ -106,7 +106,9 @@ public class ApprovalService {
         }
 
         if (dto.getDocNo() == null || dto.getDocNo().isBlank()) {
-            dto.setDocNo("TMP-" + System.currentTimeMillis());
+        	String num = String.valueOf(System.currentTimeMillis()).substring(7);
+        	dto.setDocNo("TMP-" + num);
+
         }
 
         dto.setStatusCode("AS001");
@@ -234,6 +236,19 @@ public class ApprovalService {
     @Transactional(readOnly = true)
     public List<ApprovalProductDTO> getProductsByBranch(Long branchId) {
         return approvalProductMapper.selectProductsByBranch(branchId);
+    }
+
+    // AT005(구매요청서): product 테이블 전체 상품
+    @Transactional(readOnly = true)
+    public List<ApprovalProductDTO> getAllActiveProducts() {
+        return approvalProductMapper.selectAllActiveProducts();
+    }
+
+    // AT006(발주서): inventory 에 등록된 내 지점 상품만
+    @Transactional(readOnly = true)
+    public List<ApprovalProductDTO> getInventoryProductsByBranch(Long branchId) {
+        if (branchId == null) return java.util.Collections.emptyList();
+        return approvalProductMapper.selectInventoryProductsByBranch(branchId);
     }
 
  

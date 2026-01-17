@@ -54,25 +54,39 @@ public class ApprovalController {
 
         model.addAttribute("branches", approvalService.getBranches());
 
+        // 문서별 상품 소스가 달라서, 폼에서는 목록을 분리해서 내려준다.
+        // - AT005(구매요청서): product 테이블 전체
+        // - AT006(발주서): inventory 테이블(내 지점)
+        model.addAttribute("prProducts", approvalService.getAllActiveProducts());
+
         if (docVerId != null) {
             ApprovalDraftDTO draft = approvalService.getDraftForEdit(docVerId, loginUser.getUserId());
             model.addAttribute("draft", draft);
             model.addAttribute("mode", "edit");
             model.addAttribute("pageTitle", "전자수정");
 
+            // (구형) products 모델을 쓰는 화면/스크립트 호환용
             model.addAttribute("products",
                     draft.getBranchId() != null
                             ? approvalService.getProductsByBranch(draft.getBranchId())
                             : java.util.Collections.emptyList());
 
+            model.addAttribute("poProducts", approvalService.getInventoryProductsByBranch(draft.getBranchId()));
+
             model.addAttribute("entry", "approval");
 
         } else {
             model.addAttribute("mode", "new");
-            model.addAttribute("products", java.util.Collections.emptyList());
+
+            List<ApprovalProductDTO> prList = approvalService.getAllActiveProducts();
+            model.addAttribute("prProducts", prList);
+            model.addAttribute("products", prList); // ★ 구매요청서가 products를 봐도 뜨게
+
+            model.addAttribute("poProducts", approvalService.getInventoryProductsByBranch(loginUser.getBranchId()));
             model.addAttribute("pageTitle", "전자작성");
             model.addAttribute("entry", entry);
         }
+
 
         model.addAttribute("handoverCandidates", approvalService.getHandoverCandidates(loginUser.getUserId()));
         return "approval/form";
