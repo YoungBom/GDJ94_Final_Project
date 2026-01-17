@@ -47,16 +47,24 @@
                                 </select>
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label">시작일</label>
-                                <input type="date" class="form-control" id="startDate" name="startDate">
+                                <label class="form-label">정산 여부</label>
+                                <select class="form-select" id="settlementFlag" name="settlementFlag">
+                                    <option value="">전체</option>
+                                    <option value="true">정산됨</option>
+                                    <option value="false">미정산</option>
+                                </select>
                             </div>
-                            <div class="col-md-2">
-                                <label class="form-label">종료일</label>
-                                <input type="date" class="form-control" id="endDate" name="endDate">
+                            <div class="col-md-3">
+                                <label class="form-label">기간</label>
+                                <div class="input-group">
+                                    <input type="date" class="form-control" id="startDate" name="startDate">
+                                    <span class="input-group-text">~</span>
+                                    <input type="date" class="form-control" id="endDate" name="endDate">
+                                </div>
                             </div>
-                            <div class="col-md-2 d-flex align-items-end">
+                            <div class="col-md-1 d-flex align-items-end">
                                 <button type="submit" class="btn btn-primary w-100">
-                                    <i class="bi bi-search"></i> 검색
+                                    <i class="bi bi-search"></i>
                                 </button>
                             </div>
                         </form>
@@ -89,12 +97,13 @@
                                     <th>카테고리</th>
                                     <th class="text-end">금액</th>
                                     <th style="width: 100px">상태</th>
+                                    <th style="width: 100px">정산여부</th>
                                     <th style="width: 80px">상세</th>
                                 </tr>
                             </thead>
                             <tbody id="saleTableBody">
                                 <tr>
-                                    <td colspan="8" class="text-center">
+                                    <td colspan="9" class="text-center">
                                         <div class="spinner-border" role="status">
                                             <span class="visually-hidden">Loading...</span>
                                         </div>
@@ -205,7 +214,7 @@ async function loadSaleList() {
     } catch (error) {
         console.error('목록 로드 실패:', error);
         document.getElementById('saleTableBody').innerHTML =
-            '<tr><td colspan="8" class="text-center text-danger">데이터를 불러오는데 실패했습니다.</td></tr>';
+            '<tr><td colspan="9" class="text-center text-danger">데이터를 불러오는데 실패했습니다.</td></tr>';
     }
 }
 
@@ -214,7 +223,7 @@ function renderSaleTable(list) {
     const tbody = document.getElementById('saleTableBody');
 
     if (!list || list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center">등록된 매출이 없습니다.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center">등록된 매출이 없습니다.</td></tr>';
         return;
     }
 
@@ -229,6 +238,11 @@ function renderSaleTable(list) {
             '<td>' +
                 '<span class="badge ' + getStatusBadgeClass(sale.statusCode) + '">' +
                     getStatusName(sale.statusCode) +
+                '</span>' +
+            '</td>' +
+            '<td>' +
+                '<span class="badge ' + (sale.settled ? 'bg-secondary' : 'bg-warning') + '">' +
+                    (sale.settled ? '정산됨' : '미정산') +
                 '</span>' +
             '</td>' +
             '<td>' +
