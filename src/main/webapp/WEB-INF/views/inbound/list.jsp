@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 
 <jsp:include page="../includes/admin_header.jsp" />
 
@@ -8,7 +9,10 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
 
         <div class="d-flex gap-2">
-            <a class="btn btn-primary" href="<c:url value='/inbound/new'/>">+ 신규 등록</a>
+            <%-- ✅ 지점 사용자만 신규등록 버튼 노출 (본사 계정은 숨김) --%>
+            <sec:authorize access="hasAnyRole('CAPTAIN','CREW')">
+                <a class="btn btn-primary" href="<c:url value='/inbound/new'/>">+ 신규 등록</a>
+            </sec:authorize>
         </div>
     </div>
 
