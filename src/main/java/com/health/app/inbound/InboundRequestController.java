@@ -21,7 +21,7 @@ public class InboundRequestController {
     public String newForm(Model model) {
         model.addAttribute("products", inboundRequestService.getProductOptions());
         model.addAttribute("form", new InboundRequestFormDto());
-        model.addAttribute("pageTitle", "재고 현황");
+        model.addAttribute("pageTitle", "구매요청서");
         return "inbound/new";
     }
 
@@ -52,7 +52,7 @@ public class InboundRequestController {
         List<InboundRequestListDto> list = inboundRequestService.getInboundRequestList(statusCode);
         model.addAttribute("list", list);
         model.addAttribute("statusCode", statusCode);
-        model.addAttribute("pageTitle", "재고 현황");
+        model.addAttribute("pageTitle", "구매요청서");
         return "inbound/list";
     }
 
@@ -60,7 +60,8 @@ public class InboundRequestController {
     public String detail(@RequestParam Long inboundRequestId, Model model) {
         InboundRequestDetailDto header = inboundRequestService.getInboundRequestDetail(inboundRequestId);
         List<InboundRequestItemDto> items = inboundRequestService.getInboundRequestItems(inboundRequestId);
-        model.addAttribute("pageTitle", "재고 현황");
+
+        model.addAttribute("pageTitle", "구매요청서");
         model.addAttribute("header", header);
         model.addAttribute("items", items);
 
@@ -68,7 +69,7 @@ public class InboundRequestController {
     }
 
     /**
-     * (임시) 승인 완료(IR_APPROVED)된 구매요청서를 "처리완료"로 만들고,
+     * 승인 완료(IR_APPROVED)된 구매요청서를 "처리완료(IR_DONE)"로 변경하고,
      * 요청 지점 재고를 반영한다.
      */
     @PostMapping("/{inboundRequestId}/process")

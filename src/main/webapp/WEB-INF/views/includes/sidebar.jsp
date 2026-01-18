@@ -20,12 +20,7 @@
   <div class="sidebar-wrapper">
     <nav class="mt-2">
 
-      <!--  sidebar-menu는 반드시 1개만 -->
-      <ul
-              class="nav sidebar-menu flex-column"
-              data-accordion="false"
-              id="navigation"
-      >
+      <ul class="nav sidebar-menu flex-column" data-accordion="false" id="navigation">
 
         <li class="nav-item">
           <a href="<c:url value='/statistics'/>" class="nav-link">
@@ -66,40 +61,64 @@
           </a>
         </li>
 
-        <!-- 구매/입고 (통합) -->
+        <!--  1) 입고요청(지점 → 본사) : 지점 사용자도 접근 가능 -->
         <li class="nav-item">
           <a href="#" class="nav-link" data-lte-toggle="treeview">
-            <i class="nav-icon bi bi-truck"></i>
+            <i class="nav-icon bi bi-inboxes"></i>
             <p>
-              구매/발주
+              입고요청
               <i class="nav-arrow bi bi-chevron-right"></i>
             </p>
           </a>
 
           <ul class="nav nav-treeview">
-            <li class="nav-item">
-              <a href="<c:url value='/approval/form'/>?typeCode=AT003&formCode=DF005" class="nav-link">
-               
-                <p>구매요청서/발주서 작성</p>
-              </a>
-            </li>
-
+            <%-- 작성 URL은 네 프로젝트에 맞춰 유지/수정: 없으면 목록만 남겨도 됨 --%>
             <li class="nav-item">
               <a href="<c:url value='/inbound'/>" class="nav-link">
-
-                <p>구매요청서/발주서 목록</p>
-              </a>
-            </li>
-
-            <li class="nav-item">
-              <a href="<c:url value='/audit'/>" class="nav-link">
-
-                <p>감사 로그</p>
+                <p>입고요청서 목록</p>
               </a>
             </li>
           </ul>
         </li>
 
+        <!--  2) 구매요청/발주(본사 → 외부) : 본사 권한만 노출 -->
+        <sec:authorize access="hasAnyRole('GRANDMASTER','MASTER','ADMIN')">
+          <li class="nav-item">
+            <a href="#" class="nav-link" data-lte-toggle="treeview">
+              <i class="nav-icon bi bi-truck"></i>
+              <p>
+                구매/발주
+                <i class="nav-arrow bi bi-chevron-right"></i>
+              </p>
+            </a>
+
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="<c:url value='/approval/form'/>?typeCode=AT003&formCode=DF005" class="nav-link">
+                  <p>구매요청서 작성</p>
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a href="<c:url value='/purchase'/>" class="nav-link">
+                  <p>구매요청서 목록</p>
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a href="<c:url value='/purchase/orders'/>" class="nav-link">
+                  <p>발주서 목록</p>
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a href="<c:url value='/audit'/>" class="nav-link">
+                  <p>감사 로그</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+        </sec:authorize>
 
         <!-- 일정 관리 Treeview -->
         <li class="nav-item">
@@ -146,7 +165,7 @@
           </ul>
         </li>
 
-        <!--  전자결재 Treeview (여기만 toggle) -->
+        <!-- 전자결재 -->
         <li class="nav-item">
           <a href="#" class="nav-link" data-lte-toggle="treeview">
             <i class="nav-icon bi bi-file-earmark-check"></i>
@@ -158,7 +177,6 @@
 
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <%--  FIX: 절대경로 → c:url 권장(컨텍스트 경로 안전) --%>
               <a href="<c:url value='/approval/list'/>" class="nav-link">
                 <p>결재 목록</p>
               </a>
@@ -176,7 +194,7 @@
           </ul>
         </li>
 
-        <!-- 매출·지출 통계 Treeview -->
+        <!-- 매출·지출 통계 -->
         <li class="nav-item">
           <a href="#" class="nav-link" data-lte-toggle="treeview">
             <i class="nav-icon bi bi-bar-chart"></i>
@@ -199,7 +217,7 @@
           </ul>
         </li>
 
-        <!-- 정산 관리 Treeview -->
+        <!-- 정산 관리 -->
         <li class="nav-item">
           <a href="#" class="nav-link" data-lte-toggle="treeview">
             <i class="nav-icon bi bi-calculator"></i>

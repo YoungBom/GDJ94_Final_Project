@@ -31,7 +31,7 @@ public class InboundRequestService {
 
         InboundRequestHeaderDto header = new InboundRequestHeaderDto();
         header.setInboundRequestNo("IR-" + System.currentTimeMillis());
-        header.setRequestBranchId(requestBranchId);
+        header.setRequestBranchId(requestBranchId); // ✅ DB 컬럼(request_branch_id) 저장 대상
         header.setVendorName(form.getVendorName());
         header.setStatusCode("IR_REQ");
         header.setRequestedBy(loginUserId);
@@ -89,6 +89,10 @@ public class InboundRequestService {
         return inboundRequestMapper.selectInboundItems(inboundRequestId);
     }
 
+    /**
+     * 승인완료(IR_APPROVED)된 구매요청서를 "처리완료(IR_DONE)"로 만들고,
+     * 요청 지점(request_branch_id)의 재고를 증가시킨다.
+     */
     @Transactional
     public void applyApprovedInboundToInventory(Long inboundRequestId, Long approvedBy) {
 
