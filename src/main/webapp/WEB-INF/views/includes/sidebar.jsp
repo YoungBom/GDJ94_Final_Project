@@ -94,7 +94,7 @@
 
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="<c:url value='/approval/form'/>?typeCode=AT003&formCode=DF005" class="nav-link">
+                <a href="<c:url value='/approval/form'/>?entry=buy" class="nav-link">
                   <p>구매요청서 작성</p>
                 </a>
               </li>
