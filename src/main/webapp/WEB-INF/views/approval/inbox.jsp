@@ -49,8 +49,30 @@
             <c:forEach var="row" items="${list}">
               <tr>
                 <td><c:out value="${row.docNo}"/></td>
-                <td><c:out value="${row.typeCode}"/></td>
-                <td><c:out value="${row.formCode}"/></td>
+                <td>
+				  <c:choose>
+				    <c:when test="${row.typeCode == 'AT009'}">휴가</c:when>
+				    <c:when test="${row.typeCode == 'AT006'}">발주</c:when>
+				    <c:when test="${row.typeCode == 'AT005'}">구매요청</c:when>
+				    <c:when test="${row.typeCode == 'AT004'}">재고조정</c:when>
+				    <c:when test="${row.typeCode == 'AT003'}">매출보고</c:when>
+				    <c:when test="${row.typeCode == 'AT002'}">정산보고</c:when>
+				    <c:when test="${row.typeCode == 'AT001'}">지출결의</c:when>
+				    <c:otherwise>${doc.formCode}</c:otherwise>
+				  </c:choose>
+				</td>
+                <td>
+				  <c:choose>
+				    <c:when test="${row.formCode == 'DF009'}">휴가요청서</c:when>
+				    <c:when test="${row.formCode == 'DF006'}">발주서</c:when>
+				    <c:when test="${row.formCode == 'DF005'}">구매요청서</c:when>
+				    <c:when test="${row.formCode == 'DF004'}">재고조정서</c:when>
+				    <c:when test="${row.formCode == 'DF003'}">매출보고서</c:when>
+				    <c:when test="${row.formCode == 'DF002'}">정산보고서</c:when>
+				    <c:when test="${row.formCode == 'DF001'}">지출결의서</c:when>
+				    <c:otherwise>${doc.formCode}</c:otherwise>
+				  </c:choose>
+				</td>
                 <td><span class="badge text-bg-secondary"><c:out value="${row.mySeq}"/></span></td>
 				<td>${row.submittedAt.toString().replace('T',' ')}</td>
                 <td class="text-end">
