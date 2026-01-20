@@ -303,6 +303,54 @@ public class ApprovalApplyService {
                 reason, refType, refId, actorUserId
         );
     }
+    
+    /* =========================================================
+     * ✅ 공통: 재고 OUT 반영 (재고 row 없으면 예외, 수량 부족 시 예외)
+     * ========================================================= */
+    private void applyStockOutOrThrow(
+            Long branchId,
+            Long productId,
+            Long qty,
+            String reason,
+            String refType,
+            Long refId,
+            Long actorUserId
+    ) {
+        if (branchId == null || branchId <= 0) {
+            throw new IllegalArgumentException("재고반영: branchId가 올바르지 않습니다.");
+        }
+        if (productId == null || productId <= 0) {
+            throw new IllegalArgumentException("재고반영: productId가 올바르지 않습니다.");
+        }
+        if (qty == null || qty <= 0) return;
+
+        InventoryDetailDto current = inventoryMapper.selectInventoryDetail(branchId, productId);
+        if (current == null) {
+            throw new IllegalArgumentException(
+                    "재고반영: inventory row가 없습니다. (지점/상품 재고를 먼저 생성해야 합니다) branchId="
+                            + branchId + ", productId=" + productId
+            );
+        }
+
+        long beforeQty = (current.getQuantity() == null) ? 0L : current.getQuantity();
+        long afterQty = beforeQty - qty;
+
+        if (afterQty < 0) {
+            throw new IllegalArgumentException(
+                    "재고부족: 출고 수량이 현재 수량을 초과할 수 없습니다. branchId="
+                            + branchId + ", productId=" + productId
+                            + ", current=" + beforeQty + ", request=" + qty
+            );
+        }
+
+        inventoryMapper.updateInventoryQuantity(branchId, productId, afterQty, null, actorUserId);
+
+        inventoryMapper.insertInventoryHistory(
+                branchId, productId, "OUT", qty,
+                reason, refType, refId, actorUserId
+        );
+    }
+
 
     /* =========================================================
      * AT005 구매요청(PR)
@@ -452,7 +500,7 @@ public class ApprovalApplyService {
                 actorUserId
         );
 
-        // ✅ (추가) 자기 지점 재고 IN 반영
+     // ✅ (수정) 본사 재고 OUT + 자기 지점 재고 IN 반영
         for (PrPoLine l : lines) {
             if (l == null) continue;
 
@@ -461,6 +509,18 @@ public class ApprovalApplyService {
             if (productId == null || productId <= 0) continue;
             if (qty == null || qty <= 0) continue;
 
+            // 1) 본사 재고 감소(OUT)
+            applyStockOutOrThrow(
+                    HQ_BRANCH_ID,
+                    productId,
+                    qty,
+                    "AT006_FINAL_APPROVED",
+                    "INBOUND_REQUEST",
+                    inboundRequestId,
+                    actorUserId
+            );
+
+            // 2) 요청 지점 재고 증가(IN)
             applyStockInOrThrow(
                     requestBranchId,
                     productId,
@@ -471,6 +531,7 @@ public class ApprovalApplyService {
                     actorUserId
             );
         }
+
     }
 
     /* =========================================================

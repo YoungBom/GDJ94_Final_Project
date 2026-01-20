@@ -10,11 +10,6 @@
   </div>
 
   <div class="col-md-4">
-    <label class="form-label">거래처</label>
-    <input type="text" class="form-control" name="extTxt1" maxlength="100" />
-  </div>
-
-  <div class="col-md-4">
     <label class="form-label">예상 합계</label>
     <input type="number" class="form-control bg-secondary-subtle" name="extNo1" id="prTotal" readonly />
   </div>

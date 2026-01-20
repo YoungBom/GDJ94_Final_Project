@@ -21,13 +21,13 @@ public class PurchaseController {
     @GetMapping("/new")
     @PreAuthorize("hasAnyRole('GRANDMASTER','MASTER','ADMIN','CAPTAIN','CREW')")
     public String newPurchaseForm() {
-        return "redirect:/approval/form?entry=buy&typeCode=AT006";
+        return "redirect:/approval/form?entry=buy1";
     }
 
     @GetMapping("/request/new")
     @PreAuthorize("hasAnyRole('GRANDMASTER','MASTER','ADMIN')")
     public String newPurchaseRequestForm() {
-        return "redirect:/approval/form?entry=buy&typeCode=AT005";
+        return "redirect:/approval/form?entry=buy2";
     }
 
     /**

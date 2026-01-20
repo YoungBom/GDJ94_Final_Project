@@ -38,12 +38,13 @@
 		  <option value="">선택</option>
 		
 		  <c:choose>
-		    <c:when test="${entry == 'buy'}">
-		      <option value="AT005" <c:if test="${draft.typeCode == 'AT005'}">selected</c:if>>구매요청서(PR)</option>
+		    <c:when test="${entry == 'buy1'}">
 		      <option value="AT006" <c:if test="${draft.typeCode == 'AT006'}">selected</c:if>>발주서(PO)</option>
+		    </c:when>
+			<c:when test="${entry == 'buy2'}">
+		      <option value="AT005" <c:if test="${draft.typeCode == 'AT005'}">selected</c:if>>구매요청서(PR)</option>
 		      <option value="AT004" <c:if test="${draft.typeCode == 'AT004'}">selected</c:if>>재고조정요청서</option>
 		    </c:when>
-		
 		    <c:otherwise>
 		      <option value="AT001" <c:if test="${draft.typeCode == 'AT001'}">selected</c:if>>지출결의서</option>
 		      <option value="AT002" <c:if test="${draft.typeCode == 'AT002'}">selected</c:if>>정산결재서</option>
