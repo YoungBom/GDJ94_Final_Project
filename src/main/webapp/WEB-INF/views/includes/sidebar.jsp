@@ -104,9 +104,10 @@
             <ul class="nav nav-treeview">
               <li class="nav-item">
                 <!--  변경: 기존 /inbound -> /purchase/orders -->
-                <a href="<c:url value='/purchase/orders'/>" class="nav-link">
-                  <p>발주요청서 목록</p>
-                </a>
+				<a href="<c:url value='/purchase/orders?docType=PO'/>" class="nav-link">
+				  <p>발주요청서 목록</p>
+				</a>
+
               </li>
             </ul>
           </li>
