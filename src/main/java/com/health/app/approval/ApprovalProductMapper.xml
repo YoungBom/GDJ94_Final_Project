@@ -37,22 +37,26 @@
 </select>
 
 <!-- AT006(발주서): inventory 에 등록된 "내 지점" 상품만 -->
-<select id="selectInventoryProductsByBranch"
-        resultType="com.health.app.approval.ApprovalProductDTO">
+<select id="selectInventoryProductsByBranch" resultType="com.health.app.approval.ApprovalProductDTO">
   SELECT
     p.product_id   AS productId,
     p.product_name AS productName,
     p.product_desc AS productDesc,
     p.price        AS price,
-    i.quantity     AS stockQty
+    COALESCE(hq.quantity, 0) AS stockQty
   FROM inventory i
   JOIN product p
     ON p.product_id = i.product_id
    AND p.use_yn     = 1
+  LEFT JOIN inventory hq
+    ON hq.product_id = i.product_id
+   AND hq.branch_id  = 1
+   AND hq.use_yn     = 1
   WHERE i.branch_id = #{branchId}
     AND i.use_yn    = 1
   ORDER BY p.product_name
 </select>
+
 
 
 </mapper>

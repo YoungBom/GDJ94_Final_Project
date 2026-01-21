@@ -354,7 +354,7 @@ public class ApprovalApplyService {
 
     /* =========================================================
      * AT005 구매요청(PR)
-     * - ✅ 최종 승인 시: 본사(HQ_BRANCH_ID=10000) 재고 IN
+     * - ✅ 최종 승인 시: 본사(HQ_BRANCH_ID=1) 재고 IN
      * ========================================================= */
     private void applyPurchaseRequest(ApprovalDraftDTO draft, Long actorUserId) {
 
