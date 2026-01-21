@@ -14,8 +14,8 @@
 
   /* iframe은 스크롤 제거 + 큰 캔버스 + 축소 */
   .preview-iframe{
-    width: 1250px;
-    height: 2000px;
+	width: 1448px;
+	    height: 2048px;
     border: 0;
     overflow: hidden;
     display: block;
@@ -120,7 +120,7 @@
 
       <!-- 결재선 -->
       <div class="card shadow-sm mb-3">
-        <div class="card-header bg-white fw-semibold">결재선</div>
+        <div class="card-header bg-white fw-semibold">결재라인</div>
         <div class="card-body p-0">
           <div class="table-responsive">
             <table class="table table-sm align-middle mb-0">

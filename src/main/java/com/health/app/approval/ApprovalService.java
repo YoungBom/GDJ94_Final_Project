@@ -307,22 +307,22 @@ public class ApprovalService {
 
         // 4) 상태 변경
         // AT004(재고 조정)는 "결재요청" 즉시 최종 승인 완료 처리
-        if ("AT004".equals(typeCode)) {
-            int uDoc = approvalMapper.updateDocumentStatusByDocVerId(docVerId, "AS003", loginUserId);
-            int uVer = approvalMapper.updateVersionStatusByDocVerId(docVerId, "AVS003");
-            int uAll = approvalMapper.updateAllLinesStatusByDocVerId(docVerId, "ALS003", loginUserId);
-
-            if (uDoc == 0 || uVer == 0) {
-                throw new IllegalStateException("결재 요청 처리에 실패했습니다. 다시 시도해 주세요.");
-            }
-            if (uAll == 0) {
-                throw new IllegalStateException("결재선 완료 처리에 실패했습니다. 결재선을 확인해 주세요.");
-            }
-
-            // ✅ 최종 승인 확정 시점에 업무 테이블 반영
-            approvalApplyService.applyApprovedDoc(docVerId, loginUserId);
-            return;
-        }
+//        if ("AT004".equals(typeCode)) {
+//            int uDoc = approvalMapper.updateDocumentStatusByDocVerId(docVerId, "AS003", loginUserId);
+//            int uVer = approvalMapper.updateVersionStatusByDocVerId(docVerId, "AVS003");
+//            int uAll = approvalMapper.updateAllLinesStatusByDocVerId(docVerId, "ALS003", loginUserId);
+//
+//            if (uDoc == 0 || uVer == 0) {
+//                throw new IllegalStateException("결재 요청 처리에 실패했습니다. 다시 시도해 주세요.");
+//            }
+//            if (uAll == 0) {
+//                throw new IllegalStateException("결재선 완료 처리에 실패했습니다. 결재선을 확인해 주세요.");
+//            }
+//
+//            // ✅ 최종 승인 확정 시점에 업무 테이블 반영
+//            approvalApplyService.applyApprovedDoc(docVerId, loginUserId);
+//            return;
+//        }
 
         // 일반 문서: 결재 진행 상태로 전환
         int uDoc = approvalMapper.updateDocumentStatusByDocVerId(docVerId, "AS002", loginUserId);

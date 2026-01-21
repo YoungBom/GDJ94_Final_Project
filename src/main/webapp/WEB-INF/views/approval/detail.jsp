@@ -28,7 +28,7 @@
   .preview-iframe{
     width: 1448px;
     height: 2048px;
-    transform: scale(0.7);
+    transform: scale(1);
     transform-origin: top left;
   }
 
