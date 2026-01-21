@@ -89,7 +89,7 @@
       <table class="table table-sm table-bordered align-middle" id="invTable">
         <thead class="table-light">
           <tr>
-            <th style="width:40px;" class="text-center"><input type="checkbox" id="invCheckAll" /></th>
+            <th style="width:40px;" class="text-center"></th>
             <th>조정 물품</th>
             <th style="width:120px;" class="text-center">유형</th>
             <th style="width:120px;" class="text-end">현재 수량</th>
@@ -389,7 +389,7 @@ function isAT004Page() {
       if (stock != null) tr.dataset.stockQty = String(stock);
 
       tr.innerHTML =
-        '<td class="text-center"><input type="checkbox" class="inv-chk" /></td>' +
+        '<td class="text-center"></td>' +
         '<td class="col-name"></td>' +
         '<td class="text-center">' + (type === "DECREASE" ? "감소" : "증가") + '</td>' +
         '<td class="text-end">' + (stock == null ? "-" : stock) + '</td>' +

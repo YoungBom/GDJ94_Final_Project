@@ -21,13 +21,13 @@ public class PurchaseController {
     @GetMapping("/new")
     @PreAuthorize("hasAnyRole('GRANDMASTER','MASTER','ADMIN','CAPTAIN','CREW')")
     public String newPurchaseForm() {
-        return "redirect:/approval/form?entry=buy&typeCode=AT006";
+        return "redirect:/approval/form?entry=buy1";
     }
 
     @GetMapping("/request/new")
     @PreAuthorize("hasAnyRole('GRANDMASTER','MASTER','ADMIN')")
     public String newPurchaseRequestForm() {
-        return "redirect:/approval/form?entry=buy&typeCode=AT005";
+        return "redirect:/approval/form?entry=buy2";
     }
 
     /**
@@ -63,8 +63,14 @@ public class PurchaseController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("docType", docType);
 
-        model.addAttribute("pageTitle", "구매/발주 목록");
+        String pageTitle;
+        if ("PO".equalsIgnoreCase(docType)) pageTitle = "발주 목록";
+        else if ("PR".equalsIgnoreCase(docType)) pageTitle = "구매요청 목록";
+        else pageTitle = "구매/발주 목록";
+
+        model.addAttribute("pageTitle", pageTitle);
         return "purchase/list";
+
     }
 
     /**

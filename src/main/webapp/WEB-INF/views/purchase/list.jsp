@@ -9,7 +9,8 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h3 class="card-title">구매/발주 목록</h3>
+				<h3 class="card-title">${pageTitle}</h3>
+
             </div>
 
             <div class="card-body">
