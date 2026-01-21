@@ -109,7 +109,7 @@
                             <tr>
                                 <td class="text-center align-middle">${l.createdAt}</td>
 
-                                <!-- ✅ 상태: actionTypeName -->
+                                <!--  상태: actionTypeName -->
                                 <td class="text-center align-middle">
                                     <c:choose>
                                         <c:when test="${not empty l.actionTypeName}">
@@ -133,11 +133,11 @@
                                     </c:choose>
                                 </td>
 
-                                <td class="text-end align-middle">${l.beforeValue}</td>
-                                <td class="text-end align-middle">${l.afterValue}</td>
+                                <td class="text-center align-middle">${l.beforeValue}</td>
+                                <td class="text-center align-middle">${l.afterValue}</td>
 
-                                <!-- ✅ 사유: reasonDisplay -->
-                                <td class="text-start align-middle">
+                                <!--  사유: reasonDisplay -->
+                                <td class="text-center align-middle">
                                     <c:choose>
                                         <c:when test="${not empty l.reasonDisplay}">
                                             ${l.reasonDisplay}
